@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مركز الحلو للشحن - رصيدك بإيدك</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #f5f7fa, #e4e9f0); color: #222; margin: 0; padding: 15px; min-height: 100vh; }
+        header { background: white; padding: 18px; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.07); text-align: center; margin-bottom: 20px; }
+        h1 { color: #0066cc; margin-bottom: 5px; font-size: 2.1rem; }
+        .note { background: #e3f2fd; color: #0d47a1; padding: 12px 16px; border-radius: 10px; margin: 0 auto 30px; max-width: 620px; font-size: 0.98rem; line-height: 1.45; border-right: 4px solid #1976d2; text-align: center; }
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; max-width: 680px; margin: 0 auto 40px; }
+        .service-card { background: white; border-radius: 14px; padding: 18px 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.07); cursor: pointer; transition: all 0.28s; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 140px; }
+        .service-card:hover { transform: translateY(-8px); box-shadow: 0 12px 26px rgba(0,0,0,0.13); }
+        .service-card i { font-size: 2.8rem; margin-bottom: 10px; }
+        .service-card p { font-weight: 600; font-size: 0.96rem; color: #111; }
+        .phone { background: linear-gradient(145deg, #43a047, #2e7d32); color: white; }
+        .games { background: linear-gradient(145deg, #f4511e, #d84315); color: white; }
+        .packages-list { list-style: none; padding: 0; max-width: 550px; margin: 20px auto; }
+        .packages-list li { background: white; padding: 12px 16px; margin: 8px; border-radius: 12px; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,0.1); transition: 0.25s; display: flex; justify-content: space-between; align-items: center; }
+        .packages-list li:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
+        .package-amount { color: #1565c0; font-weight: bold; }
+        .package-price { background: #e8f5e8; color: #2e7d32; font-weight: bold; padding: 6px 14px; border-radius: 8px; min-width: 80px; text-align: center; }
+        .package-price::before { content: "$"; }
+        input { width: 90%; max-width: 400px; padding: 14px; margin: 15px 0; border: 1px solid #ccc; border-radius: 10px; font-size: 1.2em; }
+        .note-box { background: #fff3cd; color: #856404; padding: 12px; border-radius: 8px; margin: 15px auto; max-width: 500px; font-size: 1.05em; border: 1px solid #ffeeba; }
+        button, #whatsapp-btn { background: #28a745; color: white; padding: 12px 30px; border: none; border-radius: 10px; cursor: pointer; font-size: 1.2em; margin: 20px; }
+        button:hover { background: #218838; }
+        #message-preview { white-space: pre-line; background: #f8fff8; padding: 20px; border-radius: 15px; margin: 20px auto; max-width: 700px; border: 2px solid #28a745; font-size: 1.1em; text-align: right; direction: rtl; }
+        section { display: none; }
+        #main-section { display: block; }
+        .sham-cash { background: white; padding: 20px; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.07); max-width: 420px; margin: 40px auto; text-align: center; }
+        .sham-cash img { width: 100%; max-width: 320px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .sham-cash a { display: inline-block; margin-top: 16px; background: #25D366; color: white; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>مركز الحلو</h1>
+    <p>للشحن - رصيدك بإيدك</p>
+</header>
+
+<section id="main-section">
+    <div class="note">
+        إذا كان لديك برنامج أو لعبة تريد الشحن عليها يرجى إخباري على الواتساب<br>
+        ليتم إضافتها في الصفحة
+    </div>
+
+    <div class="services-grid">
+        <div class="service-card phone" onclick="showSection('phone-category')">
+            <i class="fas fa-mobile-screen-button"></i>
+            <p>رصيد هاتف</p>
+        </div>
+
+        <div class="service-card games" onclick="showSection('games-category')">
+            <i class="fas fa-gamepad"></i>
+            <p>شحن ألعاب</p>
+        </div>
+    </div>
+
+    <div class="sham-cash">
+        <h2>الدفع عبر شام كاش</h2>
+        <img src="https://www2.0zz0.com/2025/12/30/00/736351650.jpg" alt="باركود شام كاش">
+        <a href="https://wa.me/?text=صورة%20حساب%20شام%20كاش:%20https://www2.0zz0.com/2025/12/30/00/736351650.jpg">
+            <i class="fab fa-whatsapp"></i> مشاركة صورة الحساب
+        </a>
+    </div>
+</section>
+
+<!-- رصيد الهاتف -->
+<section id="phone-category">
+    <h2>رصيد هاتف</h2>
+    <div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;">
+        <div class="service-card" onclick="showPackages('syriatel')" style="background:#d32f2f; color:white;">
+            <img src="https://i.ibb.co/7J03gvrH/image.png" alt="سيرياتيل" style="width:80px;height:80px;border-radius:50%;">
+            <p>سيرياتيل</p>
+        </div>
+        <div class="service-card" onclick="showPackages('mtn')" style="background:#ffeb3b; color:#000;">
+            <img src="https://i.ibb.co/VcCgrD8k/image.png" alt="إم تي إن" style="width:80px;height:80px;border-radius:50%;">
+            <p>إم تي إن</p>
+        </div>
+    </div>
+    <button onclick="showSection('main-section')">رجوع</button>
+</section>
+
+<section id="packages-section">
+    <h2 id="packages-title">اختر الباقة</h2>
+    <ul id="packages-list" class="packages-list"></ul>
+    <button onclick="showSection('phone-category')">رجوع</button>
+</section>
+
+<section id="phone-input-section">
+    <h2>أدخل رقم الهاتف</h2>
+    <div id="phone-note" class="note-box" style="display:none;"></div>
+    <input type="tel" id="phone-number" placeholder="مثال: 0991234567" maxlength="10">
+    <button onclick="generatePhoneMessage()">إرسال الطلب</button>
+    <button onclick="showSection('packages-section')">رجوع</button>
+</section>
+
+<!-- قسم شحن الألعاب (كامل ويعمل) -->
+<section id="games-category">
+    <h2>شحن ألعاب</h2>
+    <div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;">
+        <div class="service-card" onclick="showGamePackages('ff')" style="background:#ff4500; color:white;">
+            <i class="fas fa-fire" style="font-size:50px;"></i>
+            <p>فري فاير</p>
+        </div>
+        <div class="service-card" onclick="showGamePackages('pubg')" style="background:#ffb300; color:#000;">
+            <i class="fas fa-crosshairs" style="font-size:50px;"></i>
+            <p>ببجي</p>
+        </div>
+        <div class="service-card" onclick="showGamePackages('jawaker')" style="background:#8e44ad; color:white;">
+            <i class="fas fa-gamepad" style="font-size:50px;"></i>
+            <p>جواكر</p>
+        </div>
+    </div>
+    <button onclick="showSection('main-section')">رجوع</button>
+</section>
+
+<section id="game-packages-section">
+    <h2 id="game-title">اختر الباقة</h2>
+    <ul id="game-packages-list" class="packages-list"></ul>
+    <button onclick="showSection('games-category')">رجوع</button>
+</section>
+
+<section id="game-id-section">
+    <h2>أدخل ID اللاعب</h2>
+    <input type="text" id="game-id" placeholder="أدخل ID اللاعب">
+    <button onclick="generateGameMessage()">إرسال الطلب</button>
+    <button onclick="showSection('game-packages-section')">رجوع</button>
+</section>
+
+<section id="confirmation-section">
+    <h2>تأكيد الطلب</h2>
+    <div id="message-preview" style="background:#f8fff8; padding:20px; border:2px solid #28a745; border-radius:15px; margin:20px auto; max-width:700px; text-align:right; direction:rtl;"></div>
+    <a id="whatsapp-btn" href="#" target="_blank" style="display:inline-block; background:#25D366; color:white; padding:14px 30px; border-radius:10px; text-decoration:none; font-size:1.3em;">
+        <i class="fab fa-whatsapp"></i> إرسال عبر واتساب
+    </a>
+    <button onclick="showSection('main-section')">طلب جديد</button>
+</section>
+
+<script>
+    let selectedCompany = '';
+    let selectedPackage = null;
+    let currentGame = '';
+
+    // باقات سيرياتيل النهائية الجديدة
+    const syriatelPackages = [
+        {units: 9.62, price: 0.15},
+        {units: 20.19, price: 0.25},
+        {units: 40.39, price: 0.45},
+        {units: 160.58, price: 1.75},
+        {units: 192.31, price: 2.15},
+        {units: 240.38, price: 2.65},
+        {units: 370.19, price: 4.10},
+        {units: 432.69, price: 4.75},
+        {units: 480.77, price: 5.30},
+        {units: 576.92, price: 6.35},
+        {units: 625, price: 6.90},
+        {units: 721.15, price: 7.85},
+        {units: 769.23, price: 8.45},
+        {units: 951.92, price: 10.45}
+    ];
+
+    // باقات إم تي إن (غير محدثة في هذا الطلب، يمكن تعديلها لاحقًا)
+    const mtnPackages = [
+        {units: 50, price: 0.57}, {units: 85, price: 0.96}, {units: 100, price: 1.12},
+        {units: 150, price: 1.67}, {units: 200, price: 2.23}, {units: 230, price: 2.59},
+        {units: 260, price: 2.92}, {units: 280, price: 3.15}, {units: 300, price: 3.35},
+        {units: 320, price: 3.60}, {units: 340, price: 3.81}, {units: 360, price: 4.01},
+        {units: 400, price: 4.47}, {units: 420, price: 4.72}, {units: 440, price: 4.92},
+        {units: 460, price: 5.18}, {units: 480, price: 5.38}, {units: 500, price: 5.58},
+        {units: 550, price: 6.19}, {units: 600, price: 6.70}, {units: 650, price: 7.31},
+        {units: 700, price: 7.82}, {units: 750, price: 8.37}, {units: 1000, price: 11.14},
+        {units: 1500, price: 16.75}, {units: 2000, price: 22.29}, {units: 3000, price: 33.44},
+        {units: 3500, price: 39.08}, {units: 3600, price: 40.19}, {units: 4500, price: 50.24},
+        {units: 4800, price: 53.49}, {units: 5000, price: 55.72}
+    ];
+
+    // باقات الألعاب (غير محدثة في هذا الطلب)
+    const ffPackages = [
+        {name: "110 + 10 مجوهرة", price: 1.13},
+        {name: "210 + 21 مجوهرة", price: 2.24},
+        {name: "530 + 53 مجوهرة", price: 5.61},
+        {name: "1060 + 108 مجوهرة", price: 11.30},
+        {name: "2200 + 220 مجوهرة", price: 22.46},
+        {name: "عضوية أسبوعية", price: 2.76},
+        {name: "عضوية شهرية", price: 13.08},
+        {name: "تصريح بوياه", price: 3.88}
+    ];
+
+    const pubgPackages = [
+        {name: "60 شدة", price: 1.09},
+        {name: "325 شدة", price: 5.51},
+        {name: "660 شدة", price: 10.79},
+        {name: "1800 شدة", price: 26.02},
+        {name: "3850 شدة", price: 51.93},
+        {name: "8100 شدة", price: 103.77},
+        {name: "Royal Pass", price: 11.97},
+        {name: "Elite Pass Plus", price: 29.93}
+    ];
+
+    const jawakerPackages = [
+        {name: "10,000 كوينز", price: 1.27},
+        {name: "15,000 كوينز", price: 1.92},
+        {name: "20,000 كوينز", price: 2.56},
+        {name: "25,000 كوينز", price: 3.20},
+        {name: "30,000 كوينز", price: 3.83},
+        {name: "35,000 كوينز", price: 4.47},
+        {name: "40,000 كوينز", price: 5.11},
+        {name: "45,000 كوينز", price: 5.76},
+        {name: "50,000 كوينز", price: 6.40},
+        {name: "60,000 كوينز", price: 7.67},
+        {name: "70,000 كوينز", price: 8.96},
+        {name: "80,000 كوينز", price: 10.23},
+        {name: "90,000 كوينز", price: 11.50},
+        {name: "100,000 كوينز", price: 12.79},
+        {name: "200,000 كوينز", price: 25.58},
+        {name: "300,000 كوينز", price: 38.36},
+        {name: "400,000 كوينز", price: 51.15},
+        {name: "500,000 كوينز", price: 63.94}
+    ];
+
+    function hideAll() {
+        document.querySelectorAll('section').forEach(s => s.style.display = 'none');
+    }
+
+    function showSection(id) {
+        hideAll();
+        const section = document.getElementById(id);
+        if (section) section.style.display = 'block';
+
+        if (id === 'phone-input-section' && selectedCompany) {
+            const note = document.getElementById('phone-note');
+            note.style.display = 'block';
+            note.innerHTML = selectedCompany === 'syriatel' 
+                ? 'ملاحظة مهمة: يجب أن يبدأ رقم الهاتف بـ <strong>093</strong> أو <strong>098</strong> أو <strong>099</strong>'
+                : 'ملاحظة مهمة: يجب أن يبدأ رقم الهاتف بـ <strong>094</strong> أو <strong>095</strong> أو <strong>096</strong>';
+        }
+    }
+
+    function showPackages(company) {
+        selectedCompany = company;
+        const pkgs = company === 'syriatel' ? syriatelPackages : mtnPackages;
+        document.getElementById('packages-title').textContent = `باقات ${company === 'syriatel' ? 'سيرياتيل' : 'إم تي إن'}`;
+
+        const list = document.getElementById('packages-list');
+        list.innerHTML = '';
+
+        pkgs.forEach(pkg => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="package-amount">${pkg.units}</span><span class="package-price">${pkg.price}</span>`;
+            li.onclick = () => {
+                selectedPackage = pkg;
+                showSection('phone-input-section');
+            };
+            list.appendChild(li);
+        });
+
+        showSection('packages-section');
+    }
+
+    function showGamePackages(game) {
+        currentGame = game;
+        const pkgs = game === 'ff' ? ffPackages : game === 'pubg' ? pubgPackages : jawakerPackages;
+        const title = game === 'ff' ? 'فري فاير' : game === 'pubg' ? 'ببجي' : 'جواكر';
+        document.getElementById('game-title').textContent = `شحن ${title} - اختر الباقة`;
+
+        const list = document.getElementById('game-packages-list');
+        list.innerHTML = '';
+
+        pkgs.forEach(pkg => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="package-amount">${pkg.name}</span><span class="package-price">${pkg.price}</span>`;
+            li.onclick = () => {
+                selectedPackage = pkg;
+                showSection('game-id-section');
+            };
+            list.appendChild(li);
+        });
+
+        showSection('game-packages-section');
+    }
+
+    function generatePhoneMessage() {
+        const phone = document.getElementById('phone-number').value.trim();
+        if (!phone || phone.length !== 10 || !/^\d{10}$/.test(phone)) {
+            alert('الرجاء إدخال رقم هاتف صحيح مكون من 10 أرقام');
+            return;
+        }
+
+        const prefix = phone.substring(0, 3);
+        if (selectedCompany === 'syriatel' && ['094','095','096'].includes(prefix)) {
+            alert('رقم غير صحيح لسيرياتيل! يجب أن يبدأ بـ 093 أو 098 أو 099');
+            return;
+        }
+        if (selectedCompany === 'mtn' && ['093','098','099'].includes(prefix)) {
+            alert('رقم غير صحيح لإم تي إن! يجب أن يبدأ بـ 094 أو 095 أو 096');
+            return;
+        }
+
+        const message = `طلب جديد\n\n` +
+            `التاريخ: ${new Date().toLocaleString('ar-SA')}\n\n` +
+            `الخدمة: رصيد ${selectedCompany === 'syriatel' ? 'سيرياتيل' : 'إم تي إن'}\n` +
+            `الباقة: ${selectedPackage.units} ل.س\n` +
+            `السعر: $${selectedPackage.price}\n` +
+            `رقم الهاتف: ${phone}\n\n` +
+            `الرجاء الدفع على حساب شام كاش:\nhttps://www2.0zz0.com/2025/12/30/00/736351650.jpg`;
+
+        document.getElementById('message-preview').textContent = message;
+        document.getElementById('whatsapp-btn').href = `https://wa.me/963932183955?text=${encodeURIComponent(message)}`;
+
+        showSection('confirmation-section');
+    }
+
+    function generateGameMessage() {
+        const id = document.getElementById('game-id').value.trim();
+        if (!id) {
+            alert('الرجاء إدخال ID اللاعب');
+            return;
+        }
+
+        const gameName = currentGame === 'ff' ? 'فري فاير' : currentGame === 'pubg' ? 'ببجي' : 'جواكر';
+        const message = `طلب جديد\n\n` +
+            `التاريخ: ${new Date().toLocaleString('ar-SA')}\n\n` +
+            `الخدمة: شحن ${gameName}\n` +
+            `الباقة: ${selectedPackage.name}\n` +
+            `السعر: $${selectedPackage.price}\n` +
+            `ID اللاعب: ${id}\n\n` +
+            `الرجاء الدفع على حساب شام كاش:\nhttps://www2.0zz0.com/2025/12/30/00/736351650.jpg`;
+
+        document.getElementById('message-preview').textContent = message;
+        document.getElementById('whatsapp-btn').href = `https://wa.me/963932183955?text=${encodeURIComponent(message)}`;
+
+        showSection('confirmation-section');
+    }
+</script>
+</body>
+</html>
