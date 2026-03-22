@@ -136,6 +136,198 @@
     margin-left: 2px;
   }
 
+  /* ===== FLOATING CALCULATOR BUTTONS ===== */
+  .float-calc-group {
+    position: fixed;
+    bottom: 28px;
+    left: 16px;
+    z-index: 1002;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+  .float-calc-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    color: white;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+  }
+  .float-calc-btn:active { transform: scale(0.88); }
+  .float-calc-btn.basic-btn {
+    background: linear-gradient(135deg, #f5a623, #e94560);
+    box-shadow: 0 4px 18px rgba(245,166,35,0.5), 0 0 0 0 rgba(245,166,35,0.3);
+    animation: calcBtnPulse 2.5s ease-in-out infinite;
+  }
+  .float-calc-btn.currency-btn {
+    background: linear-gradient(135deg, #10b981, #0ea5e9);
+    box-shadow: 0 4px 18px rgba(16,185,129,0.5), 0 0 0 0 rgba(16,185,129,0.3);
+    animation: calcBtnPulse2 2.5s ease-in-out infinite 1.2s;
+  }
+  @keyframes calcBtnPulse {
+    0%,100% { box-shadow: 0 4px 18px rgba(245,166,35,0.5), 0 0 0 0 rgba(245,166,35,0.3); }
+    50% { box-shadow: 0 4px 18px rgba(245,166,35,0.5), 0 0 0 9px rgba(245,166,35,0); }
+  }
+  @keyframes calcBtnPulse2 {
+    0%,100% { box-shadow: 0 4px 18px rgba(16,185,129,0.5), 0 0 0 0 rgba(16,185,129,0.3); }
+    50% { box-shadow: 0 4px 18px rgba(16,185,129,0.5), 0 0 0 9px rgba(16,185,129,0); }
+  }
+
+  /* ===== BASIC CALCULATOR OVERLAY ===== */
+  .basic-calc-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(6px);
+    z-index: 2000;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .basic-calc-overlay.open { display: flex; }
+  .basic-calc-modal {
+    width: 100%;
+    max-width: 420px;
+    background: linear-gradient(170deg, #1a1a2e, #16213e);
+    border: 1.5px solid rgba(245,166,35,0.25);
+    border-radius: 28px 28px 0 0;
+    padding: 12px 16px 28px;
+    animation: slideUpCalc 0.35s cubic-bezier(0.175,0.885,0.32,1.275);
+  }
+  @keyframes slideUpCalc {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .basic-calc-handle {
+    width: 40px; height: 4px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 2px;
+    margin: 0 auto 12px;
+  }
+  .basic-calc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .basic-calc-header h3 {
+    font-size: 16px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #f5a623, #e94560);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .basic-calc-close {
+    width: 34px; height: 34px;
+    background: rgba(255,255,255,0.07);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 50%;
+    color: rgba(255,255,255,0.7);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .basic-calc-close:hover { background: rgba(255,255,255,0.13); }
+
+  /* Display */
+  .calc-display {
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    text-align: left;
+    direction: ltr;
+    min-height: 72px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-end;
+  }
+  .calc-expr {
+    font-size: 13px;
+    color: rgba(255,255,255,0.35);
+    min-height: 18px;
+    word-break: break-all;
+    direction: ltr;
+  }
+  .calc-result {
+    font-size: 32px;
+    font-weight: 900;
+    color: #f5a623;
+    line-height: 1.1;
+    direction: ltr;
+    word-break: break-all;
+  }
+
+  /* Buttons grid */
+  .calc-btns {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .calc-btn {
+    height: 58px;
+    border-radius: 14px;
+    border: none;
+    font-family: 'Cairo', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .calc-btn:active { transform: scale(0.92); }
+  .calc-btn.num {
+    background: rgba(255,255,255,0.07);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .calc-btn.num:hover { background: rgba(255,255,255,0.12); }
+  .calc-btn.op {
+    background: rgba(245,166,35,0.15);
+    color: #f5a623;
+    border: 1px solid rgba(245,166,35,0.25);
+  }
+  .calc-btn.op:hover { background: rgba(245,166,35,0.25); }
+  .calc-btn.eq {
+    background: linear-gradient(135deg, #f5a623, #e94560);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 16px rgba(245,166,35,0.4);
+  }
+  .calc-btn.eq:hover { box-shadow: 0 4px 20px rgba(245,166,35,0.6); }
+  .calc-btn.clear {
+    background: rgba(239,68,68,0.15);
+    color: #f87171;
+    border: 1px solid rgba(239,68,68,0.2);
+  }
+  .calc-btn.clear:hover { background: rgba(239,68,68,0.25); }
+  .calc-btn.del {
+    background: rgba(124,58,237,0.15);
+    color: #a78bfa;
+    border: 1px solid rgba(124,58,237,0.2);
+    font-size: 16px;
+  }
+  .calc-btn.del:hover { background: rgba(124,58,237,0.25); }
+  .calc-btn.zero { grid-column: span 2; }
+
+  /* Light mode */
+  body.light-mode .basic-calc-modal { background: linear-gradient(170deg, #f0f4ff, #e8eef8); border-color: rgba(245,166,35,0.3); }
+  body.light-mode .calc-display { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); }
+  body.light-mode .calc-expr { color: rgba(0,0,0,0.4); }
+  body.light-mode .calc-btn.num { background: rgba(0,0,0,0.06); color: #1a1a2e; border-color: rgba(0,0,0,0.1); }
+  body.light-mode .calc-btn.clear { background: rgba(239,68,68,0.08); }
+
   /* PAGE HEADER */
   .page-header { text-align:center; padding:8px 16px 14px; position:relative; z-index:10; }
   .page-header h2 { font-size:22px; font-weight:900; margin-bottom:4px; }
@@ -644,9 +836,96 @@
     color: rgba(255,255,255,0.6);
     line-height: 1.4;
   }
+
+  /* ===== WHAT'S NEW MODAL ===== */
+  .whats-new-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .whats-new-overlay.open { display: flex; }
+  .whats-new-modal {
+    width: 100%; max-width: 380px;
+    background: linear-gradient(160deg, #1a1a2e, #16213e);
+    border: 1.5px solid rgba(168,85,247,0.4);
+    border-radius: 24px;
+    padding: 24px 20px 20px;
+    animation: popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+    position: relative;
+    overflow: hidden;
+  }
+  @keyframes popIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+  .whats-new-modal::before {
+    content:''; position:absolute; top:-40px; right:-40px;
+    width:140px; height:140px;
+    background: radial-gradient(circle, rgba(168,85,247,0.2), transparent 70%);
+    pointer-events: none;
+  }
+  .wn-version-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(135deg,#7c3aed,#4f46e5);
+    color: white; font-size: 10px; font-weight: 800;
+    padding: 4px 12px; border-radius: 20px; margin-bottom: 12px;
+    letter-spacing: 0.5px;
+  }
+  .wn-title {
+    font-size: 20px; font-weight: 900; margin-bottom: 4px;
+    background: linear-gradient(135deg, #a855f7, #ec4899);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .wn-subtitle {
+    font-size: 11px; color: rgba(255,255,255,0.45); margin-bottom: 16px;
+  }
+  .wn-items { list-style: none; margin-bottom: 20px; }
+  .wn-items li {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 9px 12px; margin-bottom: 7px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px; font-size: 13px; line-height: 1.5;
+    color: rgba(255,255,255,0.85);
+  }
+  .wn-items li .wn-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .wn-close-btn {
+    width: 100%; padding: 13px;
+    background: linear-gradient(135deg, #a855f7, #7c3aed);
+    color: white; border: none; border-radius: 14px;
+    font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 800;
+    cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(168,85,247,0.4);
+  }
+  .wn-close-btn:hover { transform: translateY(-1px); }
+  .wn-close-btn:active { transform: scale(0.97); }
+  body.light-mode .whats-new-modal { background: linear-gradient(160deg, #f0f4ff, #e8eef8); border-color: rgba(124,58,237,0.3); }
+  body.light-mode .wn-items li { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.08); color: #1a1a2e; }
+  body.light-mode .wn-subtitle { color: rgba(0,0,0,0.45); }
 </style>
 </head>
 <body>
+
+<!-- ===== WHAT'S NEW MODAL ===== -->
+<div class="whats-new-overlay" id="whatsNewOverlay">
+  <div class="whats-new-modal">
+    <div class="wn-version-badge">🆕 تحديث جديد · v1.3</div>
+    <div class="wn-title">✨ ما الجديد؟</div>
+    <div class="wn-subtitle">مرحباً! إليك آخر التحديثات في التطبيق</div>
+    <ul class="wn-items">
+      <li><span class="wn-icon">🧮</span><div>تمت إضافة <strong>حاسبة عادية عائمة</strong> تظهر فوق جميع الصفحات لسهولة الحساب</div></li>
+      <li><span class="wn-icon">💱</span><div>زر <strong>حاسبة العملات</strong> أصبح عائماً أيضاً في كل الصفحات</div></li>
+      <li><span class="wn-icon">🇸🇾</span><div>تظهر الآن <strong>السعر بالليرة السورية</strong> تلقائياً عند اختيار أي باقة</div></li>
+    </ul>
+    <button class="wn-close-btn" onclick="closeWhatsNew()">✅ فهمت، شكراً!</button>
+  </div>
+</div>
+
 
 <!-- TOP BAR: Clock + Date + Mode Toggle -->
 <div class="top-bar">
@@ -667,6 +946,52 @@
   <span id="floatBackLabel">رجوع</span>
 </button>
 
+<!-- FLOATING CALCULATOR BUTTONS (bottom-left) -->
+<div class="float-calc-group">
+  <button class="float-calc-btn basic-btn" onclick="openBasicCalc()" title="حاسبة">🔢</button>
+  <button class="float-calc-btn currency-btn" onclick="openCalc()" title="حاسبة العملات">💱</button>
+</div>
+
+<!-- BASIC CALCULATOR MODAL -->
+<div class="basic-calc-overlay" id="basicCalcOverlay" onclick="closeBasicCalcOutside(event)">
+  <div class="basic-calc-modal">
+    <div class="basic-calc-handle"></div>
+    <div class="basic-calc-header">
+      <h3>🧮 الحاسبة</h3>
+      <button class="basic-calc-close" onclick="closeBasicCalc()">←</button>
+    </div>
+    <div class="calc-display">
+      <div class="calc-expr" id="calcExpr"></div>
+      <div class="calc-result" id="calcResult">0</div>
+    </div>
+    <div class="calc-btns">
+      <button class="calc-btn clear" onclick="calcClear()">AC</button>
+      <button class="calc-btn del" onclick="calcDel()">⌫</button>
+      <button class="calc-btn op" onclick="calcPercent()">%</button>
+      <button class="calc-btn op" onclick="calcOp('÷')">÷</button>
+
+      <button class="calc-btn num" onclick="calcNum('7')">7</button>
+      <button class="calc-btn num" onclick="calcNum('8')">8</button>
+      <button class="calc-btn num" onclick="calcNum('9')">9</button>
+      <button class="calc-btn op" onclick="calcOp('×')">×</button>
+
+      <button class="calc-btn num" onclick="calcNum('4')">4</button>
+      <button class="calc-btn num" onclick="calcNum('5')">5</button>
+      <button class="calc-btn num" onclick="calcNum('6')">6</button>
+      <button class="calc-btn op" onclick="calcOp('−')">−</button>
+
+      <button class="calc-btn num" onclick="calcNum('1')">1</button>
+      <button class="calc-btn num" onclick="calcNum('2')">2</button>
+      <button class="calc-btn num" onclick="calcNum('3')">3</button>
+      <button class="calc-btn op" onclick="calcOp('+')">+</button>
+
+      <button class="calc-btn num zero" onclick="calcNum('0')">0</button>
+      <button class="calc-btn num" onclick="calcDot()">.</button>
+      <button class="calc-btn eq" onclick="calcEquals()">=</button>
+    </div>
+  </div>
+</div>
+
 <!-- CALCULATOR MODAL -->
 <div class="calc-overlay" id="calcOverlay" onclick="closeCalcOutside(event)">
   <div class="calc-modal">
@@ -686,6 +1011,7 @@
       " title="رجوع">←</button>
       <h3>🧮 حاسبة العملات</h3>
       <div style="display:flex;align-items:center;gap:8px;">
+        <button onclick="closeCalc();openBasicCalc();" title="حاسبة عادية" style="width:32px;height:32px;background:rgba(245,166,35,0.12);border:1.5px solid rgba(245,166,35,0.3);border-radius:50%;color:#f5a623;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;">🔢</button>
         <button id="adminIconBtn" onclick="adminTap()" title="إعدادات" style="
           width:32px;height:32px;
           background:rgba(255,255,255,0.07);
@@ -1239,19 +1565,20 @@
     <div class="order-summary">
       <div class="row"><span class="key">الخدمة</span><span class="val" id="sum-service">-</span></div>
       <div class="row"><span class="key">الباقة</span><span class="val" id="sum-pkg">-</span></div>
-      <div class="row"><span class="key">السعر</span><span class="val" id="sum-price" style="color:#4ade80">-</span></div>
+      <div class="row"><span class="key">💵 السعر بالدولار</span><span class="val" id="sum-price" style="color:#4ade80">-</span></div>
+      <div class="row" id="sum-syp-row" style="display:none"><span class="key">🇸🇾 السعر بالليرة</span><span class="val" id="sum-syp" style="color:#f5a623">-</span></div>
     </div>
     <div class="form-group">
       <label id="phone-label">📞 رقم الهاتف (10 أرقام)</label>
       <div class="phone-input-wrap">
-        <input type="tel" id="phone-input" maxlength="10" placeholder="09XXXXXXXX" oninput="validatePhone()">
+        <input type="tel" id="phone-input" inputmode="numeric" pattern="[0-9]*" maxlength="10" placeholder="09XXXXXXXX" oninput="validatePhone()" autocomplete="off">
         <span class="check-icon" id="check-icon">✓</span>
       </div>
       <div class="phone-hint" id="phone-hint"></div>
     </div>
     <div class="form-group">
       <label>📝 ملاحظات (اختياري)</label>
-      <textarea class="notes-textarea" id="notes-input" placeholder="أي ملاحظة إضافية..." maxlength="200" oninput="filterNotes(this)"></textarea>
+      <textarea class="notes-textarea" id="notes-input" placeholder="أي ملاحظة إضافية..." maxlength="200" inputmode="text" oninput="filterNotes(this)"></textarea>
     </div>
     <button class="submit-btn" id="send-btn" onclick="sendOrder()" disabled>
       <span>💬</span><span>إرسال الطلب عبر واتساب</span>
@@ -1684,12 +2011,20 @@ function lockAdmin(){
   btn.style.color='rgba(255,255,255,0.35)';
 }
 
+function isAnyCalcOpen() {
+  return document.getElementById('basicCalcOverlay').classList.contains('open') ||
+         document.getElementById('calcOverlay').classList.contains('open');
+}
+
 function openCalc(){
   document.getElementById('calcOverlay').classList.add('open');
-  history.pushState({ page: 'calc' }, '', '');
+  document.querySelector('.float-calc-group').style.display = 'none';
   fetchLiveRates();
 }
-function closeCalc(){ document.getElementById('calcOverlay').classList.remove('open'); }
+function closeCalc(){
+  document.getElementById('calcOverlay').classList.remove('open');
+  document.querySelector('.float-calc-group').style.display = 'flex';
+}
 function closeCalcOutside(e){ if(e.target===document.getElementById('calcOverlay')) closeCalc(); }
 
 
@@ -2213,6 +2548,171 @@ renderPkgs(PUBG_PKGS,'pubg-pkgs','selectPUBG');
 renderPkgs(JOKER_PKGS,'joker-pkgs','selectJoker');
 
 // ===== NAVIGATION =====
+
+// ===== WHAT'S NEW SYSTEM =====
+// غيّر هذا الرقم في كل تحديث جديد لإظهار الرسالة للزبائن مجدداً
+const CURRENT_VERSION = 'v1.3';
+const WN_KEY = 'halou_seen_version';
+
+function checkWhatsNew() {
+  const seen = localStorage.getItem(WN_KEY);
+  if (seen !== CURRENT_VERSION) {
+    // أول مرة يفتح بعد التحديث
+    setTimeout(() => {
+      document.getElementById('whatsNewOverlay').classList.add('open');
+    }, 800);
+  }
+}
+
+function closeWhatsNew() {
+  document.getElementById('whatsNewOverlay').classList.remove('open');
+  localStorage.setItem(WN_KEY, CURRENT_VERSION);
+}
+
+checkWhatsNew();
+
+// ===== BASIC FLOATING CALCULATOR =====
+// State: operand1, operator, operand2, display
+let bc = {
+  op1: null,       // first operand (number)
+  op2: null,       // second operand (number)
+  operator: null,  // '+' '-' '*' '/'
+  display: '0',    // what user is typing now
+  expr: '',        // top expression line
+  justEvaled: false,
+  hasOp: false
+};
+
+function openBasicCalc() {
+  document.getElementById('basicCalcOverlay').classList.add('open');
+  document.querySelector('.float-calc-group').style.display = 'none';
+}
+function closeBasicCalc() {
+  document.getElementById('basicCalcOverlay').classList.remove('open');
+  document.querySelector('.float-calc-group').style.display = 'flex';
+}
+function closeBasicCalcOutside(e) {
+  if (e.target === document.getElementById('basicCalcOverlay')) closeBasicCalc();
+}
+
+function bcFormat(val) {
+  // Format number nicely: max 10 decimal places, add thousands separator
+  if (val === null || val === undefined) return '0';
+  const str = parseFloat(val.toFixed(10)).toString();
+  const parts = str.split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return parts.join('.');
+}
+
+function calcUpdateDisplay() {
+  document.getElementById('calcExpr').textContent = bc.expr;
+  document.getElementById('calcResult').textContent = bc.display;
+}
+
+function calcNum(n) {
+  if (bc.justEvaled) {
+    // Start fresh after = but keep result available
+    bc.op1 = null; bc.op2 = null; bc.operator = null;
+    bc.expr = ''; bc.justEvaled = false; bc.hasOp = false;
+    bc.display = '0';
+  }
+  if (bc.display === '0' || (bc.hasOp && bc.op2 === null && bc.display === '0')) {
+    bc.display = n;
+  } else {
+    if (bc.display.replace(/,/g, '').length >= 15) return; // max digits
+    bc.display += n;
+  }
+  calcUpdateDisplay();
+}
+
+function calcDot() {
+  if (bc.justEvaled) { bc.op1=null;bc.op2=null;bc.operator=null;bc.expr='';bc.justEvaled=false;bc.hasOp=false;bc.display='0'; }
+  if (!bc.display.includes('.')) bc.display += '.';
+  calcUpdateDisplay();
+}
+
+function calcOp(op) {
+  if (bc.display === 'خطأ') { calcClear(); return; }
+  const cur = parseFloat(bc.display.replace(/,/g, ''));
+  if (bc.operator && !bc.justEvaled && bc.op1 !== null) {
+    // chain: eval previous op first
+    const res = bcCompute(bc.op1, bc.operator, cur);
+    if (res === null) { bc.display='خطأ'; bc.expr=''; calcUpdateDisplay(); return; }
+    bc.op1 = res;
+    bc.display = bcFormat(res);
+  } else {
+    bc.op1 = cur;
+  }
+  bc.operator = op;
+  bc.expr = bcFormat(bc.op1) + ' ' + op;
+  bc.hasOp = true;
+  bc.justEvaled = false;
+  bc.op2 = null;
+  // reset display for next operand entry
+  bc.display = '0';
+  calcUpdateDisplay();
+}
+
+function calcPercent() {
+  const cur = parseFloat(bc.display.replace(/,/g,''));
+  if (isNaN(cur)) return;
+  let result;
+  if (bc.op1 !== null && bc.operator) {
+    // e.g. 200 + 15% means 200 + (200*15/100)
+    result = bc.op1 * cur / 100;
+  } else {
+    result = cur / 100;
+  }
+  bc.display = bcFormat(result);
+  calcUpdateDisplay();
+}
+
+function bcCompute(a, op, b) {
+  let r;
+  if (op === '+') r = a + b;
+  else if (op === '−') r = a - b;
+  else if (op === '×') r = a * b;
+  else if (op === '÷') {
+    if (b === 0) return null;
+    r = a / b;
+  }
+  if (!isFinite(r)) return null;
+  return r;
+}
+
+function calcEquals() {
+  if (bc.operator === null) return;
+  if (bc.display === 'خطأ') return;
+  const cur = parseFloat(bc.display.replace(/,/g,''));
+  bc.op2 = cur;
+  const res = bcCompute(bc.op1, bc.operator, bc.op2);
+  bc.expr = bcFormat(bc.op1) + ' ' + bc.operator + ' ' + bcFormat(bc.op2) + ' =';
+  if (res === null) {
+    bc.display = 'خطأ';
+    bc.op1 = null; bc.op2 = null; bc.operator = null; bc.hasOp = false;
+  } else {
+    bc.display = bcFormat(res);
+    bc.op1 = res; // allow chaining after =
+  }
+  bc.justEvaled = true;
+  bc.operator = null;
+  calcUpdateDisplay();
+}
+
+function calcClear() {
+  bc = {op1:null,op2:null,operator:null,display:'0',expr:'',justEvaled:false,hasOp:false};
+  calcUpdateDisplay();
+}
+
+function calcDel() {
+  if (bc.justEvaled || bc.display === 'خطأ') { calcClear(); return; }
+  if (bc.display.length <= 1) bc.display = '0';
+  else bc.display = bc.display.slice(0, -1);
+  calcUpdateDisplay();
+}
+
+// الحاسبة لا تتدخل في popstate بعد الآن - يُعالج من floatGoBack
+
 // Map each page → its back destination and label
 const pageBackMap = {
   'home':      { dest: null,       label: '' },
@@ -2252,6 +2752,15 @@ function updateFloatBack(pageId) {
 }
 
 function floatGoBack() {
+  // إذا كانت أي حاسبة مفتوحة → أغلقها فقط دون تنقل (الأرقام تبقى)
+  if (document.getElementById('basicCalcOverlay').classList.contains('open')) {
+    closeBasicCalc();
+    return;
+  }
+  if (document.getElementById('calcOverlay').classList.contains('open')) {
+    closeCalc();
+    return;
+  }
   if (floatBackDest) goPage(floatBackDest);
 }
 
@@ -2259,16 +2768,24 @@ function goCompany(c) { goPage(c); }
 
 // ===== HARDWARE BACK BUTTON =====
 window.addEventListener('popstate', function(e) {
+  // إذا كانت الحاسبة العادية مفتوحة → أغلقها فقط، الأرقام تبقى
+  const basicCalcOverlay = document.getElementById('basicCalcOverlay');
+  if (basicCalcOverlay && basicCalcOverlay.classList.contains('open')) {
+    closeBasicCalc();
+    history.pushState({ page: 'calc_closed' }, '', '');
+    return;
+  }
+  // إذا كانت حاسبة العملات مفتوحة → أغلقها فقط
+  const calcOverlay = document.getElementById('calcOverlay');
+  if (calcOverlay && calcOverlay.classList.contains('open')) {
+    closeCalc();
+    history.pushState({ page: 'calc_closed' }, '', '');
+    return;
+  }
   // If offer modal is open, close it
   const offerModal = document.getElementById('offerConfirmModal');
   if (offerModal && offerModal.style.display === 'flex') {
     offerModal.style.display = 'none';
-    return;
-  }
-  // If calc is open, close it
-  const calcOverlay = document.getElementById('calcOverlay');
-  if (calcOverlay.classList.contains('open')) {
-    closeCalc();
     return;
   }
   // If on a sub-page, go back
@@ -2276,7 +2793,6 @@ window.addEventListener('popstate', function(e) {
     const dest = floatBackDest;
     goPage(dest);
   } else {
-    // Already on home — push state again to prevent app exit
     history.pushState({ page: 'home' }, '', '');
   }
 });
@@ -2288,15 +2804,38 @@ history.pushState({ page: 'home' }, '', '');
 let currentOrder={};
 function openForm(service,pkg,price,backPage,isPhone){
   currentOrder={service,pkg,price,isPhone};
-  // Set dynamic back for orderform
   pageBackMap['orderform'] = { dest: backPage, label: backPage === 'syriatel' ? 'سيرياتيل' : backPage === 'mtn' ? 'MTN' : backPage === 'freefire' ? 'فري فاير' : backPage === 'pubg' ? 'ببجي' : backPage === 'joker' ? 'جواكر' : 'رجوع' };
   document.getElementById('sum-service').textContent=service;
   document.getElementById('sum-pkg').textContent=pkg;
   document.getElementById('sum-price').textContent=price;
+  // ---- السعر بالليرة السورية ----
+  const sypRow = document.getElementById('sum-syp-row');
+  const usdMatch = price.match(/[\d.]+/);
+  if(usdMatch && rates && rates.newSyp) {
+    const usdVal = parseFloat(usdMatch[0]);
+    const sypVal = Math.round(usdVal * rates.newSyp);
+    document.getElementById('sum-syp').textContent = sypVal.toLocaleString('ar-SY') + ' ل.س';
+    currentOrder.sypPrice = sypVal.toLocaleString('ar-SY') + ' ل.س';
+    sypRow.style.display = '';
+  } else {
+    sypRow.style.display = 'none';
+    currentOrder.sypPrice = null;
+  }
   document.getElementById('phone-label').textContent=isPhone?'📞 رقم الهاتف (10 أرقام)':'🎮 معرف اللاعب (ID)';
-  document.getElementById('phone-input').value='';
-  document.getElementById('phone-input').placeholder=isPhone?'09XXXXXXXX':'أدخل معرفك في اللعبة';
-  document.getElementById('phone-input').maxLength=isPhone?10:20;
+  const phoneEl = document.getElementById('phone-input');
+  phoneEl.value='';
+  phoneEl.placeholder=isPhone?'09XXXXXXXX':'أدخل معرفك في اللعبة';
+  phoneEl.maxLength=isPhone?10:20;
+  // لوحة أرقام للهاتف، لوحة نص للـ ID
+  if(isPhone){
+    phoneEl.setAttribute('type','tel');
+    phoneEl.setAttribute('inputmode','numeric');
+    phoneEl.setAttribute('pattern','[0-9]*');
+  } else {
+    phoneEl.setAttribute('type','text');
+    phoneEl.setAttribute('inputmode','text');
+    phoneEl.removeAttribute('pattern');
+  }
   document.getElementById('phone-hint').className='phone-hint';
   document.getElementById('check-icon').className='check-icon';
   document.getElementById('notes-input').value='';
@@ -2337,22 +2876,64 @@ const BAD=['fuck','shit','خرا','كس','زب','منيك','شرموط','عاه�
 function filterNotes(el){let v=el.value;BAD.forEach(w=>{if(v.toLowerCase().includes(w.toLowerCase()))v=v.toLowerCase().replace(new RegExp(w,'gi'),'***');});el.value=v;}
 
 // ===== SEND ORDER =====
+// الرابط الطويل لصورة الدفع
+const PAYMENT_IMG_LONG = 'https://ia800606.us.archive.org/24/items/screenshot-com.whatsapp-edit/Screenshot_%D9%A2%D9%A0%D9%A2%D9%A5-%D9%A1%D9%A2-%D9%A3%D9%A0-%D9%A0%D9%A3-%D9%A3%D9%A7-%D9%A1%D9%A5-%D9%A7%D9%A2%D9%A5_com.whatsapp-edit.jpg';
+const PAYMENT_IMG_CACHE_KEY = 'halou_short_img_url';
+
+// اختصار الرابط مرة واحدة وتخزينه
+async function getShortImgUrl() {
+  const cached = localStorage.getItem(PAYMENT_IMG_CACHE_KEY);
+  if (cached) return cached;
+  try {
+    const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(PAYMENT_IMG_LONG)}`);
+    if (res.ok) {
+      const short = await res.text();
+      if (short.startsWith('http')) {
+        localStorage.setItem(PAYMENT_IMG_CACHE_KEY, short.trim());
+        return short.trim();
+      }
+    }
+  } catch(e) {}
+  return null; // إذا فشل الاتصال
+}
+
+function buildAndSendWA(phone, imgUrl) {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('ar-SY') + ' ' + now.toLocaleTimeString('ar-SY');
+  const sypLine = currentOrder.sypPrice ? `\n🇸🇾 السعر بالليرة: ${currentOrder.sypPrice}` : '';
+  const imgLine = imgUrl
+    ? `\n🖼 صورة الدفع: ${imgUrl}`
+    : `\n💳 أرجو إرسال صورة الدفع هنا`;
+  const msg = `🌟 *طلب جديد - مركز الحلو للشحن*\n\n📦 الخدمة: ${currentOrder.service}\n💎 الباقة: ${currentOrder.pkg}\n💵 السعر بالدولار: ${currentOrder.price}${sypLine}\n📞 الرقم/المعرف: ${phone}\n📅 التاريخ: ${dateStr}\n💳 طريقة الدفع: شام كاش${imgLine}`;
+  const waURL = `https://wa.me/963932183955?text=${encodeURIComponent(msg)}`;
+  document.getElementById('c-service').textContent = currentOrder.service;
+  document.getElementById('c-pkg').textContent = currentOrder.pkg;
+  document.getElementById('c-price').textContent = currentOrder.price;
+  document.getElementById('c-phone').textContent = phone;
+  document.getElementById('c-date').textContent = dateStr;
+  document.getElementById('confirm-wa-btn').href = waURL;
+  window.location.href = waURL;
+}
+
 function sendOrder(){
-  const phone=document.getElementById('phone-input').value.trim();
-  const now=new Date();
-  const dateStr=now.toLocaleDateString('ar-SY')+' '+now.toLocaleTimeString('ar-SY');
-  const msg=`🌟 *طلب جديد - مركز الحلو للشحن*\n\n📦 الخدمة: ${currentOrder.service}\n💎 الباقة: ${currentOrder.pkg}\n💰 السعر: ${currentOrder.price}\n📞 الرقم/المعرف: ${phone}\n📅 التاريخ: ${dateStr}\n💳 طريقة الدفع: شام كاش\n🖼 صورة الدفع: https://ia800606.us.archive.org/24/items/screenshot-com.whatsapp-edit/Screenshot_%D9%A2%D9%A0%D9%A2%D9%A5-%D9%A1%D9%A2-%D9%A3%D9%A0-%D9%A0%D9%A3-%D9%A3%D9%A7-%D9%A1%D9%A5-%D9%A7%D9%A2%D9%A5_com.whatsapp-edit.jpg`;
-  const waURL=`https://wa.me/963932183955?text=${encodeURIComponent(msg)}`;
-  document.getElementById('c-service').textContent=currentOrder.service;
-  document.getElementById('c-pkg').textContent=currentOrder.pkg;
-  document.getElementById('c-price').textContent=currentOrder.price;
-  document.getElementById('c-phone').textContent=phone;
-  document.getElementById('c-date').textContent=dateStr;
-  document.getElementById('confirm-wa-btn').href=waURL;
-  window.open(waURL,'_blank');
-  goPage('confirm');
+  const phone = document.getElementById('phone-input').value.trim();
+  document.getElementById('phone-input').blur();
+  document.getElementById('notes-input').blur();
+
+  // تعطيل الزر مؤقتاً ومؤشر التحميل
+  const btn = document.getElementById('send-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳</span><span>جاري الإرسال...</span>';
+
+  getShortImgUrl().then(imgUrl => {
+    buildAndSendWA(phone, imgUrl);
+    // إعادة الزر بعد لحظة
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.innerHTML = '<span>💬</span><span>إرسال الطلب عبر واتساب</span>';
+    }, 2000);
+  });
 }
 </script>
 </body>
 </html>
- 
