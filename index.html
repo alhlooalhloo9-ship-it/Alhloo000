@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="مركز الحلو">
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjogItmF2LHZg9iyINin2YTYrdmE2Ygg2YTZhNi02K3ZhiIsICJzaG9ydF9uYW1lIjogItmF2LHZg9iyINin2YTYrdmE2YgiLCAiZGVzY3JpcHRpb24iOiAi2KrYt9io2YrZgiDZhdix2YPYsiDYp9mE2K3ZhNmIINmE2YTYtNit2YYgLSDYsdi12YrYryDYs9mI2LHZiiDZiNij2YTYudin2KgiLCAic3RhcnRfdXJsIjogIi4vIiwgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwZDBkMWEiLCAidGhlbWVfY29sb3IiOiAiIzBkMGQxYSIsICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsICJsYW5nIjogImFyIiwgImRpciI6ICJydGwiLCAiaWNvbnMiOiBbeyJzcmMiOiAiaHR0cHM6Ly92aWEucGxhY2Vob2xkZXIuY29tLzE5MngxOTIvZTk0NTYwL2ZmZmZmZj90ZXh0PUgiLCAic2l6ZXMiOiAiMTkyeDE5MiIsICJ0eXBlIjogImltYWdlL3BuZyJ9LCB7InNyYyI6ICJodHRwczovL3ZpYS5wbGFjZWhvbGRlci5jb20vNTEyeDUxMi9lOTQ1NjAvZmZmZmZmP3RleHQ9SCIsICJzaXplcyI6ICI1MTJ4NTEyIiwgInR5cGUiOiAiaW1hZ2UvcG5nIn1dfQ==">
 
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7V5BDL7V1"></script>
@@ -3495,11 +3495,118 @@ function clearAnalytics() {
 }
 
 <script>
-// ===== SERVICE WORKER (PWA - تشغيل بدون نت) =====
+// ===== SERVICE WORKER INLINE (PWA - تشغيل بدون نت) =====
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js')
-      .then(reg => console.log('SW registered:', reg.scope))
+    const swCode = `// ===== مركز الحلو - Service Worker =====
+// غيّر هذا الرقم عند كل تحديث جديد لإعادة تحميل الكاش
+const CACHE_VERSION = 'halou-v1.5-1775308269';
+const CACHE_NAME = CACHE_VERSION;
+
+// الملفات الأساسية للتخزين المؤقت (تعمل بدون نت)
+const CORE_FILES = [
+  './index.html',
+  './index.html', // manifest inlined
+  'https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@400;500;700;900&family=Amiri:wght@400;700&display=swap'
+];
+
+// ===== تثبيت: تخزين الملفات الأساسية =====
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      console.log('[SW] Caching core files...');
+      // نخزن index.html بالتأكيد، الباقي نحاول
+      return cache.addAll(CORE_FILES.slice(0, 2))
+        .then(() => {
+          // نحاول الفونت بشكل منفصل (قد يفشل بسبب CORS)
+          return cache.add(CORE_FILES[2]).catch(() => {});
+        });
+    }).then(() => self.skipWaiting())
+  );
+});
+
+// ===== التفعيل: حذف الكاش القديم =====
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys => {
+      return Promise.all(
+        keys
+          .filter(key => key !== CACHE_NAME)
+          .map(key => {
+            console.log('[SW] Deleting old cache:', key);
+            return caches.delete(key);
+          })
+      );
+    }).then(() => self.clients.claim())
+  );
+});
+
+// ===== الطلبات: Cache First للملفات، Network First للـ API =====
+self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+
+  // API calls (JSONBin, TinyURL, rates) → Network only, no cache
+  if (
+    url.hostname.includes('jsonbin.io') ||
+    url.hostname.includes('tinyurl.com') ||
+    url.hostname.includes('api.') ||
+    url.hostname.includes('archive.org')
+  ) {
+    event.respondWith(
+      fetch(event.request).catch(() => new Response('{}', {
+        headers: { 'Content-Type': 'application/json' }
+      }))
+    );
+    return;
+  }
+
+  // Google Fonts → Cache First
+  if (url.hostname.includes('fonts.googleapis.com') || url.hostname.includes('fonts.gstatic.com')) {
+    event.respondWith(
+      caches.match(event.request).then(cached => {
+        if (cached) return cached;
+        return fetch(event.request).then(response => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          return response;
+        }).catch(() => new Response('', { status: 200 }));
+      })
+    );
+    return;
+  }
+
+  // باقي الطلبات (index.html, manifest, etc.) → Cache First ثم Network
+  event.respondWith(
+    caches.match(event.request).then(cached => {
+      if (cached) {
+        // في الخلفية: حاول تحديث الكاش من الشبكة
+        fetch(event.request).then(response => {
+          if (response && response.status === 200) {
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, response));
+          }
+        }).catch(() => {});
+        return cached;
+      }
+      // مش موجود في الكاش → اجلبه من الشبكة
+      return fetch(event.request).then(response => {
+        if (!response || response.status !== 200) return response;
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        return response;
+      }).catch(() => {
+        // بدون نت ولا يوجد في الكاش → صفحة بديلة
+        if (event.request.destination === 'document') {
+          return caches.match('./index.html');
+        }
+      });
+    })
+  );
+});
+`;
+    const blob = new Blob([swCode], { type: 'application/javascript' });
+    const swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl)
+      .then(reg => console.log('SW registered (inline):', reg.scope))
       .catch(err => console.log('SW error:', err));
   });
 }
