@@ -3328,7 +3328,7 @@ function sendOrder(){
 }
 </script>
 
-
+<script>
 // ===== ANALYTICS SYSTEM =====
 const AN_KEY   = 'halou_analytics';   // localStorage key
 const AN_BIN   = '6801a4288a456b796684e0bc'; // bin خاص بالإحصائيات - أنشئه على JSONBin
@@ -3493,121 +3493,19 @@ function clearAnalytics() {
   localStorage.removeItem(AN_KEY);
   loadAnalytics();
 }
+</script>
 
 <script>
-// ===== SERVICE WORKER INLINE (PWA - تشغيل بدون نت) =====
+// ===== SERVICE WORKER INLINE (PWA) =====
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    const swCode = `// ===== مركز الحلو - Service Worker =====
-// غيّر هذا الرقم عند كل تحديث جديد لإعادة تحميل الكاش
-const CACHE_VERSION = 'halou-v1.5-1775308269';
-const CACHE_NAME = CACHE_VERSION;
-
-// الملفات الأساسية للتخزين المؤقت (تعمل بدون نت)
-const CORE_FILES = [
-  './index.html',
-  './index.html', // manifest inlined
-  'https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@400;500;700;900&family=Amiri:wght@400;700&display=swap'
-];
-
-// ===== تثبيت: تخزين الملفات الأساسية =====
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      console.log('[SW] Caching core files...');
-      // نخزن index.html بالتأكيد، الباقي نحاول
-      return cache.addAll(CORE_FILES.slice(0, 2))
-        .then(() => {
-          // نحاول الفونت بشكل منفصل (قد يفشل بسبب CORS)
-          return cache.add(CORE_FILES[2]).catch(() => {});
-        });
-    }).then(() => self.skipWaiting())
-  );
-});
-
-// ===== التفعيل: حذف الكاش القديم =====
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => {
-            console.log('[SW] Deleting old cache:', key);
-            return caches.delete(key);
-          })
-      );
-    }).then(() => self.clients.claim())
-  );
-});
-
-// ===== الطلبات: Cache First للملفات، Network First للـ API =====
-self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
-
-  // API calls (JSONBin, TinyURL, rates) → Network only, no cache
-  if (
-    url.hostname.includes('jsonbin.io') ||
-    url.hostname.includes('tinyurl.com') ||
-    url.hostname.includes('api.') ||
-    url.hostname.includes('archive.org')
-  ) {
-    event.respondWith(
-      fetch(event.request).catch(() => new Response('{}', {
-        headers: { 'Content-Type': 'application/json' }
-      }))
-    );
-    return;
-  }
-
-  // Google Fonts → Cache First
-  if (url.hostname.includes('fonts.googleapis.com') || url.hostname.includes('fonts.gstatic.com')) {
-    event.respondWith(
-      caches.match(event.request).then(cached => {
-        if (cached) return cached;
-        return fetch(event.request).then(response => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-          return response;
-        }).catch(() => new Response('', { status: 200 }));
-      })
-    );
-    return;
-  }
-
-  // باقي الطلبات (index.html, manifest, etc.) → Cache First ثم Network
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) {
-        // في الخلفية: حاول تحديث الكاش من الشبكة
-        fetch(event.request).then(response => {
-          if (response && response.status === 200) {
-            caches.open(CACHE_NAME).then(cache => cache.put(event.request, response));
-          }
-        }).catch(() => {});
-        return cached;
-      }
-      // مش موجود في الكاش → اجلبه من الشبكة
-      return fetch(event.request).then(response => {
-        if (!response || response.status !== 200) return response;
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-        return response;
-      }).catch(() => {
-        // بدون نت ولا يوجد في الكاش → صفحة بديلة
-        if (event.request.destination === 'document') {
-          return caches.match('./index.html');
-        }
-      });
-    })
-  );
-});
-`;
-    const blob = new Blob([swCode], { type: 'application/javascript' });
-    const swUrl = URL.createObjectURL(blob);
-    navigator.serviceWorker.register(swUrl)
-      .then(reg => console.log('SW registered (inline):', reg.scope))
-      .catch(err => console.log('SW error:', err));
+    try {
+      const b64 = 'Ly8gPT09PT0g2YXYsdmD2LIg2KfZhNit2YTZiCAtIFNlcnZpY2UgV29ya2VyID09PT09Ci8vINi62YrZkdixINmH2LDYpyDYp9mE2LHZgtmFINi52YbYryDZg9mEINiq2K3Yr9mK2Ksg2KzYr9mK2K8g2YTYpdi52KfYr9ipINiq2K3ZhdmK2YQg2KfZhNmD2KfYtApjb25zdCBDQUNIRV9WRVJTSU9OID0gJ2hhbG91LXYxLjUtMTc3NTMwODI2OSc7CmNvbnN0IENBQ0hFX05BTUUgPSBDQUNIRV9WRVJTSU9OOwoKLy8g2KfZhNmF2YTZgdin2Kog2KfZhNij2LPYp9iz2YrYqSDZhNmE2KrYrtiy2YrZhiDYp9mE2YXYpNmC2KogKNiq2LnZhdmEINio2K/ZiNmGINmG2KopCmNvbnN0IENPUkVfRklMRVMgPSBbCiAgJy4vaW5kZXguaHRtbCcsCiAgJy4vbWFuaWZlc3QuanNvbicsCiAgJ2h0dHBzOi8vZm9udHMuZ29vZ2xlYXBpcy5jb20vY3NzMj9mYW1pbHk9Q2Fpcm86d2dodEA0MDA7NjAwOzcwMDs5MDAmZmFtaWx5PVRhamF3YWw6d2dodEA0MDA7NTAwOzcwMDs5MDAmZmFtaWx5PUFtaXJpOndnaHRANDAwOzcwMCZkaXNwbGF5PXN3YXAnCl07CgovLyA9PT09PSDYqtir2KjZitiqOiDYqtiu2LLZitmGINin2YTZhdmE2YHYp9iqINin2YTYo9iz2KfYs9mK2KkgPT09PT0Kc2VsZi5hZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJywgZXZlbnQgPT4gewogIGV2ZW50LndhaXRVbnRpbCgKICAgIGNhY2hlcy5vcGVuKENBQ0hFX05BTUUpLnRoZW4oY2FjaGUgPT4gewogICAgICBjb25zb2xlLmxvZygnW1NXXSBDYWNoaW5nIGNvcmUgZmlsZXMuLi4nKTsKICAgICAgLy8g2YbYrtiy2YYgaW5kZXguaHRtbCDYqNin2YTYqtij2YPZitiv2Iwg2KfZhNio2KfZgtmKINmG2K3Yp9mI2YQKICAgICAgcmV0dXJuIGNhY2hlLmFkZEFsbChDT1JFX0ZJTEVTLnNsaWNlKDAsIDIpKQogICAgICAgIC50aGVuKCgpID0+IHsKICAgICAgICAgIC8vINmG2K3Yp9mI2YQg2KfZhNmB2YjZhtiqINio2LTZg9mEINmF2YbZgdi12YQgKNmC2K8g2YrZgdi02YQg2KjYs9io2KggQ09SUykKICAgICAgICAgIHJldHVybiBjYWNoZS5hZGQoQ09SRV9GSUxFU1syXSkuY2F0Y2goKCkgPT4ge30pOwogICAgICAgIH0pOwogICAgfSkudGhlbigoKSA9PiBzZWxmLnNraXBXYWl0aW5nKCkpCiAgKTsKfSk7CgovLyA9PT09PSDYp9mE2KrZgdi52YrZhDog2K3YsNmBINin2YTZg9in2LQg2KfZhNmC2K/ZitmFID09PT09CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcignYWN0aXZhdGUnLCBldmVudCA9PiB7CiAgZXZlbnQud2FpdFVudGlsKAogICAgY2FjaGVzLmtleXMoKS50aGVuKGtleXMgPT4gewogICAgICByZXR1cm4gUHJvbWlzZS5hbGwoCiAgICAgICAga2V5cwogICAgICAgICAgLmZpbHRlcihrZXkgPT4ga2V5ICE9PSBDQUNIRV9OQU1FKQogICAgICAgICAgLm1hcChrZXkgPT4gewogICAgICAgICAgICBjb25zb2xlLmxvZygnW1NXXSBEZWxldGluZyBvbGQgY2FjaGU6Jywga2V5KTsKICAgICAgICAgICAgcmV0dXJuIGNhY2hlcy5kZWxldGUoa2V5KTsKICAgICAgICAgIH0pCiAgICAgICk7CiAgICB9KS50aGVuKCgpID0+IHNlbGYuY2xpZW50cy5jbGFpbSgpKQogICk7Cn0pOwoKLy8gPT09PT0g2KfZhNi32YTYqNin2Ko6IENhY2hlIEZpcnN0INmE2YTZhdmE2YHYp9iq2IwgTmV0d29yayBGaXJzdCDZhNmE2YAgQVBJID09PT09CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcignZmV0Y2gnLCBldmVudCA9PiB7CiAgY29uc3QgdXJsID0gbmV3IFVSTChldmVudC5yZXF1ZXN0LnVybCk7CgogIC8vIEFQSSBjYWxscyAoSlNPTkJpbiwgVGlueVVSTCwgcmF0ZXMpIOKGkiBOZXR3b3JrIG9ubHksIG5vIGNhY2hlCiAgaWYgKAogICAgdXJsLmhvc3RuYW1lLmluY2x1ZGVzKCdqc29uYmluLmlvJykgfHwKICAgIHVybC5ob3N0bmFtZS5pbmNsdWRlcygndGlueXVybC5jb20nKSB8fAogICAgdXJsLmhvc3RuYW1lLmluY2x1ZGVzKCdhcGkuJykgfHwKICAgIHVybC5ob3N0bmFtZS5pbmNsdWRlcygnYXJjaGl2ZS5vcmcnKQogICkgewogICAgZXZlbnQucmVzcG9uZFdpdGgoCiAgICAgIGZldGNoKGV2ZW50LnJlcXVlc3QpLmNhdGNoKCgpID0+IG5ldyBSZXNwb25zZSgne30nLCB7CiAgICAgICAgaGVhZGVyczogeyAnQ29udGVudC1UeXBlJzogJ2FwcGxpY2F0aW9uL2pzb24nIH0KICAgICAgfSkpCiAgICApOwogICAgcmV0dXJuOwogIH0KCiAgLy8gR29vZ2xlIEZvbnRzIOKGkiBDYWNoZSBGaXJzdAogIGlmICh1cmwuaG9zdG5hbWUuaW5jbHVkZXMoJ2ZvbnRzLmdvb2dsZWFwaXMuY29tJykgfHwgdXJsLmhvc3RuYW1lLmluY2x1ZGVzKCdmb250cy5nc3RhdGljLmNvbScpKSB7CiAgICBldmVudC5yZXNwb25kV2l0aCgKICAgICAgY2FjaGVzLm1hdGNoKGV2ZW50LnJlcXVlc3QpLnRoZW4oY2FjaGVkID0+IHsKICAgICAgICBpZiAoY2FjaGVkKSByZXR1cm4gY2FjaGVkOwogICAgICAgIHJldHVybiBmZXRjaChldmVudC5yZXF1ZXN0KS50aGVuKHJlc3BvbnNlID0+IHsKICAgICAgICAgIGNvbnN0IGNsb25lID0gcmVzcG9uc2UuY2xvbmUoKTsKICAgICAgICAgIGNhY2hlcy5vcGVuKENBQ0hFX05BTUUpLnRoZW4oY2FjaGUgPT4gY2FjaGUucHV0KGV2ZW50LnJlcXVlc3QsIGNsb25lKSk7CiAgICAgICAgICByZXR1cm4gcmVzcG9uc2U7CiAgICAgICAgfSkuY2F0Y2goKCkgPT4gbmV3IFJlc3BvbnNlKCcnLCB7IHN0YXR1czogMjAwIH0pKTsKICAgICAgfSkKICAgICk7CiAgICByZXR1cm47CiAgfQoKICAvLyDYqNin2YLZiiDYp9mE2LfZhNio2KfYqiAoaW5kZXguaHRtbCwgbWFuaWZlc3QsIGV0Yy4pIOKGkiBDYWNoZSBGaXJzdCDYq9mFIE5ldHdvcmsKICBldmVudC5yZXNwb25kV2l0aCgKICAgIGNhY2hlcy5tYXRjaChldmVudC5yZXF1ZXN0KS50aGVuKGNhY2hlZCA9PiB7CiAgICAgIGlmIChjYWNoZWQpIHsKICAgICAgICAvLyDZgdmKINin2YTYrtmE2YHZitipOiDYrdin2YjZhCDYqtit2K/ZitirINin2YTZg9in2LQg2YXZhiDYp9mE2LTYqNmD2KkKICAgICAgICBmZXRjaChldmVudC5yZXF1ZXN0KS50aGVuKHJlc3BvbnNlID0+IHsKICAgICAgICAgIGlmIChyZXNwb25zZSAmJiByZXNwb25zZS5zdGF0dXMgPT09IDIwMCkgewogICAgICAgICAgICBjYWNoZXMub3BlbihDQUNIRV9OQU1FKS50aGVuKGNhY2hlID0+IGNhY2hlLnB1dChldmVudC5yZXF1ZXN0LCByZXNwb25zZSkpOwogICAgICAgICAgfQogICAgICAgIH0pLmNhdGNoKCgpID0+IHt9KTsKICAgICAgICByZXR1cm4gY2FjaGVkOwogICAgICB9CiAgICAgIC8vINmF2LQg2YXZiNis2YjYryDZgdmKINin2YTZg9in2LQg4oaSINin2KzZhNio2Ycg2YXZhiDYp9mE2LTYqNmD2KkKICAgICAgcmV0dXJuIGZldGNoKGV2ZW50LnJlcXVlc3QpLnRoZW4ocmVzcG9uc2UgPT4gewogICAgICAgIGlmICghcmVzcG9uc2UgfHwgcmVzcG9uc2Uuc3RhdHVzICE9PSAyMDApIHJldHVybiByZXNwb25zZTsKICAgICAgICBjb25zdCBjbG9uZSA9IHJlc3BvbnNlLmNsb25lKCk7CiAgICAgICAgY2FjaGVzLm9wZW4oQ0FDSEVfTkFNRSkudGhlbihjYWNoZSA9PiBjYWNoZS5wdXQoZXZlbnQucmVxdWVzdCwgY2xvbmUpKTsKICAgICAgICByZXR1cm4gcmVzcG9uc2U7CiAgICAgIH0pLmNhdGNoKCgpID0+IHsKICAgICAgICAvLyDYqNiv2YjZhiDZhtiqINmI2YTYpyDZitmI2KzYryDZgdmKINin2YTZg9in2LQg4oaSINi12YHYrdipINio2K/ZitmE2KkKICAgICAgICBpZiAoZXZlbnQucmVxdWVzdC5kZXN0aW5hdGlvbiA9PT0gJ2RvY3VtZW50JykgewogICAgICAgICAgcmV0dXJuIGNhY2hlcy5tYXRjaCgnLi9pbmRleC5odG1sJyk7CiAgICAgICAgfQogICAgICB9KTsKICAgIH0pCiAgKTsKfSk7Cg==';
+      const code = decodeURIComponent(escape(atob(b64)));
+      const blob = new Blob([code], {type:'application/javascript'});
+      const url = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(url).catch(()=>{});
+    } catch(e) {}
   });
 }
 </script>
