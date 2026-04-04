@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>مركز الحلو للشحن</title>
+<meta name="theme-color" content="#0d0d1a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="مركز الحلو">
+<link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@400;500;700;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -347,11 +353,90 @@
   /* PACKAGES */
   .packages-container { padding:8px 14px 20px; position:relative; z-index:10; }
   .packages-grid { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
-  .pkg-card { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:9px 10px; cursor:pointer; transition:all 0.2s; display:flex; flex-direction:column; align-items:center; gap:3px; }
+  .pkg-card { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:9px 10px; cursor:pointer; transition:all 0.2s; display:flex; flex-direction:column; align-items:center; gap:3px; position:relative; }
   .pkg-card:hover,.pkg-card:active { background:rgba(255,255,255,0.12); transform:scale(1.03); }
   .pkg-amount { font-size:13px; font-weight:900; color:#60a5fa; text-align:center; }
   .pkg-price { font-size:12px; font-weight:700; color:#4ade80; }
+  .pkg-price-syp { font-size:10px; font-weight:700; color:#f5a623; margin-top:1px; display:none; }
   .pkg-unit { font-size:9px; color:rgba(255,255,255,0.35); }
+  /* Copy WA button */
+  .pkg-copy-btn {
+    position:absolute; top:5px; left:5px;
+    width:22px; height:22px;
+    background:rgba(37,211,102,0.15);
+    border:1px solid rgba(37,211,102,0.3);
+    border-radius:6px;
+    color:#25d366;
+    font-size:11px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:all 0.2s;
+    z-index:2;
+  }
+  .pkg-copy-btn:hover { background:rgba(37,211,102,0.3); transform:scale(1.1); }
+  .pkg-copy-btn.copied { background:rgba(74,222,128,0.25); color:#4ade80; }
+  /* Dynamic pricing bar */
+  .dyn-pricing-bar {
+    margin: 0 16px 12px;
+    background: rgba(245,166,35,0.07);
+    border: 1px solid rgba(245,166,35,0.2);
+    border-radius: 14px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    position: relative; z-index: 10;
+  }
+  .dyn-pricing-bar .dp-label {
+    font-size: 11px; color: rgba(255,255,255,0.55); white-space: nowrap;
+  }
+  .dyn-pricing-bar .dp-input {
+    width: 70px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(245,166,35,0.35);
+    border-radius: 8px;
+    color: #f5a623;
+    font-family: 'Cairo', sans-serif;
+    font-size: 13px; font-weight: 700;
+    padding: 5px 8px;
+    outline: none;
+    direction: ltr; text-align: center;
+  }
+  .dyn-pricing-bar .dp-input:focus { border-color: #f5a623; }
+  .dyn-pricing-bar .dp-profit {
+    display: flex; align-items: center; gap: 6px; margin-right: auto;
+  }
+  .dyn-pricing-bar .dp-profit-input {
+    width: 50px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(74,222,128,0.35);
+    border-radius: 8px;
+    color: #4ade80;
+    font-family: 'Cairo', sans-serif;
+    font-size: 13px; font-weight: 700;
+    padding: 5px 8px;
+    outline: none;
+    direction: ltr; text-align: center;
+  }
+  .dyn-pricing-bar .dp-profit-input:focus { border-color: #4ade80; }
+  .dyn-pricing-bar .dp-syp-toggle {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 10px; color: rgba(255,255,255,0.5);
+    cursor: pointer; user-select: none;
+  }
+  .dyn-pricing-bar .dp-toggle-check {
+    width:16px; height:16px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(245,166,35,0.4);
+    border-radius: 4px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:10px; transition: all 0.2s;
+  }
+  .dyn-pricing-bar .dp-toggle-check.on { background: #f5a623; border-color:#f5a623; }
+  body.light-mode .dyn-pricing-bar { background:rgba(245,166,35,0.05); border-color:rgba(245,166,35,0.25); }
+  body.light-mode .dyn-pricing-bar .dp-label { color:rgba(0,0,0,0.55); }
+  body.light-mode .dyn-pricing-bar .dp-input { background:rgba(0,0,0,0.05); color:#b45309; }
+  body.light-mode .dyn-pricing-bar .dp-profit-input { background:rgba(0,0,0,0.05); color:#15803d; }
   .syriatel-pkg .pkg-card { border-color:rgba(230,57,70,0.2); }
   .syriatel-pkg .pkg-card:hover { border-color:rgba(230,57,70,0.5); }
   .mtn-pkg .pkg-card { border-color:rgba(255,183,3,0.2); }
@@ -907,6 +992,41 @@
   body.light-mode .whats-new-modal { background: linear-gradient(160deg, #f0f4ff, #e8eef8); border-color: rgba(124,58,237,0.3); }
   body.light-mode .wn-items li { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.08); color: #1a1a2e; }
   body.light-mode .wn-subtitle { color: rgba(0,0,0,0.45); }
+
+  /* ===== RESPONSIVE - تحسين الاستجابة ===== */
+  @media (max-width: 360px) {
+    .squares-grid { gap:10px; padding:8px 12px 16px; }
+    .sq-icon { font-size:32px; }
+    .sq-label { font-size:11px; }
+    .dyn-pricing-bar { gap:6px; padding:8px 10px; }
+    .dyn-pricing-bar .dp-input { width:60px; font-size:12px; }
+    .dyn-pricing-bar .dp-profit-input { width:40px; font-size:12px; }
+    .packages-grid { grid-template-columns:1fr 1fr; gap:5px; }
+    .pkg-card { padding:7px 6px; }
+    .pkg-amount { font-size:11px; }
+    .pkg-price { font-size:11px; }
+    .pkg-price-syp { font-size:9px; }
+    .calc-btn { height:50px; font-size:18px; }
+  }
+  @media (max-width: 400px) {
+    .header h1 { font-size:22px; }
+    .company-cards { gap:10px; padding:8px 12px; }
+    .company-card img { width:52px; height:52px; }
+  }
+  @media (min-width: 500px) {
+    .squares-grid { grid-template-columns:1fr 1fr; max-width:500px; margin:0 auto; }
+    .packages-grid { grid-template-columns:1fr 1fr 1fr; }
+    .company-cards { justify-content:center; }
+    .dyn-pricing-bar { max-width:500px; margin-left:auto; margin-right:auto; }
+  }
+  @media (min-width: 768px) {
+    body { max-width: 600px; margin: 0 auto; }
+    .top-bar, .float-back, .float-calc-group { max-width:600px; left:50%; transform:translateX(-50%); }
+    .float-back { left:unset; right:calc(50% - 280px); transform:none; }
+    .float-calc-group { left:calc(50% - 290px); transform:none; }
+    .packages-grid { grid-template-columns:1fr 1fr 1fr; }
+    .basic-calc-modal { border-radius:24px; margin-bottom:20px; }
+  }
 </style>
 </head>
 <body>
@@ -914,13 +1034,13 @@
 <!-- ===== WHAT'S NEW MODAL ===== -->
 <div class="whats-new-overlay" id="whatsNewOverlay">
   <div class="whats-new-modal">
-    <div class="wn-version-badge">🆕 تحديث جديد · v1.3</div>
+    <div class="wn-version-badge">🆕 تحديث جديد · v1.4</div>
     <div class="wn-title">✨ ما الجديد؟</div>
     <div class="wn-subtitle">مرحباً! إليك آخر التحديثات في التطبيق</div>
     <ul class="wn-items">
-      <li><span class="wn-icon">🧮</span><div>تمت إضافة <strong>حاسبة عادية عائمة</strong> تظهر فوق جميع الصفحات لسهولة الحساب</div></li>
-      <li><span class="wn-icon">💱</span><div>زر <strong>حاسبة العملات</strong> أصبح عائماً أيضاً في كل الصفحات</div></li>
-      <li><span class="wn-icon">🇸🇾</span><div>تظهر الآن <strong>السعر بالليرة السورية</strong> تلقائياً عند اختيار أي باقة</div></li>
+      <li><span class="wn-icon">💰</span><div><strong>التسعير الديناميكي</strong> — أدخل سعر الصرف اليومي ونسبة الربح وتتحدث الأسعار تلقائياً</div></li>
+      <li><span class="wn-icon">📋</span><div>زر <strong>نسخ للواتساب</strong> على كل باقة — انسخ السعر مع رسالة ترحيبية باسم المركز</div></li>
+      <li><span class="wn-icon">🇸🇾</span><div>عرض <strong>السعر بالليرة السورية</strong> مع الربح في كل باقة تلقائياً</div></li>
     </ul>
     <button class="wn-close-btn" onclick="closeWhatsNew()">✅ فهمت، شكراً!</button>
   </div>
@@ -1377,6 +1497,20 @@
     <h2 style="color:var(--syriatel-color);">سيرياتيل</h2>
     <div class="sub">اختر الباقة المناسبة</div>
   </div>
+  <div class="dyn-pricing-bar" id="dpBar-syriatel">
+    <span class="dp-label">💵 $1 =</span>
+    <input class="dp-input" id="dpRate-syriatel" type="number" step="0.1" placeholder="117.3" oninput="applyDynPricing('syriatel')">
+    <span class="dp-label">ج.س</span>
+    <div class="dp-profit">
+      <span class="dp-label">🏷 ربح</span>
+      <input class="dp-profit-input" id="dpProfit-syriatel" type="number" step="0.5" value="5" min="0" max="100" oninput="applyDynPricing('syriatel')">
+      <span class="dp-label">%</span>
+    </div>
+    <div class="dp-syp-toggle" onclick="toggleSypDisplay('syriatel')">
+      <div class="dp-toggle-check" id="dpToggle-syriatel">✓</div>
+      <span>عرض ل.س</span>
+    </div>
+  </div>
   <div class="packages-container syriatel-pkg">
     <div class="packages-grid" id="syriatel-pkgs"></div>
   </div>
@@ -1389,6 +1523,20 @@
     <div style="font-size:46px;">🟡</div>
     <h2 style="color:var(--mtn-color);">ام تي ان MTN</h2>
     <div class="sub">اختر الباقة المناسبة</div>
+  </div>
+  <div class="dyn-pricing-bar" id="dpBar-mtn">
+    <span class="dp-label">💵 $1 =</span>
+    <input class="dp-input" id="dpRate-mtn" type="number" step="0.1" placeholder="117.3" oninput="applyDynPricing('mtn')">
+    <span class="dp-label">ج.س</span>
+    <div class="dp-profit">
+      <span class="dp-label">🏷 ربح</span>
+      <input class="dp-profit-input" id="dpProfit-mtn" type="number" step="0.5" value="5" min="0" max="100" oninput="applyDynPricing('mtn')">
+      <span class="dp-label">%</span>
+    </div>
+    <div class="dp-syp-toggle" onclick="toggleSypDisplay('mtn')">
+      <div class="dp-toggle-check" id="dpToggle-mtn">✓</div>
+      <span>عرض ل.س</span>
+    </div>
   </div>
   <div class="packages-container mtn-pkg">
     <div class="packages-grid" id="mtn-pkgs"></div>
@@ -1430,6 +1578,20 @@
     <h2 style="color:var(--ff-color);">فري فاير</h2>
     <div class="sub">اختر باقة المجوهرات</div>
   </div>
+  <div class="dyn-pricing-bar" id="dpBar-freefire">
+    <span class="dp-label">💵 $1 =</span>
+    <input class="dp-input" id="dpRate-freefire" type="number" step="0.1" placeholder="117.3" oninput="applyDynPricing('freefire')">
+    <span class="dp-label">ج.س</span>
+    <div class="dp-profit">
+      <span class="dp-label">🏷 ربح</span>
+      <input class="dp-profit-input" id="dpProfit-freefire" type="number" step="0.5" value="5" min="0" max="100" oninput="applyDynPricing('freefire')">
+      <span class="dp-label">%</span>
+    </div>
+    <div class="dp-syp-toggle" onclick="toggleSypDisplay('freefire')">
+      <div class="dp-toggle-check" id="dpToggle-freefire">✓</div>
+      <span>عرض ل.س</span>
+    </div>
+  </div>
   <div class="packages-container ff-pkg">
     <div class="packages-grid" id="ff-pkgs"></div>
   </div>
@@ -1443,6 +1605,20 @@
     <h2 style="color:var(--pubg-color);">ببجي موبايل</h2>
     <div class="sub">اختر باقة الشدة</div>
   </div>
+  <div class="dyn-pricing-bar" id="dpBar-pubg">
+    <span class="dp-label">💵 $1 =</span>
+    <input class="dp-input" id="dpRate-pubg" type="number" step="0.1" placeholder="117.3" oninput="applyDynPricing('pubg')">
+    <span class="dp-label">ج.س</span>
+    <div class="dp-profit">
+      <span class="dp-label">🏷 ربح</span>
+      <input class="dp-profit-input" id="dpProfit-pubg" type="number" step="0.5" value="5" min="0" max="100" oninput="applyDynPricing('pubg')">
+      <span class="dp-label">%</span>
+    </div>
+    <div class="dp-syp-toggle" onclick="toggleSypDisplay('pubg')">
+      <div class="dp-toggle-check" id="dpToggle-pubg">✓</div>
+      <span>عرض ل.س</span>
+    </div>
+  </div>
   <div class="packages-container pubg-pkg">
     <div class="packages-grid" id="pubg-pkgs"></div>
   </div>
@@ -1455,6 +1631,20 @@
     <div class="game-page-icon">🃏</div>
     <h2 style="background:linear-gradient(135deg,#ffd000,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">جواكر</h2>
     <div class="sub">اختر الباقة المناسبة</div>
+  </div>
+  <div class="dyn-pricing-bar" id="dpBar-joker">
+    <span class="dp-label">💵 $1 =</span>
+    <input class="dp-input" id="dpRate-joker" type="number" step="0.1" placeholder="117.3" oninput="applyDynPricing('joker')">
+    <span class="dp-label">ج.س</span>
+    <div class="dp-profit">
+      <span class="dp-label">🏷 ربح</span>
+      <input class="dp-profit-input" id="dpProfit-joker" type="number" step="0.5" value="5" min="0" max="100" oninput="applyDynPricing('joker')">
+      <span class="dp-label">%</span>
+    </div>
+    <div class="dp-syp-toggle" onclick="toggleSypDisplay('joker')">
+      <div class="dp-toggle-check" id="dpToggle-joker">✓</div>
+      <span>عرض ل.س</span>
+    </div>
   </div>
   <div class="packages-container joker-pkg">
     <div class="packages-grid" id="joker-pkgs"></div>
@@ -1754,7 +1944,25 @@ let rates={oldSyp:11700.3, newSyp:117.3, tryRate:44.2};
 let activeField=null;
 let adminTapCount=0;
 let adminTapTimer=null;
-let adminUnlocked=false;
+// ===== ADMIN SESSION (يبقى مسجلاً 24 ساعة) =====
+const ADMIN_KEY = 'halou_admin_session';
+const ADMIN_EXPIRY_HOURS = 24;
+
+function saveAdminSession() {
+  const expiry = Date.now() + ADMIN_EXPIRY_HOURS * 60 * 60 * 1000;
+  localStorage.setItem(ADMIN_KEY, JSON.stringify({ expiry }));
+}
+function clearAdminSession() {
+  localStorage.removeItem(ADMIN_KEY);
+}
+function isAdminSessionValid() {
+  try {
+    const data = JSON.parse(localStorage.getItem(ADMIN_KEY));
+    if (data && data.expiry && Date.now() < data.expiry) return true;
+  } catch(e) {}
+  return false;
+}
+let adminUnlocked = isAdminSessionValid();
 
 // ===== JSONBIN CONFIG =====
 const JSONBIN_BASE = 'https://api.jsonbin.io/v3/b';
@@ -1993,6 +2201,7 @@ function checkPw(){
   const val = document.getElementById('pwInput').value;
   if(val === '770389'){
     adminUnlocked=true;
+    saveAdminSession(); // حفظ الجلسة 24 ساعة
     closePwModal();
     restoreBinCredsToUI();
     document.getElementById('adminPanel').classList.add('show');
@@ -2005,6 +2214,7 @@ function checkPw(){
 }
 function lockAdmin(){
   adminUnlocked=false;
+  clearAdminSession(); // حذف الجلسة المحفوظة
   document.getElementById('adminPanel').classList.remove('show');
   const btn = document.getElementById('adminIconBtn');
   btn.style.borderColor='rgba(255,255,255,0.12)';
@@ -2533,25 +2743,149 @@ setInterval(loadOffersFromCloud, 60000);
 checkNotifBanner();
 
 // ===== RENDER PACKAGES =====
-function renderPkgs(pkgs,cid,cb){
-  document.getElementById(cid).innerHTML=pkgs.map((p,i)=>`
+// خريطة serviceId → pkgs + callback + label
+const PKG_MAP = {
+  syriatel: { pkgs: ()=>SYRIATEL_PKGS, cb:'selectSyriatel', cid:'syriatel-pkgs', label:'سيرياتيل - رصيد' },
+  mtn:      { pkgs: ()=>MTN_PKGS,      cb:'selectMTN',      cid:'mtn-pkgs',      label:'MTN - رصيد' },
+  freefire: { pkgs: ()=>FF_PKGS,       cb:'selectFF',        cid:'ff-pkgs',       label:'فري فاير' },
+  pubg:     { pkgs: ()=>PUBG_PKGS,     cb:'selectPUBG',      cid:'pubg-pkgs',     label:'ببجي موبايل' },
+  joker:    { pkgs: ()=>JOKER_PKGS,    cb:'selectJoker',     cid:'joker-pkgs',    label:'جواكر' },
+};
+
+// حالة التسعير الديناميكي لكل خدمة
+const dpState = {};
+Object.keys(PKG_MAP).forEach(id => {
+  dpState[id] = { rate: null, profit: 5, showSyp: true };
+});
+
+function renderPkgs(pkgs, cid, cb) {
+  const serviceId = Object.keys(PKG_MAP).find(k => PKG_MAP[k].cid === cid) || '';
+  const dp = dpState[serviceId] || {};
+  const useRate = dp.rate || rates.newSyp || 117.3;
+  const profit = (dp.profit !== undefined ? dp.profit : 5);
+  const showSyp = dp.showSyp !== false;
+
+  document.getElementById(cid).innerHTML = pkgs.map((p, i) => {
+    // حساب السعر بالليرة مع الربح
+    const usdMatch = p.price.match(/[\d.]+/);
+    let sypHtml = '';
+    let sypVal = 0;
+    if (usdMatch && showSyp) {
+      const usdVal = parseFloat(usdMatch[0]);
+      sypVal = Math.round(usdVal * useRate * (1 + profit / 100));
+      sypHtml = `<div class="pkg-price-syp" style="display:block">≈ ${sypVal.toLocaleString('ar-SY')} ل.س</div>`;
+    }
+    // رسالة الواتساب
+    const waMsg = buildCopyMsg(p, serviceId, sypVal > 0 && showSyp ? sypVal : null, profit);
+    return `
     <div class="pkg-card" onclick="${cb}(${i})">
+      <button class="pkg-copy-btn" onclick="copyPkgWA(event, this, '${encodeURIComponent(waMsg)}')" title="نسخ للواتساب">📋</button>
       <div class="pkg-amount">${p.amount}</div>
-      ${p.unit?`<div class="pkg-unit">${p.unit}</div>`:''}
+      ${p.unit ? `<div class="pkg-unit">${p.unit}</div>` : ''}
       <div class="pkg-price">${p.price}</div>
-    </div>`).join('');
+      ${sypHtml}
+    </div>`;
+  }).join('');
 }
+
+function buildCopyMsg(p, serviceId, sypVal, profit) {
+  const label = PKG_MAP[serviceId]?.label || serviceId;
+  const profitNote = profit > 0 ? ` (شامل ${profit}% ربح)` : '';
+  let msg = `🌟 *مركز الحلو للشحن*
+
+`;
+  msg += `📦 الخدمة: ${label}
+`;
+  msg += `💎 الباقة: ${p.amount}${p.unit ? ' ' + p.unit : ''}
+`;
+  msg += `💵 السعر: ${p.price}${profitNote}`;
+  if (sypVal) msg += `
+🇸🇾 بالليرة: ${sypVal.toLocaleString('ar-SY')} ل.س`;
+  msg += `
+
+📲 للطلب: تواصل معنا عبر واتساب`;
+  return msg;
+}
+
+function copyPkgWA(event, btn, encodedMsg) {
+  event.stopPropagation(); // لا تفتح نموذج الطلب
+  const msg = decodeURIComponent(encodedMsg);
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(msg).then(() => showCopied(btn));
+  } else {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = msg; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showCopied(btn);
+  }
+}
+
+function showCopied(btn) {
+  btn.textContent = '✅';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = '📋'; btn.classList.remove('copied'); }, 1500);
+}
+
+function applyDynPricing(serviceId) {
+  const rateEl = document.getElementById(`dpRate-${serviceId}`);
+  const profitEl = document.getElementById(`dpProfit-${serviceId}`);
+  if (!rateEl) return;
+  const rateVal = parseFloat(rateEl.value) || rates.newSyp || 117.3;
+  const profitVal = parseFloat(profitEl.value) ?? 5;
+  dpState[serviceId].rate = rateVal;
+  dpState[serviceId].profit = profitVal;
+  const map = PKG_MAP[serviceId];
+  if (map) renderPkgs(map.pkgs(), map.cid, map.cb);
+}
+
+function toggleSypDisplay(serviceId) {
+  dpState[serviceId].showSyp = !dpState[serviceId].showSyp;
+  const toggle = document.getElementById(`dpToggle-${serviceId}`);
+  if (toggle) {
+    toggle.classList.toggle('on', dpState[serviceId].showSyp);
+    toggle.textContent = dpState[serviceId].showSyp ? '✓' : '';
+  }
+  const map = PKG_MAP[serviceId];
+  if (map) renderPkgs(map.pkgs(), map.cid, map.cb);
+}
+
+// إعداد الـ placeholders من rates الحالية عند التحميل
+function initDpBars() {
+  Object.keys(PKG_MAP).forEach(id => {
+    const el = document.getElementById(`dpRate-${id}`);
+    if (el) el.placeholder = (rates.newSyp || 117.3).toString();
+    // تشغيل عرض ل.س بشكل افتراضي
+    const toggle = document.getElementById(`dpToggle-${id}`);
+    if (toggle) toggle.classList.add('on');
+    // render مع السعر الافتراضي من rates
+    dpState[id].rate = rates.newSyp || 117.3;
+    const map = PKG_MAP[id];
+    if (map) renderPkgs(map.pkgs(), map.cid, map.cb);
+  });
+}
+
+// استدعاء بعد تحميل rates
+const _origFetchLiveRates = fetchLiveRates;
+function fetchLiveRates() {
+  return _origFetchLiveRates().then ? _origFetchLiveRates().then(() => initDpBars()) : (_origFetchLiveRates(), initDpBars());
+}
+
 renderPkgs(SYRIATEL_PKGS,'syriatel-pkgs','selectSyriatel');
 renderPkgs(MTN_PKGS,'mtn-pkgs','selectMTN');
 renderPkgs(FF_PKGS,'ff-pkgs','selectFF');
 renderPkgs(PUBG_PKGS,'pubg-pkgs','selectPUBG');
 renderPkgs(JOKER_PKGS,'joker-pkgs','selectJoker');
+// تطبيق السعر الافتراضي بعد تحميل الصفحة
+setTimeout(initDpBars, 300);
 
 // ===== NAVIGATION =====
 
 // ===== WHAT'S NEW SYSTEM =====
 // غيّر هذا الرقم في كل تحديث جديد لإظهار الرسالة للزبائن مجدداً
-const CURRENT_VERSION = 'v1.3';
+const CURRENT_VERSION = 'v1.4';
 const WN_KEY = 'halou_seen_version';
 
 function checkWhatsNew() {
@@ -2932,6 +3266,17 @@ function sendOrder(){
       btn.disabled = false;
       btn.innerHTML = '<span>💬</span><span>إرسال الطلب عبر واتساب</span>';
     }, 2000);
+  });
+}
+</script>
+
+<script>
+// ===== SERVICE WORKER (PWA - تشغيل بدون نت) =====
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.log('SW error:', err));
   });
 }
 </script>
