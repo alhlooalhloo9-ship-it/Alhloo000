@@ -3125,8 +3125,9 @@ function goPage(id) {
   document.getElementById(id).classList.add('active');
   window.scrollTo(0, 0);
   updateFloatBack(id);
-  // Push state for hardware back button
   history.pushState({ page: id }, '', '');
+  // تتبع الصفحة في الإحصائيات
+  if (typeof trackPageView === 'function') trackPageView(id);
 }
 
 function updateFloatBack(pageId) {
@@ -3425,13 +3426,6 @@ window.addEventListener('beforeunload', () => {
   data.sessionCount++;
   saveLocalAnalytics(data);
 });
-
-// ===== تحديث goPage لتتبع الصفحات =====
-const _origGoPage = goPage;
-function goPage(id) {
-  trackPageView(id);
-  _origGoPage(id);
-}
 
 // ===== عرض الإحصائيات في لوحة الأدمن =====
 function loadAnalytics() {
