@@ -746,7 +746,7 @@
   /* Admin panel */
   .admin-panel { display:none; margin-top:10px; }
   .admin-panel.show { display:block; }
-  .admin-panel-inner { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:12px; }
+  .admin-panel-inner { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:12px; max-height:70vh; overflow-y:auto; -webkit-overflow-scrolling:touch; }
   .admin-panel-title { font-size:11px; color:var(--gold2); font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:6px; }
   .admin-rate-row { display:flex; align-items:center; gap:8px; margin-bottom:7px; }
   .admin-rate-row:last-child { margin-bottom:0; }
@@ -1107,9 +1107,139 @@
     font-family:'Cairo',sans-serif; font-size:10px; font-weight:700;
     cursor:pointer;
   }
+
+  /* ===== WELCOME + NICKNAME MODALS ===== */
+  .welcome-overlay {
+    position: fixed; inset: 0;
+    background: linear-gradient(135deg, rgba(13,13,26,0.97), rgba(26,26,46,0.97));
+    z-index: 9998;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    flex-direction: column;
+    gap: 0;
+  }
+  .welcome-overlay.open { display: flex; }
+
+  .welcome-box {
+    width: 100%; max-width: 360px;
+    text-align: center;
+    animation: popIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275);
+  }
+  .welcome-icon { font-size: 64px; margin-bottom: 12px; animation: floatIcon 3s ease-in-out infinite; }
+  @keyframes floatIcon {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .welcome-title {
+    font-size: 26px; font-weight: 900; margin-bottom: 6px;
+    background: linear-gradient(135deg, #f5a623, #e94560, #f5a623);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-size: 200% auto; animation: shine 3s linear infinite;
+  }
+  .welcome-sub { font-size: 13px; color: rgba(255,255,255,0.55); margin-bottom: 24px; line-height: 1.6; }
+  .welcome-features {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-bottom: 24px;
+  }
+  .welcome-feat {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px; padding: 12px 8px;
+    font-size: 12px; color: rgba(255,255,255,0.75);
+  }
+  .welcome-feat .wf-icon { font-size: 22px; margin-bottom: 5px; }
+  .welcome-btn {
+    width: 100%; padding: 14px;
+    background: linear-gradient(135deg, #f5a623, #e94560);
+    color: white; border: none; border-radius: 50px;
+    font-family: 'Cairo', sans-serif; font-size: 15px; font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 6px 24px rgba(245,166,35,0.4);
+    transition: all 0.2s;
+  }
+  .welcome-btn:active { transform: scale(0.97); }
+
+  /* Nickname modal */
+  .nickname-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(10px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .nickname-overlay.open { display: flex; }
+  .nickname-box {
+    width: 100%; max-width: 340px;
+    background: linear-gradient(160deg, #1a1a2e, #16213e);
+    border: 1.5px solid rgba(245,166,35,0.3);
+    border-radius: 24px; padding: 28px 22px;
+    animation: popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+    text-align: center;
+  }
+  .nickname-icon { font-size: 48px; margin-bottom: 10px; }
+  .nickname-title { font-size: 20px; font-weight: 900; color: white; margin-bottom: 6px; }
+  .nickname-sub { font-size: 12px; color: rgba(255,255,255,0.45); margin-bottom: 18px; line-height: 1.6; }
+  .nickname-input {
+    width: 100%; padding: 13px 16px;
+    background: rgba(255,255,255,0.07);
+    border: 1.5px solid rgba(245,166,35,0.35);
+    border-radius: 14px; color: white;
+    font-family: 'Cairo', sans-serif; font-size: 15px; font-weight: 700;
+    outline: none; text-align: center; margin-bottom: 12px;
+    box-sizing: border-box;
+  }
+  .nickname-input:focus { border-color: #f5a623; }
+  .nickname-input::placeholder { color: rgba(255,255,255,0.25); }
+  .nickname-btn {
+    width: 100%; padding: 13px;
+    background: linear-gradient(135deg, #f5a623, #e94560);
+    color: white; border: none; border-radius: 50px;
+    font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 900;
+    cursor: pointer; margin-bottom: 8px;
+    box-shadow: 0 4px 18px rgba(245,166,35,0.35);
+  }
+  .nickname-skip {
+    width: 100%; padding: 10px;
+    background: none; border: none;
+    color: rgba(255,255,255,0.3); font-family: 'Cairo', sans-serif;
+    font-size: 12px; cursor: pointer;
+  }
 </style>
 </head>
 <body>
+
+<!-- ===== WELCOME MODAL (first visit ever) ===== -->
+<div class="welcome-overlay" id="welcomeOverlay">
+  <div class="welcome-box">
+    <div class="welcome-icon">🌟</div>
+    <div class="welcome-title">مركز الحلو للشحن</div>
+    <div class="welcome-sub">يسعدنا وجودك معنا!<br>خدمات الشحن والألعاب بين يديك</div>
+    <div class="welcome-features">
+      <div class="welcome-feat"><div class="wf-icon">📱</div>رصيد سيرياتيل وMTN</div>
+      <div class="welcome-feat"><div class="wf-icon">🎮</div>شحن الألعاب</div>
+      <div class="welcome-feat"><div class="wf-icon">💱</div>حاسبة العملات</div>
+      <div class="welcome-feat"><div class="wf-icon">⚡</div>طلب فوري</div>
+    </div>
+    <button class="welcome-btn" onclick="closeWelcome()">🚀 ابدأ الآن</button>
+  </div>
+</div>
+
+<!-- ===== NICKNAME MODAL ===== -->
+<div class="nickname-overlay" id="nicknameOverlay">
+  <div class="nickname-box">
+    <div class="nickname-icon">👤</div>
+    <div class="nickname-title">ما اسمك؟</div>
+    <div class="nickname-sub">اكتب اسمك المستعار حتى نتعرف عليك<br>يمكنك تخطي هذه الخطوة</div>
+    <input class="nickname-input" id="nicknameInput" type="text" placeholder="اكتب اسمك هنا..." maxlength="30" inputmode="text">
+    <button class="nickname-btn" onclick="saveNickname()">✅ تأكيد</button>
+    <button class="nickname-skip" onclick="saveNickname(true)">تخطي</button>
+  </div>
+</div>
 
 <!-- ===== WHAT'S NEW MODAL ===== -->
 <div class="whats-new-overlay" id="whatsNewOverlay">
@@ -1366,12 +1496,13 @@
             <div class="service-bar-row"><div class="service-bar-label">ببجي</div><div class="service-bar-track"><div class="service-bar-fill" id="bar-pubg" style="width:0%;background:#4cc9f0"></div></div><div class="service-bar-count" id="cnt-pubg">0</div></div>
             <div class="service-bar-row"><div class="service-bar-label">جواكر</div><div class="service-bar-track"><div class="service-bar-fill" id="bar-joker" style="width:0%;background:#ffd000"></div></div><div class="service-bar-count" id="cnt-joker">0</div></div>
           </div>
-          <div class="analytics-section-title">آخر الزيارات</div>
-          <div id="an-log" style="max-height:180px;overflow-y:auto;">
+          <div class="analytics-section-title">آخر الزوار</div>
+          <div id="an-log" style="max-height:220px;overflow-y:auto;-webkit-overflow-scrolling:touch;">
             <div style="text-align:center;color:rgba(255,255,255,0.25);font-size:11px;padding:20px 0">جاري التحميل...</div>
           </div>
-          <button class="analytics-refresh-btn" onclick="loadAnalytics()">🔄 تحديث الإحصائيات</button>
-          <button class="analytics-clear-btn" onclick="clearAnalytics()">🗑 مسح كل البيانات</button>
+          <button class="analytics-refresh-btn" onclick="loadAnalytics()">🔄 تحديث</button>
+          <button class="analytics-clear-btn" onclick="clearAnalytics()">🗑 مسح الإحصائيات</button>
+          <button class="analytics-clear-btn" style="margin-top:4px;border-color:rgba(245,166,35,0.3);color:#f5a623;" onclick="resetWelcome()">🔄 إعادة رسالة الترحيب</button>
         </div>
 
         <!-- TAB: OFFERS -->
@@ -2945,22 +3076,12 @@ setTimeout(initDpBars, 300);
 const CURRENT_VERSION = 'v1.5';
 const WN_KEY = 'halou_seen_version';
 
-function checkWhatsNew() {
-  const seen = localStorage.getItem(WN_KEY);
-  if (seen !== CURRENT_VERSION) {
-    // أول مرة يفتح بعد التحديث
-    setTimeout(() => {
-      document.getElementById('whatsNewOverlay').classList.add('open');
-    }, 800);
-  }
-}
-
 function closeWhatsNew() {
   document.getElementById('whatsNewOverlay').classList.remove('open');
   localStorage.setItem(WN_KEY, CURRENT_VERSION);
 }
 
-checkWhatsNew();
+// checkWelcome يُستدعى من الأسفل بعد تعريف الدالة
 
 // ===== BASIC FLOATING CALCULATOR =====
 // State: operand1, operator, operand2, display
@@ -3331,155 +3452,231 @@ function sendOrder(){
 
 <script>
 // ===== ANALYTICS SYSTEM =====
-const AN_KEY   = 'halou_analytics';   // localStorage key
-const AN_BIN   = '6801a4288a456b796684e0bc'; // bin خاص بالإحصائيات - أنشئه على JSONBin
+const AN_KEY = 'halou_analytics';
+const DEVICE_KEY = 'halou_device_id';
+const NICKNAME_KEY = 'halou_nickname';
+const FIRST_VISIT_KEY = 'halou_first_visit';
+const WELCOME_SEEN_KEY = 'halou_welcome_seen';
 
-// معرف فريد لهذا الجهاز
+// معرف فريد للجهاز
 function getDeviceId() {
-  let id = localStorage.getItem('halou_device_id');
+  let id = localStorage.getItem(DEVICE_KEY);
   if (!id) {
     id = 'dev_' + Math.random().toString(36).substr(2,9) + '_' + Date.now().toString(36);
-    localStorage.setItem('halou_device_id', id);
+    localStorage.setItem(DEVICE_KEY, id);
   }
   return id;
 }
 
-// قراءة البيانات المحلية
-function getLocalAnalytics() {
+function getNickname() { return localStorage.getItem(NICKNAME_KEY) || 'زائر مجهول'; }
+
+// جمع معلومات الجهاز
+function getDeviceInfo() {
+  const ua = navigator.userAgent;
+  let device = 'غير محدد';
+  let os = 'غير محدد';
+  if (/iPhone/i.test(ua)) { device = 'iPhone'; os = 'iOS'; }
+  else if (/iPad/i.test(ua)) { device = 'iPad'; os = 'iOS'; }
+  else if (/Android/i.test(ua)) {
+    os = 'Android';
+    const m = ua.match(/Android [^;]+; ([^)]+)/);
+    device = m ? m[1].trim().split(' ').slice(0,3).join(' ') : 'Android';
+  } else if (/Windows/i.test(ua)) { os = 'Windows'; device = 'كمبيوتر'; }
+  else if (/Mac/i.test(ua)) { os = 'macOS'; device = 'Mac'; }
+  else { device = 'متصفح'; os = 'غير محدد'; }
+  const browser = /Chrome/i.test(ua) ? 'Chrome' : /Firefox/i.test(ua) ? 'Firefox' : /Safari/i.test(ua) ? 'Safari' : /Edge/i.test(ua) ? 'Edge' : 'متصفح';
+  const screen = window.screen.width + 'x' + window.screen.height;
+  const lang = navigator.language || 'غير محدد';
+  return { device, os, browser, screen, lang };
+}
+
+// جلب الموقع الجغرافي
+async function getLocation() {
   try {
-    return JSON.parse(localStorage.getItem(AN_KEY)) || newAnalyticsObj();
-  } catch(e) { return newAnalyticsObj(); }
+    const res = await fetch('https://ipapi.co/json/?fields=city,region,country_name,org');
+    if (!res.ok) throw new Error();
+    const d = await res.json();
+    return (d.city || '') + (d.region ? ' / ' + d.region : '') + (d.country_name ? ' 🌍 ' + d.country_name : '');
+  } catch(e) {
+    return 'غير محدد';
+  }
 }
 
 function newAnalyticsObj() {
-  return {
-    totalVisits: 0,
-    uniqueDevices: [],
-    orders: 0,
-    services: { syriatel:0, mtn:0, freefire:0, pubg:0, joker:0 },
-    sessions: [],      // آخر 50 جلسة
-    totalTime: 0,      // ثواني
-    sessionCount: 0
-  };
+  return { totalVisits:0, uniqueDevices:[], orders:0,
+    services:{syriatel:0,mtn:0,freefire:0,pubg:0,joker:0},
+    sessions:[], totalTime:0, sessionCount:0 };
 }
-
+function getLocalAnalytics() {
+  try { return JSON.parse(localStorage.getItem(AN_KEY)) || newAnalyticsObj(); }
+  catch(e) { return newAnalyticsObj(); }
+}
 function saveLocalAnalytics(data) {
-  // احتفظ بآخر 50 جلسة فقط
-  if (data.sessions.length > 50) data.sessions = data.sessions.slice(-50);
+  if (data.sessions.length > 100) data.sessions = data.sessions.slice(-100);
   localStorage.setItem(AN_KEY, JSON.stringify(data));
 }
 
-// ===== تتبع الزيارة =====
+// ===== تسجيل الزيارة =====
 let _sessionStart = Date.now();
 let _currentSession = {
   device: getDeviceId(),
+  nickname: getNickname(),
   time: new Date().toLocaleString('ar-SY'),
+  timestamp: Date.now(),
   duration: 0,
-  pages: []
+  pages: [],
+  location: 'جاري التحديد...',
+  deviceInfo: getDeviceInfo()
 };
 
-// تسجيل الزيارة عند فتح التطبيق
-(function trackVisit() {
+(async function trackVisit() {
   const data = getLocalAnalytics();
   data.totalVisits++;
-  // هل زائر جديد؟
   if (!data.uniqueDevices.includes(getDeviceId())) {
     data.uniqueDevices.push(getDeviceId());
-    // احتفظ بآخر 200 جهاز فقط
-    if (data.uniqueDevices.length > 200) data.uniqueDevices = data.uniqueDevices.slice(-200);
+    if (data.uniqueDevices.length > 500) data.uniqueDevices = data.uniqueDevices.slice(-500);
   }
   saveLocalAnalytics(data);
+  // جلب الموقع بشكل غير متزامن
+  const loc = await getLocation();
+  _currentSession.location = loc;
 })();
 
-// تتبع الصفحات التي يزورها الزبون
 function trackPageView(pageId) {
-  if (!_currentSession.pages.includes(pageId)) {
-    _currentSession.pages.push(pageId);
-  }
-  // تتبع الخدمات
-  const serviceMap = { syriatel:1, mtn:1, freefire:1, pubg:1, joker:1 };
+  if (!_currentSession.pages.includes(pageId)) _currentSession.pages.push(pageId);
+  const serviceMap = {syriatel:1,mtn:1,freefire:1,pubg:1,joker:1};
   if (serviceMap[pageId]) {
     const data = getLocalAnalytics();
-    if (data.services[pageId] !== undefined) {
-      data.services[pageId]++;
-      saveLocalAnalytics(data);
-    }
+    if (data.services[pageId] !== undefined) { data.services[pageId]++; saveLocalAnalytics(data); }
   }
 }
 
-// تتبع إرسال الطلب
 function trackOrder() {
   const data = getLocalAnalytics();
   data.orders++;
   saveLocalAnalytics(data);
 }
 
-// حفظ مدة الجلسة عند مغادرة الصفحة
 window.addEventListener('beforeunload', () => {
   const duration = Math.round((Date.now() - _sessionStart) / 1000);
-  if (duration < 5) return; // تجاهل الزيارات السريعة جداً
+  if (duration < 3) return;
   const data = getLocalAnalytics();
   _currentSession.duration = duration;
-  _currentSession.pages = _currentSession.pages.join(' ← ');
-  data.sessions.push(_currentSession);
+  _currentSession.nickname = getNickname();
+  _currentSession.pagesStr = _currentSession.pages.join(' ← ');
+  data.sessions.push({
+    device: _currentSession.device,
+    nickname: _currentSession.nickname,
+    time: _currentSession.time,
+    timestamp: _currentSession.timestamp,
+    duration: duration,
+    pages: _currentSession.pagesStr,
+    location: _currentSession.location,
+    deviceInfo: _currentSession.deviceInfo
+  });
   data.totalTime += duration;
   data.sessionCount++;
   saveLocalAnalytics(data);
 });
 
-// ===== عرض الإحصائيات في لوحة الأدمن =====
+// ===== WELCOME & NICKNAME SYSTEM =====
+function checkWelcome() {
+  const seenWelcome = localStorage.getItem(WELCOME_SEEN_KEY);
+  const seenVersion = localStorage.getItem('halou_seen_version');
+  if (!seenWelcome) {
+    // أول زيارة على الإطلاق
+    setTimeout(() => {
+      document.getElementById('welcomeOverlay').classList.add('open');
+    }, 400);
+  } else if (seenVersion !== CURRENT_VERSION) {
+    // تحديث جديد
+    setTimeout(() => {
+      document.getElementById('whatsNewOverlay').classList.add('open');
+    }, 800);
+  }
+}
+
+function closeWelcome() {
+  document.getElementById('welcomeOverlay').classList.remove('open');
+  localStorage.setItem(WELCOME_SEEN_KEY, '1');
+  // بعد الترحيب → اطلب الاسم إذا لم يُدخل بعد
+  if (!localStorage.getItem(NICKNAME_KEY)) {
+    setTimeout(() => {
+      document.getElementById('nicknameOverlay').classList.add('open');
+      document.getElementById('nicknameInput').focus();
+    }, 300);
+  }
+}
+
+function saveNickname(skip) {
+  const val = document.getElementById('nicknameInput').value.trim();
+  if (!skip && val.length > 0) {
+    localStorage.setItem(NICKNAME_KEY, val);
+    _currentSession.nickname = val;
+  } else if (skip) {
+    localStorage.setItem(NICKNAME_KEY, 'زائر');
+  }
+  document.getElementById('nicknameOverlay').classList.remove('open');
+}
+
+// ===== عرض الإحصائيات =====
 function loadAnalytics() {
   const data = getLocalAnalytics();
   const today = new Date().toLocaleDateString('ar-SY');
-  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
 
-  // الإحصائيات الأساسية
-  document.getElementById('an-total').textContent   = data.totalVisits.toLocaleString('ar-SY');
-  document.getElementById('an-unique').textContent  = data.uniqueDevices.length.toLocaleString('ar-SY');
-  document.getElementById('an-orders').textContent  = data.orders.toLocaleString('ar-SY');
+  document.getElementById('an-total').textContent  = data.totalVisits.toLocaleString('ar-SY');
+  document.getElementById('an-unique').textContent = data.uniqueDevices.length.toLocaleString('ar-SY');
+  document.getElementById('an-orders').textContent = data.orders.toLocaleString('ar-SY');
 
-  // اليوم
-  const todaySessions = data.sessions.filter(s => s.time && s.time.startsWith(today));
-  document.getElementById('an-today').textContent = todaySessions.length.toLocaleString('ar-SY');
+  const todayCount = data.sessions.filter(s => s.time && s.time.startsWith(today)).length;
+  document.getElementById('an-today').textContent = todayCount.toLocaleString('ar-SY');
+  document.getElementById('an-week').textContent  = Math.min(data.sessions.length, data.totalVisits).toLocaleString('ar-SY');
 
-  // هذا الأسبوع - نحسبه من إجمالي الجلسات المحفوظة (تقريباً)
-  document.getElementById('an-week').textContent = Math.min(data.sessions.length, data.totalVisits).toLocaleString('ar-SY');
-
-  // متوسط الوقت
   if (data.sessionCount > 0) {
-    const avgSec = Math.round(data.totalTime / data.sessionCount);
-    const mins = Math.floor(avgSec / 60);
-    const secs = avgSec % 60;
-    document.getElementById('an-avgtime').textContent = mins + ':' + String(secs).padStart(2,'0');
+    const avg = Math.round(data.totalTime / data.sessionCount);
+    document.getElementById('an-avgtime').textContent = Math.floor(avg/60) + ':' + String(avg%60).padStart(2,'0');
   } else {
     document.getElementById('an-avgtime').textContent = '—';
   }
 
   // أشرطة الخدمات
-  const services = data.services;
-  const maxSvc = Math.max(1, ...Object.values(services));
-  Object.entries(services).forEach(([key, val]) => {
+  const maxSvc = Math.max(1, ...Object.values(data.services));
+  Object.entries(data.services).forEach(([key, val]) => {
     const bar = document.getElementById('bar-' + key);
     const cnt = document.getElementById('cnt-' + key);
     if (bar) bar.style.width = Math.round((val / maxSvc) * 100) + '%';
     if (cnt) cnt.textContent = val;
   });
 
-  // آخر الزيارات
+  // سجل الزوار التفصيلي
   const logEl = document.getElementById('an-log');
-  const recentSessions = [...data.sessions].reverse().slice(0, 20);
-  if (recentSessions.length === 0) {
-    logEl.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.25);font-size:11px;padding:20px 0">لا توجد بيانات بعد</div>';
-  } else {
-    logEl.innerHTML = recentSessions.map(s => {
-      const dur = s.duration ? (Math.floor(s.duration/60) + 'د ' + (s.duration%60) + 'ث') : '—';
-      const pages = s.pages || '—';
-      return `<div class="visit-log-row">
-        <div class="visit-log-info">⏱ ${dur} &nbsp;|&nbsp; 📄 ${pages}</div>
-        <div class="visit-log-time">${(s.time||'').substring(0,10)}</div>
-      </div>`;
-    }).join('');
+  const recent = [...data.sessions].reverse().slice(0, 30);
+  if (recent.length === 0) {
+    logEl.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.25);font-size:11px;padding:20px 0">لا توجد زيارات مسجلة بعد</div>';
+    return;
   }
+  logEl.innerHTML = recent.map((s, i) => {
+    const dur = s.duration ? Math.floor(s.duration/60) + 'د ' + (s.duration%60) + 'ث' : '—';
+    const di = s.deviceInfo || {};
+    const nick = s.nickname && s.nickname !== 'زائر مجهول' ? `<span style="color:#f5a623;font-weight:800;">${s.nickname}</span>` : `<span style="color:rgba(255,255,255,0.3);">مجهول</span>`;
+    const loc = s.location && s.location !== 'غير محدد' && s.location !== 'جاري التحديد...' ? s.location : '—';
+    return `<div class="visit-log-row" style="flex-direction:column;align-items:flex-start;gap:4px;padding:9px 10px;">
+      <div style="display:flex;justify-content:space-between;width:100%;align-items:center;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:16px;">👤</span>${nick}
+        </div>
+        <div class="visit-log-time">${(s.time||'').substring(0,10)}</div>
+      </div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.5);display:flex;flex-wrap:wrap;gap:8px;margin-top:2px;">
+        <span>📍 ${loc}</span>
+        <span>📱 ${di.device||'—'}</span>
+        <span>💻 ${di.os||'—'}</span>
+        <span>🌐 ${di.browser||'—'}</span>
+        <span>⏱ ${dur}</span>
+      </div>
+      ${s.pages ? `<div style="font-size:9px;color:rgba(255,255,255,0.3);margin-top:2px;">📄 ${s.pages}</div>` : ''}
+    </div>`;
+  }).join('');
 }
 
 function clearAnalytics() {
@@ -3487,6 +3684,18 @@ function clearAnalytics() {
   localStorage.removeItem(AN_KEY);
   loadAnalytics();
 }
+
+function resetWelcome() {
+  localStorage.removeItem(WELCOME_SEEN_KEY);
+  localStorage.removeItem(NICKNAME_KEY);
+  localStorage.removeItem('halou_seen_version');
+  alert('✅ تم الإعادة — ستظهر رسالة الترحيب في الزيارة القادمة');
+}
+
+// تشغيل نظام الترحيب بعد تحميل الصفحة
+window.addEventListener('DOMContentLoaded', function() {
+  setTimeout(checkWelcome, 500);
+});
 </script>
 
 <script>
