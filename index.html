@@ -369,20 +369,35 @@
   .pkg-price-syp { font-size:10px; font-weight:700; color:#f5a623; margin-top:1px; display:none; }
   .pkg-unit { font-size:9px; color:rgba(255,255,255,0.35); }
   /* Copy WA button */
-  .pkg-copy-btn {
-    position:absolute; top:5px; left:5px;
-    width:22px; height:22px;
-    background:rgba(37,211,102,0.15);
-    border:1px solid rgba(37,211,102,0.3);
-    border-radius:6px;
-    color:#25d366;
-    font-size:11px;
-    display:flex; align-items:center; justify-content:center;
-    cursor:pointer; transition:all 0.2s;
-    z-index:2;
+  /* زري النسخ */
+  .pkg-copy-btns {
+    position: absolute; top: 4px; left: 4px;
+    display: flex; flex-direction: column; gap: 3px;
+    z-index: 2;
   }
-  .pkg-copy-btn:hover { background:rgba(37,211,102,0.3); transform:scale(1.1); }
-  .pkg-copy-btn.copied { background:rgba(74,222,128,0.25); color:#4ade80; }
+  .pkg-copy-btn {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s;
+    font-size: 10px;
+    border: 1px solid;
+    line-height: 1;
+  }
+  .pkg-copy-btn.num-btn {
+    background: rgba(91,95,239,0.12);
+    border-color: rgba(91,95,239,0.25);
+    color: #5B5FEF;
+  }
+  .pkg-copy-btn.txt-btn {
+    background: rgba(37,211,102,0.12);
+    border-color: rgba(37,211,102,0.25);
+    color: #25d366;
+  }
+  .pkg-copy-btn:hover { transform: scale(1.15); }
+  .pkg-copy-btn.num-btn:hover { background: rgba(91,95,239,0.25); }
+  .pkg-copy-btn.txt-btn:hover { background: rgba(37,211,102,0.25); }
+  .pkg-copy-btn.copied { background: rgba(74,222,128,0.3) !important; color: #4ade80 !important; border-color: rgba(74,222,128,0.4) !important; }
   /* Dynamic pricing bar */
   .dyn-pricing-bar {
     margin: 0 16px 12px;
@@ -1681,11 +1696,16 @@ body::before { display: none !important; }
   border-color: rgba(255,255,255,0.3) !important;
   color: white !important;
 }
+.pkg-copy-btns {
+  position: absolute; top: 4px; left: 4px;
+  display: flex; flex-direction: column; gap: 3px;
+  z-index: 2;
+}
 
 .pkg-amount { color: var(--txt) !important; font-size: 12px !important; font-weight: 900 !important; }
 .pkg-price { color: var(--success) !important; font-size: 12px !important; font-weight: 800 !important; }
 .pkg-unit { color: var(--txt3) !important; font-size: 9px !important; }
-.pkg-price-syp { color: var(--warn) !important; font-size: 9px !important; }
+.pkg-price-syp { color: var(--warn) !important; font-size: 9px !important; display:block !important; margin-top:2px; }
 
 /* Syriatel/MTN pkg borders */
 .syriatel-pkg .pkg-card { border-color: rgba(220,38,38,0.15) !important; }
@@ -1701,13 +1721,15 @@ body::before { display: none !important; }
 .joker-pkg .pkg-amount { color: var(--txt) !important; }
 
 /* Copy button */
-.pkg-copy-btn {
+.pkg-copy-btn.num-btn {
   background: rgba(91,95,239,0.08) !important;
   border-color: rgba(91,95,239,0.2) !important;
   color: var(--p1) !important;
-  border-radius: 6px !important;
-  font-size: 10px !important;
-  width: 20px !important; height: 20px !important;
+}
+.pkg-copy-btn.txt-btn {
+  background: rgba(16,185,129,0.08) !important;
+  border-color: rgba(16,185,129,0.2) !important;
+  color: var(--success) !important;
 }
 
 /* ── OFFERS PAGE ── */
@@ -2029,6 +2051,177 @@ body:not(.light-mode) .welcome-overlay {
 /* Smooth page transitions */
 .page.active { animation: pageIn 0.2s ease !important; }
 @keyframes pageIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+/* ══════════════════════════════════════
+   ANALYTICS DASHBOARD CSS
+══════════════════════════════════════ */
+.an-section-hdr {
+  font-size: 10px; font-weight: 800;
+  color: var(--txt2, rgba(255,255,255,0.5));
+  letter-spacing: 1px; text-transform: uppercase;
+  margin: 12px 0 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+
+/* KPI Grid */
+.an-kpi-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 7px; margin-bottom: 12px;
+}
+.an-kpi-card {
+  border-radius: 14px; padding: 10px 8px;
+  text-align: center; border: 1px solid;
+  transition: transform 0.2s;
+  cursor: default;
+}
+.an-kpi-card:active { transform: scale(0.97); }
+.an-kpi-icon { font-size: 18px; margin-bottom: 4px; }
+.an-kpi-num {
+  font-size: 18px; font-weight: 900; line-height: 1;
+  margin-bottom: 3px;
+}
+.an-kpi-lbl { font-size: 9px; font-weight: 600; opacity: 0.7; }
+.an-kpi-blue   { background:rgba(91,95,239,0.1);  border-color:rgba(91,95,239,0.25);  }
+.an-kpi-blue   .an-kpi-num { color:#5B5FEF; }
+.an-kpi-green  { background:rgba(16,185,129,0.1); border-color:rgba(16,185,129,0.25); }
+.an-kpi-green  .an-kpi-num { color:#10B981; }
+.an-kpi-purple { background:rgba(124,58,237,0.1); border-color:rgba(124,58,237,0.25); }
+.an-kpi-purple .an-kpi-num { color:#7C3AED; }
+.an-kpi-orange { background:rgba(245,158,11,0.1); border-color:rgba(245,158,11,0.25); }
+.an-kpi-orange .an-kpi-num { color:#F59E0B; }
+.an-kpi-pink   { background:rgba(236,72,153,0.1); border-color:rgba(236,72,153,0.25); }
+.an-kpi-pink   .an-kpi-num { color:#EC4899; }
+.an-kpi-teal   { background:rgba(20,184,166,0.1); border-color:rgba(20,184,166,0.25); }
+.an-kpi-teal   .an-kpi-num { color:#14B8A6; }
+
+/* Chart */
+.an-chart-wrap {
+  background: var(--card, rgba(255,255,255,0.04));
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 14px; padding: 12px;
+  margin-bottom: 12px; position: relative;
+}
+
+/* Services */
+.an-services-list { margin-bottom: 6px; }
+.an-top-badge {
+  background: linear-gradient(135deg,rgba(245,158,11,0.15),rgba(245,158,11,0.05));
+  border: 1px solid rgba(245,158,11,0.3);
+  border-radius: 10px; padding: 7px 12px;
+  font-size: 11px; font-weight: 700;
+  color: #F59E0B;
+  display: flex; align-items: center; gap: 6px;
+}
+
+/* Devices */
+.an-device-list {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 6px; margin-bottom: 12px;
+}
+.an-device-item {
+  background: var(--card, rgba(255,255,255,0.04));
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 12px; padding: 10px;
+  text-align: center;
+}
+.an-device-pct {
+  font-size: 18px; font-weight: 900; color: #5B5FEF; line-height: 1;
+}
+.an-device-lbl { font-size: 10px; color: var(--txt2, rgba(255,255,255,0.5)); margin-top: 3px; }
+.an-device-bar {
+  height: 3px; background: rgba(91,95,239,0.15);
+  border-radius: 2px; margin-top: 6px; overflow: hidden;
+}
+.an-device-bar-fill { height: 100%; background: #5B5FEF; border-radius: 2px; transition: width 0.6s; }
+
+/* Visitor detail */
+.an-visitor-detail-panel {
+  background: var(--card, rgba(245,166,35,0.06));
+  border: 1.5px solid rgba(91,95,239,0.25);
+  border-radius: 14px; padding: 12px;
+  margin-bottom: 10px;
+  animation: pageIn 0.2s ease;
+}
+.an-vd-header {
+  display: flex; justify-content: space-between;
+  align-items: center; margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border, rgba(255,255,255,0.08));
+}
+.an-vd-info {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 6px; font-size: 10px;
+  color: var(--txt2, rgba(255,255,255,0.6));
+}
+.an-vd-cell {
+  background: var(--bg, rgba(0,0,0,0.15));
+  border-radius: 8px; padding: 6px 8px;
+}
+.an-vd-cell-lbl { color: var(--txt3, rgba(255,255,255,0.35)); font-size: 9px; margin-bottom: 2px; }
+.an-vd-cell-val { font-weight: 700; font-size: 11px; color: var(--txt, white); }
+
+/* Session rows */
+.vd-session-row {
+  background: var(--bg, rgba(255,255,255,0.03));
+  border: 1px solid var(--border, rgba(255,255,255,0.06));
+  border-radius: 8px; padding: 7px 10px;
+  margin-bottom: 5px; font-size: 10px;
+  color: var(--txt2, rgba(255,255,255,0.55));
+}
+
+/* Offers stats */
+.an-offer-row {
+  background: var(--card, rgba(255,255,255,0.04));
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 10px; padding: 9px 12px;
+  margin-bottom: 6px;
+  display: flex; align-items: center; gap: 10px;
+}
+.an-offer-icon { font-size: 20px; flex-shrink: 0; }
+.an-offer-info { flex: 1; min-width: 0; }
+.an-offer-name { font-size: 11px; font-weight: 800; color: var(--txt, white); }
+.an-offer-meta { font-size: 10px; color: var(--txt2, rgba(255,255,255,0.5)); margin-top: 2px; }
+.an-offer-cr {
+  font-size: 12px; font-weight: 900;
+  color: #10B981; white-space: nowrap;
+}
+
+/* Activity timeline */
+.an-timeline-row {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 7px 0; position: relative;
+}
+.an-timeline-row::before {
+  content: ''; position: absolute;
+  right: 14px; top: 28px; bottom: -7px;
+  width: 1px; background: var(--border, rgba(255,255,255,0.07));
+}
+.an-timeline-row:last-child::before { display: none; }
+.an-timeline-dot {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; flex-shrink: 0;
+}
+.an-timeline-body { flex: 1; min-width: 0; padding-top: 4px; }
+.an-timeline-text { font-size: 11px; color: var(--txt, rgba(255,255,255,0.8)); font-weight: 600; }
+.an-timeline-time { font-size: 9px; color: var(--txt3, rgba(255,255,255,0.3)); margin-top: 1px; }
+
+/* Login attempts */
+#anLoginAttempts { min-height: 14px; }
+
+/* Light mode overrides for dashboard */
+body.light-mode .an-kpi-card { border-color: rgba(91,95,239,0.15); }
+body.light-mode .an-kpi-lbl { color: var(--txt2); }
+body.light-mode .an-chart-wrap { background: var(--card); border-color: var(--border); }
+body.light-mode .an-device-item { background: var(--card); border-color: var(--border); }
+body.light-mode .an-device-pct { color: var(--p1); }
+body.light-mode .an-visitor-detail-panel { background: var(--card); }
+body.light-mode .an-vd-info { color: var(--txt2); }
+body.light-mode .an-vd-cell { background: var(--bg2); }
+body.light-mode .an-vd-cell-val { color: var(--txt); }
+body.light-mode .an-offer-row { background: var(--card); border-color: var(--border); }
+body.light-mode .an-offer-name { color: var(--txt); }
+body.light-mode .an-timeline-text { color: var(--txt); }
 </style>
 </head>
 <body>
@@ -2301,76 +2494,131 @@ body:not(.light-mode) .welcome-overlay {
 
         <!-- TAB: ANALYTICS (password protected) -->
         <div class="admin-tab-content" id="adminTabAnalytics">
-
-          <!-- Password gate -->
-          <div id="anPwGate" style="text-align:center;padding:20px 0;">
-            <div style="font-size:36px;margin-bottom:10px;">🔒</div>
-            <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:12px;">أدخل كلمة مرور الإحصائيات</div>
+          <!-- ══ PASSWORD GATE ══ -->
+          <div id="anPwGate" style="text-align:center;padding:24px 0 16px;">
+            <div style="font-size:48px;margin-bottom:10px;">🔐</div>
+            <div style="font-size:14px;font-weight:800;color:var(--txt,#fff);margin-bottom:4px;">لوحة الإحصائيات</div>
+            <div style="font-size:11px;color:var(--txt2,rgba(255,255,255,0.5));margin-bottom:16px;">أدخل كلمة المرور للدخول</div>
             <input id="anPwInput" type="password" inputmode="numeric"
-              style="width:100%;padding:10px 14px;background:rgba(0,0,0,0.3);border:1.5px solid rgba(245,166,35,0.4);border-radius:12px;color:white;font-family:'Cairo',sans-serif;font-size:18px;text-align:center;outline:none;letter-spacing:6px;box-sizing:border-box;margin-bottom:8px;"
-              placeholder="••••" maxlength="6"
-              onkeydown="if(event.key==='Enter') checkAnPw()">
-            <div id="anPwError" style="color:#f87171;font-size:11px;margin-bottom:8px;display:none;">❌ كلمة المرور غير صحيحة</div>
-            <button onclick="checkAnPw()" style="width:100%;padding:10px;background:linear-gradient(135deg,#f5a623,#e94560);border:none;border-radius:12px;color:white;font-family:'Cairo',sans-serif;font-size:13px;font-weight:800;cursor:pointer;">دخول</button>
+              style="width:100%;padding:12px 16px;background:rgba(91,95,239,0.08);border:1.5px solid rgba(91,95,239,0.3);border-radius:14px;color:var(--txt,white);font-family:'Cairo',sans-serif;font-size:20px;text-align:center;outline:none;letter-spacing:8px;box-sizing:border-box;margin-bottom:10px;"
+              placeholder="••••" maxlength="6" onkeydown="if(event.key==='Enter') checkAnPw()">
+            <div id="anPwError" style="color:#ef4444;font-size:11px;font-weight:700;margin-bottom:10px;display:none;">❌ كلمة المرور غير صحيحة</div>
+            <button onclick="checkAnPw()" style="width:100%;padding:12px;background:linear-gradient(135deg,#5B5FEF,#7C82FF);border:none;border-radius:14px;color:white;font-family:'Cairo',sans-serif;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(91,95,239,0.35);">🚀 دخول</button>
+            <div style="margin-top:10px;font-size:9px;color:var(--txt3,rgba(255,255,255,0.25));" id="anLoginAttempts"></div>
           </div>
 
-          <!-- Analytics content (hidden until password) -->
+          <!-- ══ DASHBOARD CONTENT ══ -->
           <div id="anContent" style="display:none;">
 
-            <!-- Period selector -->
-            <div style="display:flex;gap:5px;margin-bottom:12px;background:rgba(0,0,0,0.2);border-radius:12px;padding:4px;">
-              <button class="an-period-btn active" id="anPeriodToday"   onclick="setAnPeriod('today',this)">اليوم</button>
-              <button class="an-period-btn"        id="anPeriodWeek"    onclick="setAnPeriod('week',this)">أسبوع</button>
-              <button class="an-period-btn"        id="anPeriodMonth"   onclick="setAnPeriod('month',this)">شهر</button>
-              <button class="an-period-btn"        id="anPeriodYear"    onclick="setAnPeriod('year',this)">سنة</button>
-              <button class="an-period-btn"        id="anPeriodAll"     onclick="setAnPeriod('all',this)">الكل</button>
+            <!-- Dashboard header -->
+            <div style="background:linear-gradient(135deg,#5B5FEF,#7C82FF);border-radius:14px;padding:12px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-size:13px;font-weight:900;color:white;">📊 لوحة التحكم</div>
+                <div style="font-size:10px;color:rgba(255,255,255,0.7);" id="an-last-update">آخر تحديث: —</div>
+              </div>
+              <button onclick="loadAnalytics()" style="background:rgba(255,255,255,0.2);border:none;border-radius:10px;padding:6px 12px;color:white;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">🔄 تحديث</button>
             </div>
 
-            <!-- Summary cards -->
-            <div class="stat-grid" style="grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px;">
-              <div class="stat-card"><div class="stat-num" id="an-total">—</div><div class="stat-lbl">زيارات</div></div>
-              <div class="stat-card green"><div class="stat-num" id="an-unique">—</div><div class="stat-lbl">زوار فريدون</div></div>
-              <div class="stat-card purple"><div class="stat-num" id="an-orders">—</div><div class="stat-lbl">طلبات</div></div>
-            </div>
-            <div class="stat-grid" style="grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;">
-              <div class="stat-card blue"><div class="stat-num" id="an-avgtime">—</div><div class="stat-lbl">متوسط الوقت</div></div>
-              <div class="stat-card"><div class="stat-num" id="an-today">—</div><div class="stat-lbl" id="an-period-lbl">اليوم</div></div>
+            <!-- Period tabs -->
+            <div style="display:flex;gap:4px;margin-bottom:12px;background:rgba(91,95,239,0.08);border-radius:12px;padding:4px;border:1px solid rgba(91,95,239,0.15);">
+              <button class="an-period-btn active" id="anPeriodToday"  onclick="setAnPeriod('today',this)">اليوم</button>
+              <button class="an-period-btn"        id="anPeriodWeek"   onclick="setAnPeriod('week',this)">أسبوع</button>
+              <button class="an-period-btn"        id="anPeriodMonth"  onclick="setAnPeriod('month',this)">شهر</button>
+              <button class="an-period-btn"        id="anPeriodYear"   onclick="setAnPeriod('year',this)">سنة</button>
+              <button class="an-period-btn"        id="anPeriodAll"    onclick="setAnPeriod('all',this)">الكل</button>
             </div>
 
-            <!-- Services bars -->
-            <div class="analytics-section-title">📊 الخدمات الأكثر طلباً</div>
-            <div id="an-services" style="margin-bottom:12px;">
+            <!-- ① KPI Cards -->
+            <div class="an-section-hdr">📈 نظرة عامة</div>
+            <div class="an-kpi-grid">
+              <div class="an-kpi-card an-kpi-blue">
+                <div class="an-kpi-icon">👁</div>
+                <div class="an-kpi-num" id="an-total">—</div>
+                <div class="an-kpi-lbl">الزيارات</div>
+              </div>
+              <div class="an-kpi-card an-kpi-green">
+                <div class="an-kpi-icon">👤</div>
+                <div class="an-kpi-num" id="an-unique">—</div>
+                <div class="an-kpi-lbl">زوار فريدون</div>
+              </div>
+              <div class="an-kpi-card an-kpi-purple">
+                <div class="an-kpi-icon">📦</div>
+                <div class="an-kpi-num" id="an-orders">—</div>
+                <div class="an-kpi-lbl">الطلبات</div>
+              </div>
+              <div class="an-kpi-card an-kpi-orange">
+                <div class="an-kpi-icon">⏱</div>
+                <div class="an-kpi-num" id="an-avgtime">—</div>
+                <div class="an-kpi-lbl">متوسط الوقت</div>
+              </div>
+              <div class="an-kpi-card an-kpi-pink">
+                <div class="an-kpi-icon">📅</div>
+                <div class="an-kpi-num" id="an-today">—</div>
+                <div class="an-kpi-lbl" id="an-period-lbl">اليوم</div>
+              </div>
+              <div class="an-kpi-card an-kpi-teal">
+                <div class="an-kpi-icon">🔥</div>
+                <div class="an-kpi-num" id="an-active">—</div>
+                <div class="an-kpi-lbl">نشطون (ساعة)</div>
+              </div>
+            </div>
+
+            <!-- ② Mini Chart (visits) -->
+            <div class="an-section-hdr">📉 مخطط الزيارات (7 أيام)</div>
+            <div class="an-chart-wrap">
+              <canvas id="anVisitChart" height="80"></canvas>
+              <div id="anChartEmpty" style="display:none;text-align:center;padding:20px;font-size:11px;color:var(--txt3,rgba(255,255,255,0.3));">لا توجد بيانات كافية</div>
+            </div>
+
+            <!-- ③ Services ranking -->
+            <div class="an-section-hdr">🏆 ترتيب الخدمات</div>
+            <div id="an-services" class="an-services-list">
               <div class="service-bar-row"><div class="service-bar-label">سيرياتيل</div><div class="service-bar-track"><div class="service-bar-fill" id="bar-syriatel" style="width:0%;background:#e63946"></div></div><div class="service-bar-count" id="cnt-syriatel">0</div></div>
               <div class="service-bar-row"><div class="service-bar-label">MTN</div><div class="service-bar-track"><div class="service-bar-fill" id="bar-mtn" style="width:0%;background:#ffb703"></div></div><div class="service-bar-count" id="cnt-mtn">0</div></div>
               <div class="service-bar-row"><div class="service-bar-label">فري فاير</div><div class="service-bar-track"><div class="service-bar-fill" id="bar-freefire" style="width:0%;background:#f72585"></div></div><div class="service-bar-count" id="cnt-freefire">0</div></div>
               <div class="service-bar-row"><div class="service-bar-label">ببجي</div><div class="service-bar-track"><div class="service-bar-fill" id="bar-pubg" style="width:0%;background:#4cc9f0"></div></div><div class="service-bar-count" id="cnt-pubg">0</div></div>
               <div class="service-bar-row"><div class="service-bar-label">جواكر</div><div class="service-bar-track"><div class="service-bar-fill" id="bar-joker" style="width:0%;background:#ffd000"></div></div><div class="service-bar-count" id="cnt-joker">0</div></div>
             </div>
+            <div id="an-top-service" class="an-top-badge" style="display:none;margin-bottom:12px;"></div>
 
-            <!-- Visitors list -->
-            <div class="analytics-section-title">👥 قائمة الزوار</div>
-            <div id="an-visitors-list" style="margin-bottom:8px;max-height:200px;overflow-y:auto;-webkit-overflow-scrolling:touch;"></div>
+            <!-- ④ Devices pie -->
+            <div class="an-section-hdr">📱 أنواع الأجهزة</div>
+            <div id="an-devices" class="an-device-list"></div>
 
-            <!-- Visitor detail panel -->
-            <div id="an-visitor-detail" style="display:none;background:rgba(245,166,35,0.07);border:1px solid rgba(245,166,35,0.2);border-radius:12px;padding:12px;margin-bottom:8px;">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                <div style="font-size:12px;font-weight:800;color:#f5a623;" id="vd-name">—</div>
-                <button onclick="document.getElementById('an-visitor-detail').style.display='none'" style="background:none;border:none;color:rgba(255,255,255,0.3);font-size:16px;cursor:pointer;">✕</button>
+            <!-- ⑤ Users table -->
+            <div class="an-section-hdr" style="display:flex;justify-content:space-between;align-items:center;">
+              <span>👥 قائمة الزوار</span>
+              <span id="an-users-count" style="font-size:10px;background:rgba(91,95,239,0.12);color:#5B5FEF;padding:2px 8px;border-radius:20px;font-weight:700;"></span>
+            </div>
+            <div id="an-visitors-list" style="margin-bottom:8px;max-height:240px;overflow-y:auto;-webkit-overflow-scrolling:touch;"></div>
+
+            <!-- Visitor detail -->
+            <div id="an-visitor-detail" class="an-visitor-detail-panel" style="display:none;">
+              <div class="an-vd-header">
+                <div style="font-size:13px;font-weight:800;color:#5B5FEF;" id="vd-name">—</div>
+                <button onclick="document.getElementById('an-visitor-detail').style.display='none'" style="background:none;border:none;color:var(--txt3,rgba(255,255,255,0.3));font-size:18px;cursor:pointer;line-height:1;">✕</button>
               </div>
-              <div id="vd-info" style="font-size:10px;color:rgba(255,255,255,0.6);line-height:2;"></div>
-              <div class="analytics-section-title" style="margin-top:8px;">سجل الجلسات</div>
-              <div id="vd-sessions" style="max-height:150px;overflow-y:auto;"></div>
+              <div id="vd-info" class="an-vd-info"></div>
+              <div class="an-section-hdr" style="font-size:9px;margin:8px 0 4px;">سجل الجلسات</div>
+              <div id="vd-sessions" style="max-height:160px;overflow-y:auto;"></div>
             </div>
 
-            <!-- Recent log -->
-            <div class="analytics-section-title">🕐 آخر الزيارات</div>
-            <div id="an-log" style="max-height:180px;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-bottom:8px;">
-              <div style="text-align:center;color:rgba(255,255,255,0.25);font-size:11px;padding:16px 0">جاري التحميل...</div>
+            <!-- ⑥ Activity Timeline -->
+            <div class="an-section-hdr">🕐 سجل النشاط</div>
+            <div id="an-log" style="max-height:200px;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-bottom:10px;">
+              <div style="text-align:center;color:var(--txt3,rgba(255,255,255,0.25));font-size:11px;padding:16px 0">جاري التحميل...</div>
             </div>
 
-            <button class="analytics-refresh-btn" onclick="loadAnalytics()">🔄 تحديث</button>
-            <button class="analytics-clear-btn" onclick="clearAnalytics()" style="margin-top:5px;">🗑 مسح الإحصائيات</button>
-            <button class="analytics-clear-btn" style="margin-top:4px;border-color:rgba(245,166,35,0.3);color:#f5a623;" onclick="resetWelcome()">🔄 إعادة رسالة الترحيب</button>
+            <!-- ⑦ Offers tracking -->
+            <div class="an-section-hdr">🎁 تتبع العروض</div>
+            <div id="an-offers-stats" style="margin-bottom:10px;"></div>
+
+            <!-- Controls -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px;">
+              <button class="analytics-refresh-btn" onclick="loadAnalytics()">🔄 تحديث</button>
+              <button class="analytics-clear-btn" onclick="clearAnalytics()">🗑 مسح البيانات</button>
+            </div>
+            <button class="analytics-clear-btn" style="width:100%;margin-top:5px;border-color:rgba(245,166,35,0.3);color:#f5a623;" onclick="resetWelcome()">🔄 إعادة رسالة الترحيب</button>
           </div>
         </div>
 
@@ -3710,6 +3958,14 @@ function showOfferNotif(offer) {
 
   // إظهار النافذة
   document.getElementById('offerNotifOverlay').classList.add('open');
+  // track view
+  try {
+    const d=getAN();
+    if(!d.offerStats) d.offerStats={};
+    if(!d.offerStats[offer.id]) d.offerStats[offer.id]={views:0,clicks:0};
+    d.offerStats[offer.id].views++;
+    saveAN(d);
+  } catch(e){}
 }
 
 function startOfferTimer(expiresAt) {
@@ -3744,7 +4000,17 @@ function dismissOfferNotif() {
 
 function goToOffer() {
   const offerId = document.getElementById('onIcon').dataset.offerid;
-  if (offerId) markOfferSeen(offerId); // مرة واحدة فقط
+  if (offerId) {
+    markOfferSeen(offerId);
+    // track click
+    try {
+      const d=getAN();
+      if(!d.offerStats) d.offerStats={};
+      if(!d.offerStats[offerId]) d.offerStats[offerId]={views:0,clicks:0};
+      d.offerStats[offerId].clicks++;
+      saveAN(d);
+    } catch(e){}
+  }
   dismissOfferNotif();
   goPage('offers');
 }
@@ -3897,28 +4163,35 @@ Object.keys(PKG_MAP).forEach(id => {
   dpState[id] = { rate: null, profit: 5, showSyp: true };
 });
 
+function extractNum(amount) {
+  // استخراج الرقم الأول فقط من النص (مثلاً: "110+10 مجوهرة" → "110", "14,367 عملة" → "14367")
+  const m = amount.replace(/,/g, '').match(/^[\d]+/);
+  return m ? m[0] : amount;
+}
+
 function renderPkgs(pkgs, cid, cb) {
   const serviceId = Object.keys(PKG_MAP).find(k => PKG_MAP[k].cid === cid) || '';
-  const dp = dpState[serviceId] || {};
-  const useRate = rates.newSyp || 117.3;  // دائماً من سعر الصرف الرسمي
-  const profit = 0;   // لا ربح — الأسعار كما هي
-  const showSyp = false; // لا عرض ل.س في البطاقات
+  const useRate = rates.newSyp || 117.3;  // سعر الصرف الحالي
 
   document.getElementById(cid).innerHTML = pkgs.map((p, i) => {
-    // حساب السعر بالليرة مع الربح
+    // حساب السعر بالليرة السورية
     const usdMatch = p.price.match(/[\d.]+/);
     let sypHtml = '';
-    let sypVal = 0;
-    if (usdMatch && showSyp) {
+    if (usdMatch && useRate) {
       const usdVal = parseFloat(usdMatch[0]);
-      sypVal = Math.round(usdVal * useRate * (1 + profit / 100));
-      sypHtml = `<div class="pkg-price-syp" style="display:block">≈ ${sypVal.toLocaleString('ar-SY')} ل.س</div>`;
+      const sypVal = Math.round(usdVal * useRate);
+      sypHtml = `<div class="pkg-price-syp" style="display:block;">≈ ${sypVal.toLocaleString()} ل.س</div>`;
     }
-    // رسالة الواتساب
-    const copyText = encodeURIComponent(p.amount + (p.unit ? ' ' + p.unit : ''));
+    // زر 1: نسخ الرقم فقط
+    const numOnly = encodeURIComponent(extractNum(p.amount));
+    // زر 2: نسخ الكمية الكاملة مع النص
+    const fullText = encodeURIComponent(p.amount + (p.unit ? ' ' + p.unit : ''));
     return `
     <div class="pkg-card" onclick="${cb}(${i})">
-      <button class="pkg-copy-btn" onclick="copyPkgWA(event, this, '${copyText}')" title="نسخ الكمية">📋</button>
+      <div class="pkg-copy-btns">
+        <button class="pkg-copy-btn num-btn" onclick="copyPkgWA(event,this,'${numOnly}')" title="نسخ الرقم فقط">#</button>
+        <button class="pkg-copy-btn txt-btn" onclick="copyPkgWA(event,this,'${fullText}')" title="نسخ الكمية كاملة">📋</button>
+      </div>
       <div class="pkg-amount">${p.amount}</div>
       ${p.unit ? `<div class="pkg-unit">${p.unit}</div>` : ''}
       <div class="pkg-price">${p.price}</div>
@@ -3963,10 +4236,15 @@ function copyPkgWA(event, btn, encodedMsg) {
 }
 
 function showCopied(btn) {
+  const isNum = btn.classList.contains('num-btn');
+  const origTxt = btn.textContent;
   btn.textContent = '✅';
   btn.classList.add('copied');
-  showToast('✅ تم النسخ!');
-  setTimeout(() => { btn.textContent = '📋'; btn.classList.remove('copied'); }, 1500);
+  showToast(isNum ? '🔢 تم نسخ الرقم!' : '📋 تم نسخ الكمية!');
+  setTimeout(() => {
+    btn.textContent = origTxt;
+    btn.classList.remove('copied');
+  }, 1500);
 }
 
 function showToast(msg) {
@@ -4529,6 +4807,9 @@ function filterSessions(sessions, period) {
   return sessions.filter(s=> s.ts && (now - s.ts) < map[period]);
 }
 
+// ── Login attempts tracking ──
+let _loginAttempts = 0;
+
 // ── Analytics Password ──
 function openAnalyticsWithPw(btn) {
   switchAdminTab('analytics', btn);
@@ -4544,22 +4825,33 @@ function openAnalyticsWithPw(btn) {
 function checkAnPw() {
   const val = document.getElementById('anPwInput').value.trim();
   const err = document.getElementById('anPwError');
+  // log attempt
+  const d = getAN();
+  if (!d.loginAttempts) d.loginAttempts = [];
   if (val === AN_PW) {
     anUnlocked = true;
+    d.loginAttempts.push({ ts: Date.now(), success: true });
+    saveAN(d);
     document.getElementById('anPwGate').style.display  = 'none';
     document.getElementById('anContent').style.display = 'block';
     document.getElementById('anPwInput').value = '';
     err.style.display = 'none';
+    _loginAttempts = 0;
     loadAnalytics();
   } else {
+    _loginAttempts++;
+    d.loginAttempts.push({ ts: Date.now(), success: false });
+    saveAN(d);
     err.style.display = 'block';
     document.getElementById('anPwInput').value = '';
     document.getElementById('anPwInput').focus();
+    const attEl = document.getElementById('anLoginAttempts');
+    if (attEl) attEl.textContent = `محاولات فاشلة: ${_loginAttempts}`;
     setTimeout(()=>err.style.display='none', 2500);
   }
 }
 
-// ── Load & Render Analytics ──
+// ── Main Dashboard Loader ──
 function loadAnalytics() {
   if (!anUnlocked) return;
   const allData = getAN();
@@ -4567,14 +4859,25 @@ function loadAnalytics() {
   const now = Date.now();
   const todayStr = new Date().toLocaleDateString('ar-SY');
 
-  // KPIs
-  document.getElementById('an-total').textContent  = anPeriod==='all' ? allData.totalVisits.toLocaleString('ar-SY') : sessions.length.toLocaleString('ar-SY');
-  document.getElementById('an-unique').textContent = allData.uniqueDevices.length.toLocaleString('ar-SY');
-  document.getElementById('an-orders').textContent = allData.orders.toLocaleString('ar-SY');
+  // Update timestamp
+  const upd = document.getElementById('an-last-update');
+  if (upd) upd.textContent = 'آخر تحديث: ' + new Date().toLocaleTimeString('ar-SY');
+
+  // ① KPIs
+  const totalDisp = anPeriod==='all' ? allData.totalVisits : sessions.length;
+  document.getElementById('an-total').textContent   = totalDisp.toLocaleString('ar-SY');
+  document.getElementById('an-unique').textContent  = allData.uniqueDevices.length.toLocaleString('ar-SY');
+  document.getElementById('an-orders').textContent  = allData.orders.toLocaleString('ar-SY');
 
   const todayCount = allData.sessions.filter(s=>s.time && s.time.startsWith(todayStr)).length;
   document.getElementById('an-today').textContent = todayCount.toLocaleString('ar-SY');
 
+  // Active last hour
+  const activeCount = allData.sessions.filter(s=>s.ts && (now-s.ts)<3600000).length;
+  const activeEl = document.getElementById('an-active');
+  if (activeEl) activeEl.textContent = activeCount.toLocaleString('ar-SY');
+
+  // Avg time
   const filtTime  = sessions.reduce((a,s)=>a+(s.duration||0),0);
   const filtCount = sessions.filter(s=>s.duration).length;
   if (filtCount>0) {
@@ -4582,12 +4885,14 @@ function loadAnalytics() {
     document.getElementById('an-avgtime').textContent = Math.floor(avg/60)+'د '+String(avg%60).padStart(2,'0')+'ث';
   } else { document.getElementById('an-avgtime').textContent='—'; }
 
-  // Service bars (from filtered sessions)
+  // ② Draw chart (7 days)
+  drawVisitChart(allData.sessions);
+
+  // ③ Services ranking
   const svcCount = {syriatel:0,mtn:0,freefire:0,pubg:0,joker:0};
   sessions.forEach(s=>{
     if(s.pages) s.pages.split(' ← ').forEach(p=>{ if(svcCount[p]!==undefined) svcCount[p]++; });
   });
-  // fallback to allData.services if all zeros
   const svcSrc = Object.values(svcCount).every(v=>v===0) ? allData.services : svcCount;
   const maxSvc = Math.max(1,...Object.values(svcSrc));
   Object.entries(svcSrc).forEach(([k,v])=>{
@@ -4595,128 +4900,274 @@ function loadAnalytics() {
     if(b) b.style.width=Math.round((v/maxSvc)*100)+'%';
     if(c) c.textContent=v;
   });
+  // Top service badge
+  const topSvc = Object.entries(svcSrc).sort((a,b)=>b[1]-a[1])[0];
+  const svcLabels = {syriatel:'سيرياتيل',mtn:'MTN',freefire:'فري فاير',pubg:'ببجي',joker:'جواكر'};
+  const topEl = document.getElementById('an-top-service');
+  if (topEl && topSvc && topSvc[1]>0) {
+    topEl.style.display='flex';
+    topEl.innerHTML = `🏆 الأكثر طلباً: <strong>${svcLabels[topSvc[0]]||topSvc[0]}</strong> — ${topSvc[1]} ضغطة`;
+  } else if (topEl) { topEl.style.display='none'; }
 
-  // Visitors list - group by device
-  const byDevice = {};
-  allData.sessions.forEach(s=>{
-    if(!byDevice[s.device]) byDevice[s.device]={nickname:s.nickname||'زائر',sessions:[],lastTime:0,location:s.location||'—',di:s.di||{}};
-    byDevice[s.device].sessions.push(s);
-    if(s.ts>byDevice[s.device].lastTime){ byDevice[s.device].lastTime=s.ts; byDevice[s.device].nickname=s.nickname||byDevice[s.device].nickname; byDevice[s.device].location=s.location||byDevice[s.device].location; }
-  });
-  const visitors = Object.entries(byDevice).sort((a,b)=>b[1].lastTime-a[1].lastTime);
-  const vlist = document.getElementById('an-visitors-list');
-  if (!visitors.length) {
-    vlist.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.25);font-size:11px;padding:16px 0">لا توجد زيارات بعد</div>';
-  } else {
-    vlist.innerHTML = visitors.slice(0,30).map(([did,v])=>{
-      const nick = v.nickname && v.nickname!=='زائر مجهول' ? v.nickname : 'زائر';
-      const initial = nick[0] || '?';
-      const loc = v.location && v.location!=='غير محدد' && v.location!=='...' ? v.location.split('/')[0].trim() : '—';
-      const lastD = v.lastTime ? new Date(v.lastTime).toLocaleDateString('ar-SY') : '—';
-      return `<div class="an-visitor-row" onclick="showVisitorDetail('${did}')">
-        <div class="an-visitor-avatar">${initial}</div>
-        <div class="an-visitor-info">
-          <div class="an-visitor-name">${nick}</div>
-          <div class="an-visitor-meta">📍${loc} · ${v.di.device||'—'} · ${lastD}</div>
-        </div>
-        <div class="an-visitor-badge">${v.sessions.length} زيارة</div>
-      </div>`;
-    }).join('');
-  }
+  // ④ Devices breakdown
+  renderDeviceStats(allData.sessions);
 
-  // Recent log
-  const logEl = document.getElementById('an-log');
-  const recent = [...sessions].reverse().slice(0,20);
-  if(!recent.length){
-    logEl.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.25);font-size:11px;padding:16px 0">لا توجد بيانات في هذه الفترة</div>';
-  } else {
-    logEl.innerHTML = recent.map(s=>{
-      const dur = s.duration ? Math.floor(s.duration/60)+'د '+(s.duration%60)+'ث' : '—';
-      const di  = s.di||{};
-      const nick= s.nickname&&s.nickname!=='زائر مجهول'?`<b style="color:#f5a623">${s.nickname}</b>`:`<span style="color:rgba(255,255,255,0.3)">مجهول</span>`;
-      const loc = s.location&&s.location!=='غير محدد'&&s.location!=='...'?s.location:'—';
-      return `<div class="visit-log-row" style="flex-direction:column;gap:4px;align-items:flex-start;">
-        <div style="display:flex;justify-content:space-between;width:100%;">${nick}<span class="visit-log-time">${(s.time||'').substring(0,10)}</span></div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.45);display:flex;flex-wrap:wrap;gap:6px;">
-          <span>📍${loc}</span><span>📱${di.device||'—'}</span><span>💻${di.os||'—'}</span><span>🌐${di.browser||'—'}</span><span>⏱${dur}</span>
-        </div>
-        ${s.pages?`<div style="font-size:9px;color:rgba(255,255,255,0.25);">📄 ${s.pages}</div>`:''}
-      </div>`;
-    }).join('');
-  }
+  // ⑤ Users table
+  renderVisitorsList(allData);
+
+  // ⑥ Activity timeline
+  renderActivityLog(sessions);
+
+  // ⑦ Offers tracking
+  renderOffersStats(allData);
 }
 
+// ── Chart (SVG-based, no library) ──
+function drawVisitChart(allSessions) {
+  const canvas = document.getElementById('anVisitChart');
+  const empty  = document.getElementById('anChartEmpty');
+  if (!canvas) return;
+
+  // Build last 7 days data
+  const days = [];
+  const labels = [];
+  for (let i=6; i>=0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate()-i);
+    const str = d.toLocaleDateString('ar-SY');
+    const dayShort = d.toLocaleDateString('ar-SY',{weekday:'short'}).replace('،','');
+    const count = allSessions.filter(s=>s.time&&s.time.startsWith(str)).length;
+    days.push(count);
+    labels.push(dayShort);
+  }
+  const total = days.reduce((a,b)=>a+b,0);
+  if (total === 0) {
+    canvas.style.display='none';
+    if(empty) empty.style.display='block';
+    return;
+  }
+  canvas.style.display='block';
+  if(empty) empty.style.display='none';
+
+  const W = canvas.parentElement.clientWidth - 24;
+  canvas.width = W; canvas.height = 80;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,W,80);
+
+  const maxVal = Math.max(1,...days);
+  const barW = Math.floor((W - 20) / 7) - 4;
+  const isLight = document.body.classList.contains('light-mode');
+  const barColor = '#5B5FEF';
+  const txtColor = isLight ? '#6B7280' : 'rgba(255,255,255,0.4)';
+
+  days.forEach((v,i) => {
+    const h = Math.max(4, Math.round((v/maxVal)*52));
+    const x = 10 + i*((W-20)/7);
+    const y = 58-h;
+    // Bar
+    ctx.fillStyle = v>0 ? barColor : (isLight?'#E5E7EB':'rgba(255,255,255,0.06)');
+    ctx.beginPath();
+    ctx.roundRect ? ctx.roundRect(x,y,barW,h,3) : ctx.rect(x,y,barW,h);
+    ctx.fill();
+    // Value
+    if(v>0){
+      ctx.fillStyle=barColor;
+      ctx.font='bold 9px Cairo,sans-serif';
+      ctx.textAlign='center';
+      ctx.fillText(v, x+barW/2, y-2);
+    }
+    // Label
+    ctx.fillStyle=txtColor;
+    ctx.font='8px Cairo,sans-serif';
+    ctx.textAlign='center';
+    ctx.fillText(labels[i], x+barW/2, 74);
+  });
+}
+
+// ── Device Stats ──
+function renderDeviceStats(sessions) {
+  const el = document.getElementById('an-devices');
+  if (!el) return;
+  const counts = {mobile:0, desktop:0, tablet:0, other:0};
+  sessions.forEach(s=>{
+    const di = s.di||{};
+    if (/iPad/i.test(di.device||'')) counts.tablet++;
+    else if (/iPhone|Android/i.test(di.os||'')) counts.mobile++;
+    else if (/Windows|macOS|Linux/i.test(di.os||'')) counts.desktop++;
+    else counts.other++;
+  });
+  const total = Math.max(1, sessions.length);
+  const items = [
+    {icon:'📱',lbl:'موبايل',count:counts.mobile,color:'#5B5FEF'},
+    {icon:'💻',lbl:'كمبيوتر',count:counts.desktop,color:'#10B981'},
+    {icon:'📟',lbl:'تابلت',count:counts.tablet,color:'#F59E0B'},
+    {icon:'❓',lbl:'أخرى',count:counts.other,color:'#6B7280'},
+  ].filter(d=>d.count>0);
+
+  if (!items.length) { el.innerHTML='<div style="font-size:11px;color:var(--txt3,rgba(255,255,255,0.3));padding:10px;text-align:center;">لا توجد بيانات</div>'; return; }
+  el.innerHTML = items.map(d=>{
+    const pct = Math.round((d.count/total)*100);
+    return `<div class="an-device-item">
+      <div style="font-size:20px;">${d.icon}</div>
+      <div class="an-device-pct" style="color:${d.color}">${pct}%</div>
+      <div class="an-device-lbl">${d.lbl} (${d.count})</div>
+      <div class="an-device-bar"><div class="an-device-bar-fill" style="width:${pct}%;background:${d.color}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── Visitors List ──
+function renderVisitorsList(allData) {
+  const byDevice = {};
+  allData.sessions.forEach(s=>{
+    if(!s.device) return;
+    if(!byDevice[s.device]) byDevice[s.device]={nickname:s.nickname||'زائر',sessions:[],lastTime:0,location:'—',di:{}};
+    byDevice[s.device].sessions.push(s);
+    if((s.ts||0)>byDevice[s.device].lastTime){
+      byDevice[s.device].lastTime=s.ts||0;
+      if(s.nickname) byDevice[s.device].nickname=s.nickname;
+      if(s.location&&s.location!=='...') byDevice[s.device].location=s.location;
+      if(s.di) byDevice[s.device].di=s.di;
+    }
+  });
+  const visitors = Object.entries(byDevice).sort((a,b)=>b[1].lastTime-a[1].lastTime);
+
+  const countEl = document.getElementById('an-users-count');
+  if (countEl) countEl.textContent = visitors.length + ' مستخدم';
+
+  const vlist = document.getElementById('an-visitors-list');
+  if (!vlist) return;
+  if (!visitors.length) {
+    vlist.innerHTML='<div style="text-align:center;color:var(--txt3,rgba(255,255,255,0.25));font-size:11px;padding:16px 0">لا توجد زيارات مسجلة</div>';
+    return;
+  }
+  vlist.innerHTML = visitors.slice(0,50).map(([did,v],idx)=>{
+    const nick = (v.nickname && v.nickname!=='زائر مجهول') ? v.nickname : 'زائر';
+    const initial = nick.replace(/\s/g,'')[0] || '?';
+    const loc = (v.location&&v.location!=='غير محدد'&&v.location!=='...') ? v.location.split('/')[0].trim() : '—';
+    const lastD = v.lastTime ? new Date(v.lastTime).toLocaleDateString('ar-SY') : '—';
+    const colors = ['#5B5FEF','#10B981','#F59E0B','#EC4899','#14B8A6','#7C3AED'];
+    const col = colors[idx%colors.length];
+    const totalTime = v.sessions.reduce((a,s)=>a+(s.duration||0),0);
+    const avgTime = v.sessions.length ? Math.round(totalTime/v.sessions.length) : 0;
+    return `<div class="an-visitor-row" onclick="showVisitorDetail('${did}')">
+      <div class="an-visitor-avatar" style="background:${col}">${initial}</div>
+      <div class="an-visitor-info">
+        <div class="an-visitor-name">${nick}</div>
+        <div class="an-visitor-meta">📍${loc} · ${v.di.os||'—'} · ${v.di.browser||'—'}</div>
+      </div>
+      <div style="text-align:left;flex-shrink:0;">
+        <div class="an-visitor-badge">${v.sessions.length} زيارة</div>
+        <div style="font-size:9px;color:var(--txt3,rgba(255,255,255,0.3));text-align:center;margin-top:2px;">${lastD}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Visitor Detail ──
 function showVisitorDetail(deviceId) {
   const allData = getAN();
   const byDevice = {};
   allData.sessions.forEach(s=>{
+    if(!s.device) return;
     if(!byDevice[s.device]) byDevice[s.device]={nickname:s.nickname||'زائر',sessions:[],location:'—',di:{}};
     byDevice[s.device].sessions.push(s);
-    byDevice[s.device].nickname = s.nickname||byDevice[s.device].nickname;
-    byDevice[s.device].location = s.location||byDevice[s.device].location;
-    byDevice[s.device].di       = s.di||byDevice[s.device].di;
+    if(s.nickname) byDevice[s.device].nickname=s.nickname;
+    if(s.location&&s.location!=='...') byDevice[s.device].location=s.location;
+    if(s.di) byDevice[s.device].di=s.di;
   });
   const v = byDevice[deviceId];
   if (!v) return;
-  const detail = document.getElementById('an-visitor-detail');
   const di = v.di||{};
-  document.getElementById('vd-name').textContent = '👤 ' + (v.nickname||'زائر');
   const totalTime = v.sessions.reduce((a,s)=>a+(s.duration||0),0);
   const avgTime   = v.sessions.length ? Math.round(totalTime/v.sessions.length) : 0;
+  const allPages  = v.sessions.flatMap(s=>s.pages?s.pages.split(' ← '):[]);
+  const pageCounts = {};
+  allPages.forEach(p=>{ if(p) pageCounts[p]=(pageCounts[p]||0)+1; });
+  const topPage = Object.entries(pageCounts).sort((a,b)=>b[1]-a[1])[0];
+
+  document.getElementById('vd-name').textContent = '👤 ' + v.nickname;
   document.getElementById('vd-info').innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
-      <div>📍 ${v.location||'—'}</div>
-      <div>📱 ${di.device||'—'}</div>
-      <div>💻 ${di.os||'—'}</div>
-      <div>🌐 ${di.browser||'—'}</div>
-      <div>🔢 ${v.sessions.length} زيارة</div>
-      <div>⏱ متوسط ${Math.floor(avgTime/60)}د ${avgTime%60}ث</div>
-      <div>🖥️ ${di.screen||'—'}</div>
-    </div>`;
-  document.getElementById('vd-sessions').innerHTML = [...v.sessions].reverse().slice(0,10).map(s=>{
+    <div class="an-vd-cell"><div class="an-vd-cell-lbl">📍 الموقع</div><div class="an-vd-cell-val">${v.location||'—'}</div></div>
+    <div class="an-vd-cell"><div class="an-vd-cell-lbl">📱 الجهاز</div><div class="an-vd-cell-val">${di.device||'—'}</div></div>
+    <div class="an-vd-cell"><div class="an-vd-cell-lbl">💻 النظام</div><div class="an-vd-cell-val">${di.os||'—'}</div></div>
+    <div class="an-vd-cell"><div class="an-vd-cell-lbl">🌐 المتصفح</div><div class="an-vd-cell-val">${di.browser||'—'}</div></div>
+    <div class="an-vd-cell"><div class="an-vd-cell-lbl">🔢 الزيارات</div><div class="an-vd-cell-val">${v.sessions.length}</div></div>
+    <div class="an-vd-cell"><div class="an-vd-cell-lbl">⏱ متوسط الوقت</div><div class="an-vd-cell-val">${Math.floor(avgTime/60)}د ${avgTime%60}ث</div></div>
+    <div class="an-vd-cell"><div class="an-vd-cell-lbl">🖥️ الشاشة</div><div class="an-vd-cell-val">${di.screen||'—'}</div></div>
+    <div class="an-vd-cell"><div class="an-vd-cell-lbl">🏆 أكثر صفحة</div><div class="an-vd-cell-val">${topPage?topPage[0]:'—'}</div></div>
+  `;
+  document.getElementById('vd-sessions').innerHTML = [...v.sessions].reverse().slice(0,15).map(s=>{
     const dur = s.duration ? Math.floor(s.duration/60)+'د '+(s.duration%60)+'ث' : '—';
     return `<div class="vd-session-row">
-      <span style="color:#f5a623;">${(s.time||'').substring(0,16)}</span> · ⏱${dur}
-      ${s.pages?`<br>📄 <span style="color:rgba(255,255,255,0.35)">${s.pages}</span>`:''}
+      <div style="color:var(--p1,#5B5FEF);font-weight:700;">${(s.time||'').substring(0,16)}</div>
+      <div>⏱ ${dur} ${s.pages?'· 📄 '+s.pages:''}</div>
     </div>`;
   }).join('');
+  const detail = document.getElementById('an-visitor-detail');
   detail.style.display='block';
   detail.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
-// ── Welcome & Nickname ──
-function checkWelcome() {
-  const seenWelcome = localStorage.getItem(WELCOME_SEEN_KEY);
-  const seenVersion = localStorage.getItem('halou_seen_version');
-  if (!seenWelcome) {
-    setTimeout(()=>document.getElementById('welcomeOverlay').classList.add('open'), 400);
-  } else if (seenVersion !== CURRENT_VERSION) {
-    setTimeout(()=>document.getElementById('whatsNewOverlay').classList.add('open'), 800);
+// ── Activity Timeline ──
+function renderActivityLog(sessions) {
+  const logEl = document.getElementById('an-log');
+  if (!logEl) return;
+  const recent = [...sessions].reverse().slice(0,25);
+  if (!recent.length) {
+    logEl.innerHTML='<div style="text-align:center;color:var(--txt3,rgba(255,255,255,0.25));font-size:11px;padding:16px 0">لا توجد بيانات في هذه الفترة</div>';
+    return;
   }
+  const icons = {default:'🔵',order:'🛒',syriatel:'📱',mtn:'📡',freefire:'🔥',pubg:'🪖',joker:'🃏',games:'🎮'};
+  const colors = {default:'rgba(91,95,239,0.15)',order:'rgba(16,185,129,0.15)',syriatel:'rgba(230,57,70,0.15)',mtn:'rgba(255,183,3,0.15)',freefire:'rgba(247,37,133,0.15)',pubg:'rgba(76,201,240,0.15)',joker:'rgba(255,208,0,0.15)'};
+
+  logEl.innerHTML = recent.map(s=>{
+    const dur = s.duration ? Math.floor(s.duration/60)+'د '+(s.duration%60)+'ث' : '—';
+    const di = s.di||{};
+    const nick = (s.nickname&&s.nickname!=='زائر مجهول') ? `<b style="color:var(--p1,#5B5FEF)">${s.nickname}</b>` : `<span style="color:var(--txt3,rgba(255,255,255,0.3))">زائر</span>`;
+    const loc = (s.location&&s.location!=='غير محدد'&&s.location!=='...') ? s.location : '—';
+    // detect type
+    let type = 'default';
+    if(s.pages&&s.pages.includes('syriatel')) type='syriatel';
+    else if(s.pages&&s.pages.includes('mtn')) type='mtn';
+    else if(s.pages&&s.pages.includes('freefire')) type='freefire';
+    else if(s.pages&&s.pages.includes('pubg')) type='pubg';
+    else if(s.pages&&s.pages.includes('joker')) type='joker';
+    else if(s.pages&&s.pages.includes('games')) type='games';
+
+    return `<div class="an-timeline-row">
+      <div class="an-timeline-dot" style="background:${colors[type]||colors.default}">${icons[type]||icons.default}</div>
+      <div class="an-timeline-body">
+        <div class="an-timeline-text">${nick} · ⏱${dur} · 📱${di.device||'—'}</div>
+        <div class="an-timeline-time">📍${loc} · ${(s.time||'').substring(0,16)}</div>
+        ${s.pages?`<div style="font-size:9px;color:var(--txt3,rgba(255,255,255,0.25));margin-top:1px;">📄 ${s.pages}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
 }
 
-function closeWelcome() {
-  document.getElementById('welcomeOverlay').classList.remove('open');
-  localStorage.setItem(WELCOME_SEEN_KEY,'1');
-  if (!localStorage.getItem(NICKNAME_KEY)) {
-    setTimeout(()=>{
-      document.getElementById('nicknameOverlay').classList.add('open');
-      document.getElementById('nicknameInput').focus();
-    },300);
+// ── Offers Stats ──
+function renderOffersStats(allData) {
+  const el = document.getElementById('an-offers-stats');
+  if (!el) return;
+  const offerStats = allData.offerStats || {};
+  const offerKeys = Object.keys(offerStats);
+  if (!offerKeys.length || !activeOffers || !activeOffers.length) {
+    el.innerHTML='<div style="font-size:11px;color:var(--txt3,rgba(255,255,255,0.3));text-align:center;padding:10px;">لا توجد بيانات عروض بعد</div>';
+    return;
   }
-}
-
-function saveNickname(skip) {
-  const val = document.getElementById('nicknameInput').value.trim();
-  if (!skip && val.length>0) { localStorage.setItem(NICKNAME_KEY,val); _cs.nickname=val; }
-  else if (skip) { localStorage.setItem(NICKNAME_KEY,'زائر'); }
-  document.getElementById('nicknameOverlay').classList.remove('open');
-}
-
-function clearAnalytics() {
-  if(!confirm('هل أنت متأكد من مسح كل الإحصائيات؟')) return;
-  localStorage.removeItem(AN_KEY);
-  loadAnalytics();
+  el.innerHTML = activeOffers.slice(0,5).map(offer=>{
+    const stats = offerStats[offer.id] || {views:0,clicks:0};
+    const cr = stats.views>0 ? Math.round((stats.clicks/stats.views)*100) : 0;
+    return `<div class="an-offer-row">
+      <div class="an-offer-icon">${offer.catIcon||'🎁'}</div>
+      <div class="an-offer-info">
+        <div class="an-offer-name">${offer.pkgName||'عرض'} — ${offer.catLabel||''}</div>
+        <div class="an-offer-meta">👁 ${stats.views} ظهور · 👆 ${stats.clicks} نقرة</div>
+      </div>
+      <div class="an-offer-cr">${cr}%<div style="font-size:8px;font-weight:600;color:var(--txt3,rgba(255,255,255,0.3));">تفاعل</div></div>
+    </div>`;
+  }).join('');
 }
 
 function resetWelcome() {
