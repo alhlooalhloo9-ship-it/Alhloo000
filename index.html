@@ -2486,6 +2486,25 @@ body.light-mode .an-timeline-text { color: var(--txt); }
             📅 آخر تحديث: <span id="adminLastSaved" style="color:#4ade80;font-weight:700;">—</span>
           </div>
           <div id="syncStatus" style="margin-top:6px;font-size:10px;text-align:center;color:rgba(255,255,255,0.4);display:none;"></div>
+          <!-- Telegram Auto-Fetch -->
+          <div style="background:rgba(91,95,239,0.08);border:1.5px solid rgba(91,95,239,0.2);border-radius:12px;padding:10px;margin-top:10px;">
+            <div style="font-size:11px;font-weight:800;color:var(--p1,#5B5FEF);margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+              <span>📡</span> تحديث تلقائي من تلغرام
+            </div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.45);margin-bottom:8px;" id="tgLastFetch">آخر جلب: لم يتم بعد</div>
+            <div id="tgStatus" style="font-size:10px;text-align:center;padding:5px;border-radius:8px;margin-bottom:8px;display:none;"></div>
+            <div style="display:flex;gap:6px;">
+              <button onclick="fetchRatesFromTelegram()" id="tgFetchBtn"
+                style="flex:1;background:linear-gradient(135deg,#5B5FEF,#7C82FF);border:none;color:white;font-family:'Cairo',sans-serif;font-size:11px;font-weight:800;padding:8px;border-radius:10px;cursor:pointer;">
+                🔄 جلب من تلغرام
+              </button>
+              <button onclick="toggleAutoFetch()" id="tgAutoBtn"
+                style="flex:1;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:#10B981;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:8px;border-radius:10px;cursor:pointer;">
+                ⏱ تلقائي: إيقاف
+              </button>
+            </div>
+          </div>
+
           <div style="display:flex;gap:8px;justify-content:center;margin-top:10px;">
             <button onclick="saveAdminRates()" style="background:linear-gradient(135deg,#16a34a,#15803d);border:none;color:white;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:8px 18px;border-radius:20px;cursor:pointer;">☁️ حفظ ونشر للجميع</button>
             <button onclick="lockAdmin()" style="background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.4);font-family:'Cairo',sans-serif;font-size:11px;padding:8px 14px;border-radius:20px;cursor:pointer;">🔒 إقفال</button>
@@ -5181,6 +5200,127 @@ function resetWelcome() {
 window.addEventListener('DOMContentLoaded', function() {
   setTimeout(checkWelcome, 500);
 });
+
+// ===== TELEGRAM AUTO RATES =====
+const TG_CHANNEL = 'https://t.me/s/aa123456hhn';
+const TG_PROXY   = 'https://api.allorigins.win/raw?url=';
+let   tgAutoInterval = null;
+let   tgAutoOn = false;
+
+async function fetchRatesFromTelegram() {
+  const btn    = document.getElementById('tgFetchBtn');
+  const status = document.getElementById('tgStatus');
+  const lastEl = document.getElementById('tgLastFetch');
+
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الجلب...'; }
+  if (status) { status.style.display = 'block'; status.style.background = 'rgba(245,158,11,0.12)'; status.style.color = '#F59E0B'; status.textContent = '⏳ جاري الاتصال بتلغرام...'; }
+
+  try {
+    const url = TG_PROXY + encodeURIComponent(TG_CHANNEL + '?t=' + Date.now());
+    const res  = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) throw new Error('فشل الاتصال: ' + res.status);
+    const html = await res.text();
+
+    // Extract all 5-digit numbers (old SYP rates like 12750)
+    const all5 = [...html.matchAll(/(1[0-9]{4})/g)].map(m => parseInt(m[1]));
+    if (!all5.length) throw new Error('لم يتم العثور على أرقام في القناة');
+
+    // Take the highest (الأعلى = سعر البيع)
+    const highest = Math.max(...all5);
+
+    // newSyp = first 3 digits (12750 → 127)
+    const newSypVal  = Math.floor(highest / 100);
+    // oldSyp = full 5-digit number
+    const oldSypVal  = highest;
+
+    // Update inputs
+    const newEl = document.getElementById('rateAdmNew');
+    const oldEl = document.getElementById('rateAdmOld');
+    if (newEl) newEl.value = newSypVal;
+    if (oldEl) oldEl.value = oldSypVal;
+
+    // Apply to rates object immediately
+    rates.newSyp = newSypVal;
+    rates.oldSyp = oldSypVal;
+
+    // Update display
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('ar-SY');
+    const dateStr = now.toLocaleDateString('ar-SY');
+    if (lastEl) lastEl.textContent = `آخر جلب: ${dateStr} — ${timeStr} | $1 = ${newSypVal} ج.س`;
+
+    // Re-render all packages with new rate
+    Object.keys(PKG_MAP).forEach(id => {
+      const map = PKG_MAP[id];
+      if (map) renderPkgs(map.pkgs(), map.cid, map.cb);
+    });
+
+    // Update calc display
+    applyRatesToUI(dateStr, timeStr);
+
+    // Auto-save to cloud
+    await saveAdminRates();
+
+    if (status) {
+      status.style.background = 'rgba(16,185,129,0.12)';
+      status.style.color = '#10B981';
+      status.textContent = `✅ تم التحديث! $1 = ${newSypVal} ج.س (من ${highest} ق.س)`;
+    }
+    setTimeout(() => { if(status) status.style.display='none'; }, 5000);
+
+  } catch (e) {
+    if (status) {
+      status.style.background = 'rgba(239,68,68,0.1)';
+      status.style.color = '#EF4444';
+      status.textContent = '❌ ' + (e.message || 'خطأ غير معروف');
+    }
+    setTimeout(() => { if(status) status.style.display='none'; }, 4000);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🔄 جلب من تلغرام'; }
+  }
+}
+
+function toggleAutoFetch() {
+  const btn = document.getElementById('tgAutoBtn');
+  if (tgAutoOn) {
+    // Stop
+    clearInterval(tgAutoInterval);
+    tgAutoInterval = null;
+    tgAutoOn = false;
+    if (btn) {
+      btn.textContent = '⏱ تلقائي: إيقاف';
+      btn.style.background = 'rgba(16,185,129,0.12)';
+      btn.style.borderColor = 'rgba(16,185,129,0.3)';
+      btn.style.color = '#10B981';
+    }
+    localStorage.removeItem('tg_auto_fetch');
+  } else {
+    // Start — every 30 minutes
+    tgAutoOn = true;
+    fetchRatesFromTelegram(); // fetch immediately
+    tgAutoInterval = setInterval(fetchRatesFromTelegram, 30 * 60 * 1000);
+    if (btn) {
+      btn.textContent = '⏱ تلقائي: تشغيل ✅';
+      btn.style.background = 'rgba(239,68,68,0.12)';
+      btn.style.borderColor = 'rgba(239,68,68,0.3)';
+      btn.style.color = '#EF4444';
+    }
+    localStorage.setItem('tg_auto_fetch', '1');
+  }
+}
+
+// Also add a visible indicator on rate-update-bar for users
+function applyRatesToUI(dateStr, timeStr) {
+  const ruText = document.getElementById('ruText') ||
+                 document.querySelector('.rate-update-bar .ru-text');
+  if (ruText) {
+    ruText.textContent = `تم تحديث سعر الصرف بتاريخ ${dateStr} — الساعة ${timeStr||''} | $1 = ${rates.newSyp} ج.س | ${rates.oldSyp} ق.س | ${rates.tryRate} ₺`;
+  }
+  // Update calc card on home
+  const calcCard = document.querySelector('.calc-sq-rate');
+  if (calcCard) calcCard.innerHTML = `$1 = ${rates.newSyp} ج.س<br>$1 = ${rates.tryRate} ₺`;
+}
+
 </script>
 
 <script>
