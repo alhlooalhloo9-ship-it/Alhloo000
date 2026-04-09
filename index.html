@@ -2222,6 +2222,145 @@ body.light-mode .an-vd-cell-val { color: var(--txt); }
 body.light-mode .an-offer-row { background: var(--card); border-color: var(--border); }
 body.light-mode .an-offer-name { color: var(--txt); }
 body.light-mode .an-timeline-text { color: var(--txt); }
+
+/* ══════════════════════════════════════
+   LIGHT MODE — COMPREHENSIVE TEXT FIX
+   يصلح كل النصوص البيضاء في الوضع الفاتح
+══════════════════════════════════════ */
+
+/* ── CSS Variables override for light mode ── */
+body.light-mode {
+  --txt:  #1A1D2E !important;
+  --txt2: #4B5563 !important;
+  --txt3: #9CA3AF !important;
+  --card: #FFFFFF !important;
+  --bg:   #F5F7FB !important;
+  --bg2:  #ECEEF5 !important;
+  --border: #E5E7EB !important;
+}
+
+/* ── عناصر تحتوي نص أبيض ثابت ── */
+body.light-mode .an-visitor-name,
+body.light-mode .an-visitor-meta,
+body.light-mode .an-vd-cell-val,
+body.light-mode .an-timeline-text,
+body.light-mode .an-timeline-time,
+body.light-mode .an-offer-name,
+body.light-mode .an-offer-meta,
+body.light-mode .an-device-lbl,
+body.light-mode .an-kpi-lbl,
+body.light-mode .an-section-hdr,
+body.light-mode .vd-session-row,
+body.light-mode .stat-card .stat-lbl,
+body.light-mode .analytics-section-title { color: var(--txt2) !important; }
+
+body.light-mode .an-visitor-name { color: var(--txt) !important; font-weight: 800 !important; }
+body.light-mode .an-timeline-text { color: var(--txt) !important; }
+
+/* ── لوحة الإدمن ── */
+body.light-mode .admin-panel-inner * { color: var(--txt); }
+body.light-mode .admin-tab-btn:not(.active) { color: var(--txt2) !important; background: transparent !important; }
+body.light-mode .admin-rate-row label { color: var(--txt2) !important; }
+body.light-mode #adminLastSaved { color: #16a34a !important; }
+body.light-mode #syncStatus { color: var(--txt2) !important; }
+body.light-mode #tgLastFetch { color: var(--txt2) !important; }
+body.light-mode #tgStatus { color: var(--txt) !important; }
+body.light-mode .offer-admin-row-title { color: var(--txt) !important; }
+body.light-mode .offer-admin-row-timer { color: var(--p1) !important; }
+
+/* ── باقات الخدمات ── */
+body.light-mode .pkg-unit { color: var(--txt3) !important; }
+body.light-mode .pkg-price-syp { color: #d97706 !important; }
+
+/* ── صفحة العروض ── */
+body.light-mode .offer-card { background: var(--card) !important; }
+body.light-mode .offer-title { color: var(--txt) !important; }
+body.light-mode .offer-desc { color: var(--txt2) !important; }
+body.light-mode .no-offers-msg { color: var(--txt2) !important; }
+body.light-mode .countdown-num { color: var(--p1) !important; }
+
+/* ── نموذج الطلب ── */
+body.light-mode .order-summary .key { color: var(--txt2) !important; }
+body.light-mode .order-summary .val { color: var(--txt) !important; }
+body.light-mode .form-group label { color: var(--txt2) !important; }
+body.light-mode .phone-hint { color: var(--txt2) !important; }
+body.light-mode #phone-label { color: var(--txt2) !important; }
+
+/* ── صفحة التأكيد ── */
+body.light-mode .confirm-row .key { color: var(--txt2) !important; }
+body.light-mode .confirm-row .val { color: var(--txt) !important; }
+body.light-mode .payment-section .pay-title { color: var(--p1) !important; }
+body.light-mode .confirm-card .card-header { color: #16a34a !important; }
+
+/* ── الرأس (header) ── */
+body.light-mode .header { background: linear-gradient(135deg, var(--p1), var(--p2)) !important; }
+body.light-mode .header h1 { color: white !important; -webkit-text-fill-color: white !important; }
+body.light-mode .header .slogan { color: rgba(255,255,255,0.8) !important; }
+
+/* ── رأس الصفحات (page headers) ── */
+body.light-mode .page-header h2 { color: white !important; -webkit-text-fill-color: white !important; }
+body.light-mode .page-header .sub { color: rgba(255,255,255,0.8) !important; }
+
+/* ── حاسبة العملات ── */
+body.light-mode .calc-header h3 { color: var(--p1) !important; -webkit-text-fill-color: var(--p1) !important; }
+body.light-mode .conv-label { color: var(--txt2) !important; }
+body.light-mode .conv-currency { color: var(--txt3) !important; }
+body.light-mode .conv-field-label { color: var(--txt2) !important; }
+body.light-mode .rate-update-bar .ru-title { color: var(--p1) !important; }
+body.light-mode .rate-update-bar .ru-text { color: var(--txt2) !important; }
+
+/* ── الشركات ── */
+body.light-mode .company-card .company-name { font-weight: 800 !important; }
+body.light-mode .company-card p,
+body.light-mode .company-card span { color: var(--txt2) !important; }
+
+/* ── الكروت الرئيسية (sq-cards) ── */
+/* هذه الكروت ملونة لذا النص يبقى أبيض */
+body.light-mode .sq-card .sq-label { color: white !important; }
+body.light-mode .sq-card .sq-sub { color: rgba(255,255,255,0.75) !important; }
+body.light-mode .sq-card .calc-sq-rate { color: rgba(255,255,255,0.8) !important; }
+
+/* ── الإشعارات والنوافذ المنبثقة ── */
+body.light-mode .offer-notif-title { color: var(--txt) !important; }
+body.light-mode .offer-notif-service { color: var(--txt2) !important; }
+body.light-mode .offer-notif-note { color: var(--txt2) !important; }
+body.light-mode .offer-notif-btn-later { color: var(--txt2) !important; }
+body.light-mode .whats-new-modal .wn-items li { color: var(--txt) !important; }
+body.light-mode .wn-subtitle { color: var(--txt2) !important; }
+
+/* ── صفحة سيرياتيل وMTN (Syrian page) ── */
+body.light-mode #syrian .section-title,
+body.light-mode .section-title { color: var(--txt2) !important; }
+
+/* ── زر الرجوع العائم ── */
+body.light-mode .float-back { color: white !important; }
+
+/* ── حاسبة أساسية ── */
+body.light-mode .basic-calc-header h3 { color: var(--p1) !important; -webkit-text-fill-color: var(--p1) !important; }
+body.light-mode .calc-handle { background: rgba(0,0,0,0.15) !important; }
+
+/* ── النصوص الإضافية ── */
+body.light-mode [style*="color:rgba(255,255,255"] { color: var(--txt2) !important; }
+body.light-mode [style*="color: rgba(255,255,255"] { color: var(--txt2) !important; }
+body.light-mode [style*="color:white"] { color: var(--txt) !important; }
+body.light-mode [style*="color: white"] { color: var(--txt) !important; }
+
+/* استثناء: الأزرار والبطاقات الملونة يبقى فيها نص أبيض */
+body.light-mode button[style*="background:linear-gradient"],
+body.light-mode .sq-card *,
+body.light-mode .page-header *,
+body.light-mode .header *,
+body.light-mode .float-back,
+body.light-mode .float-calc-btn,
+body.light-mode .submit-btn,
+body.light-mode .whatsapp-btn,
+body.light-mode .confirm-whatsapp-btn,
+body.light-mode .wn-close-btn,
+body.light-mode .welcome-btn,
+body.light-mode .nickname-btn,
+body.light-mode .offer-notif-btn-main,
+body.light-mode .an-period-btn.active,
+body.light-mode .offer-badge { color: white !important; -webkit-text-fill-color: white !important; }
 </style>
 </head>
 <body>
@@ -4166,6 +4305,76 @@ loadOffersFromCloud();
 setInterval(loadOffersFromCloud, 60000);
 checkNotifBanner();
 
+// ── تحديث تلقائي من تلغرام لجميع المستخدمين ──
+// يعمل في الخلفية بدون تدخل — كل 30 دقيقة
+async function autoFetchForAllUsers() {
+  try {
+    const url = 'https://api.allorigins.win/raw?url=' + 
+                encodeURIComponent('https://t.me/s/aa123456hhn?t=' + Date.now());
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) return;
+    const html = await res.text();
+
+    // أخذ آخر 5000 حرف فقط (آخر الرسائل)
+    const tail = html.slice(-5000);
+    const nums = [...tail.matchAll(/(1[0-9]{4})/g)].map(m => parseInt(m[1]));
+    if (!nums.length) return;
+
+    const highest = Math.max(...nums);
+    const newSypVal = Math.floor(highest / 100);
+    const oldSypVal = highest;
+
+    // تحقق: لا تحدث إذا لم يتغير السعر
+    if (newSypVal === rates.newSyp) return;
+
+    // تحديث الأسعار
+    rates.newSyp = newSypVal;
+    rates.oldSyp = oldSypVal;
+
+    // حفظ محلي وتحديث الواجهة
+    const now = new Date();
+    const days=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    const months=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    const dateStr = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+    const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+    localStorage.setItem('halou_rates', JSON.stringify({
+      newSyp: newSypVal, oldSyp: oldSypVal,
+      tryRate: rates.tryRate || 44.5,
+      dateStr, timeStr,
+      source: 'telegram'
+    }));
+
+    // تحديث الواجهة للمستخدم
+    applyRatesToUI(dateStr, timeStr);
+
+    // إعادة رسم الباقات بالسعر الجديد
+    if (typeof PKG_MAP !== 'undefined') {
+      Object.keys(PKG_MAP).forEach(id => {
+        const map = PKG_MAP[id];
+        if (map) renderPkgs(map.pkgs(), map.cid, map.cb);
+      });
+    }
+
+    // إذا كان أدمن → حدّث حقول الإدخال ونشر للجميع
+    if (typeof adminUnlocked !== 'undefined' && adminUnlocked) {
+      const newEl = document.getElementById('rateAdmNew');
+      const oldEl = document.getElementById('rateAdmOld');
+      if (newEl) newEl.value = newSypVal;
+      if (oldEl) oldEl.value = oldSypVal;
+      // نشر للجميع تلقائياً
+      if (typeof saveAdminRates === 'function') saveAdminRates();
+    }
+
+  } catch(e) {
+    // صامت — لا يزعج المستخدم عند فشل الاتصال
+  }
+}
+
+// تشغيل فوراً عند فتح التطبيق ثم كل 30 دقيقة
+setTimeout(autoFetchForAllUsers, 3000); // بعد 3 ثواني من التحميل
+setInterval(autoFetchForAllUsers, 5 * 60 * 1000); // كل 5 دقائق
+
 // ===== RENDER PACKAGES =====
 // خريطة serviceId → pkgs + callback + label
 const PKG_MAP = {
@@ -5309,16 +5518,21 @@ function toggleAutoFetch() {
   }
 }
 
-// Also add a visible indicator on rate-update-bar for users
-function applyRatesToUI(dateStr, timeStr) {
-  const ruText = document.getElementById('ruText') ||
-                 document.querySelector('.rate-update-bar .ru-text');
+// Update UI whenever rates change
+function applyRatesToUI(dateStr, timeStr, source) {
+  // Rate update bar (inside currency calc)
+  const ruText = document.querySelector('.rate-update-bar .ru-text');
   if (ruText) {
-    ruText.textContent = `تم تحديث سعر الصرف بتاريخ ${dateStr} — الساعة ${timeStr||''} | $1 = ${rates.newSyp} ج.س | ${rates.oldSyp} ق.س | ${rates.tryRate} ₺`;
+    const srcLabel = source === 'telegram' ? ' 📡 تلغرام' : '';
+    ruText.textContent = `تم تحديث سعر الصرف بتاريخ ${dateStr} — الساعة ${timeStr||''}${srcLabel} | $1 = ${rates.newSyp} ج.س | ${rates.oldSyp} ق.س | ${rates.tryRate} ₺`;
   }
-  // Update calc card on home
+  // Calc card on home screen
   const calcCard = document.querySelector('.calc-sq-rate');
   if (calcCard) calcCard.innerHTML = `$1 = ${rates.newSyp} ج.س<br>$1 = ${rates.tryRate} ₺`;
+  // Update converter fields if open
+  if (typeof convertFrom === 'function') {
+    try { convertFrom(null); } catch(e){}
+  }
 }
 
 </script>
