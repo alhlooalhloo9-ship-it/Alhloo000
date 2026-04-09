@@ -3507,6 +3507,17 @@ function loadLocalRates(){
   } catch(e){}
 }
 
+// ── دالة مركزية لإعادة رسم الباقات بالسعر الجديد ──
+function rerenderAllPkgs() {
+  if (typeof PKG_MAP === 'undefined') return;
+  Object.keys(PKG_MAP).forEach(id => {
+    const map = PKG_MAP[id];
+    if (map && document.getElementById(map.cid)) {
+      renderPkgs(map.pkgs(), map.cid, map.cb);
+    }
+  });
+}
+
 function applyRatesToUI(dateStr, timeStr){
   const ruText = document.querySelector('.ru-text');
   if(ruText){
@@ -3518,6 +3529,8 @@ function applyRatesToUI(dateStr, timeStr){
   }
   const calcCard = document.querySelector('.calc-sq-rate');
   if(calcCard) calcCard.innerHTML = `$1 = ${rates.newSyp} ج.س<br>$1 = ${rates.tryRate} ₺`;
+  // ✅ إعادة رسم الباقات بالسعر الجديد
+  rerenderAllPkgs();
   if(adminUnlocked && dateStr && document.getElementById('adminLastSaved')){
     document.getElementById('adminLastSaved').textContent = `${dateStr} — ${timeStr||''}`;
   }
@@ -4348,13 +4361,7 @@ async function autoFetchForAllUsers() {
     // تحديث الواجهة للمستخدم
     applyRatesToUI(dateStr, timeStr);
 
-    // إعادة رسم الباقات بالسعر الجديد
-    if (typeof PKG_MAP !== 'undefined') {
-      Object.keys(PKG_MAP).forEach(id => {
-        const map = PKG_MAP[id];
-        if (map) renderPkgs(map.pkgs(), map.cid, map.cb);
-      });
-    }
+    // rerenderAllPkgs() — يُستدعى تلقائياً من applyRatesToUI
 
     // إذا كان أدمن → حدّث حقول الإدخال ونشر للجميع
     if (typeof adminUnlocked !== 'undefined' && adminUnlocked) {
@@ -5520,19 +5527,24 @@ function toggleAutoFetch() {
 
 // Update UI whenever rates change
 function applyRatesToUI(dateStr, timeStr, source) {
-  // Rate update bar (inside currency calc)
-  const ruText = document.querySelector('.rate-update-bar .ru-text');
+  // Rate update bar
+  const ruText = document.querySelector('.rate-update-bar .ru-text') ||
+                 document.querySelector('.ru-text');
   if (ruText) {
     const srcLabel = source === 'telegram' ? ' 📡 تلغرام' : '';
-    ruText.textContent = `تم تحديث سعر الصرف بتاريخ ${dateStr} — الساعة ${timeStr||''}${srcLabel} | $1 = ${rates.newSyp} ج.س | ${rates.oldSyp} ق.س | ${rates.tryRate} ₺`;
+    if (dateStr) {
+      ruText.textContent = `تم تحديث سعر الصرف بتاريخ ${dateStr} — الساعة ${timeStr||''}${srcLabel} | $1 = ${rates.newSyp} ج.س | ${rates.oldSyp} ق.س | ${rates.tryRate} ₺`;
+    }
   }
   // Calc card on home screen
   const calcCard = document.querySelector('.calc-sq-rate');
   if (calcCard) calcCard.innerHTML = `$1 = ${rates.newSyp} ج.س<br>$1 = ${rates.tryRate} ₺`;
-  // Update converter fields if open
+  // Update converter
   if (typeof convertFrom === 'function') {
     try { convertFrom(null); } catch(e){}
   }
+  // ✅ إعادة رسم الباقات بالسعر الجديد — هذا يجعل السعر متطابقاً مع الحاسبة
+  rerenderAllPkgs();
 }
 
 </script>
