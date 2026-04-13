@@ -2361,6 +2361,153 @@ body.light-mode .nickname-btn,
 body.light-mode .offer-notif-btn-main,
 body.light-mode .an-period-btn.active,
 body.light-mode .offer-badge { color: white !important; -webkit-text-fill-color: white !important; }
+
+/* ══════════════════════════════════════
+   NEW CURRENCY CALCULATOR DESIGN
+══════════════════════════════════════ */
+.nv-rates-bar {
+  display: flex; align-items: center;
+  background: #1a1a2e;
+  border-radius: 14px; padding: 10px 14px;
+  margin-bottom: 8px; gap: 6px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.nv-rate-item {
+  display: flex; align-items: center; gap: 5px;
+  flex: 1; justify-content: center;
+}
+.nv-rate-flag { font-size: 16px; }
+.nv-rate-label { font-size: 11px; font-weight: 700; color: #f5a623; }
+.nv-rate-sep { font-size: 13px; color: rgba(255,255,255,0.3); }
+.nv-rate-val { font-size: 13px; font-weight: 900; color: white; }
+.nv-rate-divider { width: 1px; height: 28px; background: rgba(255,255,255,0.1); }
+
+.nv-update-row {
+  font-size: 10px; color: rgba(255,255,255,0.4);
+  text-align: center; margin-bottom: 12px;
+  padding: 5px 10px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+}
+
+/* USD section */
+.nv-usd-section {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border: 2px solid rgba(245,166,35,0.4);
+  border-radius: 16px; padding: 12px 14px;
+  margin-bottom: 10px;
+}
+.nv-currency-badge {
+  font-size: 11px; font-weight: 800;
+  padding: 4px 12px; border-radius: 20px;
+  display: inline-flex; align-items: center; gap: 5px;
+  margin-bottom: 10px;
+}
+.nv-usd-badge { background: rgba(245,166,35,0.15); color: #f5a623; border: 1px solid rgba(245,166,35,0.3); }
+.nv-try-badge { background: rgba(167,139,250,0.15); color: #a78bfa; border: 1px solid rgba(167,139,250,0.3); }
+
+.nv-main-row {
+  display: flex; align-items: center; gap: 8px;
+}
+.nv-pm-btn {
+  width: 44px; height: 44px;
+  background: rgba(245,166,35,0.12);
+  border: 1.5px solid rgba(245,166,35,0.3);
+  border-radius: 12px; color: #f5a623;
+  font-size: 22px; font-weight: 700;
+  cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  transition: all 0.15s; flex-shrink: 0;
+  font-family: 'Cairo', sans-serif;
+}
+.nv-pm-btn:active { transform: scale(0.92); background: rgba(245,166,35,0.25); }
+
+.nv-main-input {
+  flex: 1; background: transparent;
+  border: none; outline: none;
+  color: white; font-family: 'Cairo', sans-serif;
+  font-size: 32px; font-weight: 900;
+  text-align: center; direction: ltr;
+  min-width: 0;
+}
+.nv-main-input::placeholder { color: rgba(255,255,255,0.2); font-size: 22px; }
+.nv-main-input::-webkit-outer-spin-button,
+.nv-main-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+/* TRY section */
+.nv-output-section {
+  background: linear-gradient(135deg, #1a0a3a, #16213e);
+  border: 2px solid rgba(167,139,250,0.35);
+  border-radius: 16px; padding: 12px 14px;
+  margin-bottom: 10px;
+}
+.nv-output-row {
+  display: flex; align-items: center; gap: 8px;
+}
+.nv-out-icon {
+  font-size: 16px; font-weight: 900;
+  color: #a78bfa; flex-shrink: 0;
+}
+.nv-try-input {
+  color: #a78bfa !important;
+  font-size: 28px !important;
+}
+
+/* SYP grid */
+.nv-syp-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-bottom: 10px;
+}
+.nv-syp-card {
+  border-radius: 16px; padding: 12px 10px;
+  text-align: center; border: 2px solid;
+}
+.nv-new-card {
+  background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(5,150,105,0.08));
+  border-color: rgba(16,185,129,0.4);
+}
+.nv-old-card {
+  background: linear-gradient(135deg, rgba(251,146,60,0.12), rgba(217,119,6,0.08));
+  border-color: rgba(251,146,60,0.4);
+}
+.nv-syp-hdr {
+  font-size: 10px; font-weight: 700;
+  margin-bottom: 8px;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+}
+.nv-new-card .nv-syp-hdr { color: #10B981; }
+.nv-old-card .nv-syp-hdr { color: #fb923c; }
+.nv-new-badge {
+  background: rgba(16,185,129,0.2); color: #10B981;
+  font-size: 8px; font-weight: 800;
+  padding: 1px 5px; border-radius: 4px;
+  border: 1px solid rgba(16,185,129,0.3);
+}
+.nv-syp-input {
+  width: 100%; background: transparent;
+  border: none; outline: none;
+  font-family: 'Cairo', sans-serif;
+  font-size: 24px; font-weight: 900;
+  text-align: center; direction: ltr;
+}
+.nv-new-card .nv-syp-input { color: #10B981; }
+.nv-old-card .nv-syp-input { color: #fb923c; }
+.nv-syp-input::placeholder { color: rgba(255,255,255,0.2); font-size: 16px; }
+.nv-syp-input::-webkit-outer-spin-button,
+.nv-syp-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.nv-syp-sym {
+  font-size: 10px; font-weight: 700; margin-top: 4px;
+  opacity: 0.6;
+}
+
+/* Light mode overrides */
+body.light-mode .nv-rates-bar { background: var(--card); border-color: var(--border); }
+body.light-mode .nv-rate-val { color: var(--txt); }
+body.light-mode .nv-update-row { color: var(--txt2); background: var(--bg); }
+body.light-mode .nv-usd-section { background: var(--card); border-color: rgba(245,158,11,0.4); }
+body.light-mode .nv-output-section { background: var(--card); border-color: rgba(124,58,237,0.3); }
+body.light-mode .nv-main-input { color: var(--txt); }
+body.light-mode .nv-syp-card { background: var(--card) !important; }
 </style>
 </head>
 <body>
@@ -2538,7 +2685,7 @@ body.light-mode .offer-badge { color: white !important; -webkit-text-fill-color:
       <div class="ru-icon">📢</div>
       <div class="ru-content">
         <div class="ru-title">آخر تحديث لأسعار الصرف</div>
-        <div class="ru-text">تم تحديث سعر الصرف بتاريخ الأحد 23 فبراير 2026 — $1 = 117.3 ج.س | 11700.3 ق.س | 44.2 ₺</div>
+        <div class="ru-text">جاري تحميل الأسعار...</div>
       </div>
     </div>
 
@@ -3506,6 +3653,33 @@ function loadLocalRates(){
   } catch(e){}
 }
 
+// +/- buttons for USD
+function nvAdjust(delta) {
+  const inp = document.getElementById('inp-usd');
+  if (!inp) return;
+  const cur = parseFloat(inp.value) || 0;
+  const next = Math.max(0, cur + delta);
+  inp.value = next;
+  convertFrom('usd');
+}
+
+// Update calc UI elements when rates change
+function updateNewCalcUI() {
+  // update ru-text in rate-update-bar
+  const ruText = document.querySelector('.rate-update-bar .ru-text') || document.querySelector('.ru-text');
+  if (ruText) {
+    const now = new Date();
+    const days=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    const months=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    const dateStr = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+    const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    ruText.textContent = `تم تحديث سعر الصرف بتاريخ ${dateStr} — ${timeStr} | $1 = ${rates.newSyp} ج.س | ${rates.oldSyp} ق.س | ${rates.tryRate} ₺`;
+  }
+  // update home calc card
+  const calcCard = document.querySelector('.calc-sq-rate');
+  if (calcCard) calcCard.innerHTML = `$1 = ${rates.newSyp} ج.س<br>$1 = ${rates.tryRate} ₺`;
+}
+
 // ── دالة مركزية لإعادة رسم الباقات بالسعر الجديد ──
 function rerenderAllPkgs() {
   if (typeof PKG_MAP === 'undefined') return;
@@ -3528,6 +3702,7 @@ function applyRatesToUI(dateStr, timeStr){
   }
   const calcCard = document.querySelector('.calc-sq-rate');
   if(calcCard) calcCard.innerHTML = `$1 = ${rates.newSyp} ج.س<br>$1 = ${rates.tryRate} ₺`;
+  updateNewCalcUI();
   // ✅ إعادة رسم الباقات بالسعر الجديد
   rerenderAllPkgs();
   if(adminUnlocked && dateStr && document.getElementById('adminLastSaved')){
@@ -3601,7 +3776,9 @@ function fmt(n, decimals=2){
 
 function setVal(id, val){
   const el=document.getElementById('inp-'+id);
-  if(document.activeElement===el) return;
+  if (!el) return;
+  // فقط تجاهل إذا كان هذا الحقل هو الحقل النشط الذي يكتب فيه المستخدم
+  if (el === document.activeElement && activeField === id) return;
   el.value = (val===''||val===null) ? '' : val;
 }
 
@@ -4497,6 +4674,7 @@ function toggleSypDisplay(serviceId) {
 
 // إعداد الـ placeholders من rates الحالية عند التحميل
 function initDpBars() {
+  updateNewCalcUI();
   Object.keys(PKG_MAP).forEach(id => {
     const el = document.getElementById(`dpRate-${id}`);
     if (el) el.placeholder = (rates.newSyp || 117.3).toString();
@@ -5457,14 +5635,15 @@ async function fetchTelegramHTML() {
 
 // استخراج السعر من HTML
 function extractRateFromHTML(html) {
-  const tail = html.slice(-8000); // آخر الرسائل فقط
+  const tail = html.slice(-8000);
   const nums = [...tail.matchAll(/\b(1[0-9]{4})\b/g)].map(m => parseInt(m[1]));
   if (!nums.length) throw new Error('لم يتم العثور على أرقام في القناة');
   const highest = Math.max(...nums);
-  return {
-    newSyp: Math.floor(highest / 100),
-    oldSyp: highest
-  };
+  // newSyp = أول 3 أرقام (12850 → 128)
+  // oldSyp = newSyp × 100 دائماً (128 × 100 = 12800)
+  const newSyp = Math.floor(highest / 100);
+  const oldSyp = newSyp * 100;
+  return { newSyp, oldSyp };
 }
 
 async function fetchRatesFromTelegram() {
@@ -5569,6 +5748,7 @@ function applyRatesToUI(dateStr, timeStr, source) {
   if (typeof convertFrom === 'function') {
     try { convertFrom(null); } catch(e){}
   }
+  updateNewCalcUI();
   // ✅ إعادة رسم الباقات بالسعر الجديد — هذا يجعل السعر متطابقاً مع الحاسبة
   rerenderAllPkgs();
 }
