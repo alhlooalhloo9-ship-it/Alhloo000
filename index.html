@@ -2508,6 +2508,62 @@ body.light-mode .nv-usd-section { background: var(--card); border-color: rgba(24
 body.light-mode .nv-output-section { background: var(--card); border-color: rgba(124,58,237,0.3); }
 body.light-mode .nv-main-input { color: var(--txt); }
 body.light-mode .nv-syp-card { background: var(--card) !important; }
+
+/* ══════════════════════════════════════
+   RATE UPDATE NOTIFICATION BANNER
+══════════════════════════════════════ */
+#rateNotifBanner {
+  position: fixed;
+  top: calc(70px + env(safe-area-inset-top, 0px));
+  left: 50%; transform: translateX(-50%);
+  z-index: 9998;
+  width: calc(100% - 32px);
+  max-width: 420px;
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  transition: all 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+  opacity: 0; pointer-events: none;
+  transform: translateX(-50%) translateY(-20px);
+}
+#rateNotifBanner.show {
+  opacity: 1; pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+#rateNotifBanner.loading {
+  background: linear-gradient(135deg, #92400e, #d97706);
+  border: 1.5px solid rgba(245,158,11,0.5);
+}
+#rateNotifBanner.success {
+  background: linear-gradient(135deg, #064e3b, #065f46);
+  border: 1.5px solid rgba(16,185,129,0.5);
+}
+.rn-icon {
+  font-size: 26px; flex-shrink: 0;
+  animation: rnSpin 1s linear infinite;
+}
+#rateNotifBanner.success .rn-icon { animation: none; }
+@keyframes rnSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+.rn-body { flex: 1; min-width: 0; }
+.rn-title {
+  font-size: 12px; font-weight: 900; color: white;
+  margin-bottom: 3px;
+}
+.rn-detail {
+  font-size: 11px; color: rgba(255,255,255,0.8);
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.rn-old { text-decoration: line-through; opacity: 0.6; }
+.rn-arrow { font-size: 14px; }
+.rn-new { font-size: 14px; font-weight: 900; color: #6ee7b7; }
+.rn-close {
+  background: rgba(255,255,255,0.15); border: none;
+  border-radius: 50%; width: 26px; height: 26px;
+  color: white; font-size: 12px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
 </style>
 </head>
 <body>
@@ -2534,6 +2590,16 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
 </div>
 
 <!-- ===== WELCOME MODAL (first visit ever) ===== -->
+<!-- RATE UPDATE NOTIFICATION BANNER -->
+<div id="rateNotifBanner" class="loading">
+  <div class="rn-icon" id="rnIcon">🔄</div>
+  <div class="rn-body">
+    <div class="rn-title" id="rnTitle">جاري تحديث السعر...</div>
+    <div class="rn-detail" id="rnDetail"></div>
+  </div>
+  <button class="rn-close" onclick="hideRateNotif()">✕</button>
+</div>
+
 <div class="welcome-overlay" id="welcomeOverlay">
   <div class="welcome-box">
     <div class="welcome-icon">🌟</div>
@@ -3595,25 +3661,43 @@ async function loadRatesFromCloud(){
   if(!BIN_ID){ loadLocalRates(); return; }
   const statusEl = document.getElementById('calcStatus');
   try {
-    // Try with API key first, fallback to public access
     const url = `${JSONBIN_BASE}/${BIN_ID}/latest?t=${Date.now()}`;
-    const headers = { 'X-Master-Key': API_KEY };
-    
-    const res = await fetch(url, { headers });
-    
+    const res = await fetch(url, { headers: { 'X-Master-Key': API_KEY } });
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     const r = data.record;
-    
     if(!r || (!r.newSyp && !r.tryRate)) throw new Error('empty record');
-    
-    rates.newSyp  = parseFloat(r.newSyp)  || 117.3;
-    rates.oldSyp  = parseFloat(r.oldSyp)  || 11700.3;
-    rates.tryRate = parseFloat(r.tryRate) || 44.2;
 
-    applyRatesToUI(r.dateStr, r.timeStr);
-    statusEl.textContent = '🟢 أسعار محدّثة من السحابة';
-    statusEl.className   = 'calc-status live';
+    const cloudNew  = parseFloat(r.newSyp)  || 117.3;
+    const cloudOld  = parseFloat(r.oldSyp)  || 11700.3;
+    const cloudTry  = parseFloat(r.tryRate) || 44.2;
+    const cloudTime = r.tgUpdatedAt || 0;
+
+    // تحقق: إذا كان السعر المحلي أحدث من السحابة → لا تكتب فوقه
+    const localRaw  = localStorage.getItem('halou_rates');
+    const localData = localRaw ? JSON.parse(localRaw) : null;
+    const localTime = localData ? (localData.tgUpdatedAt || 0) : 0;
+
+    if (localTime > cloudTime && localData && localData.newSyp) {
+      // السعر المحلي (من تلغرام) أحدث — استخدمه
+      rates.newSyp  = parseFloat(localData.newSyp);
+      rates.oldSyp  = parseFloat(localData.oldSyp);
+      rates.tryRate = parseFloat(localData.tryRate) || cloudTry;
+      applyRatesToUI(localData.dateStr, localData.timeStr, 'telegram');
+    } else {
+      // السحابة أحدث — استخدمها
+      rates.newSyp  = cloudNew;
+      rates.oldSyp  = cloudOld;
+      rates.tryRate = cloudTry;
+      applyRatesToUI(r.dateStr, r.timeStr);
+      localStorage.setItem('halou_rates', JSON.stringify({
+        newSyp: cloudNew, oldSyp: cloudOld, tryRate: cloudTry,
+        dateStr: r.dateStr||'', timeStr: r.timeStr||'',
+        tgUpdatedAt: cloudTime
+      }));
+    }
+
+    if(statusEl){ statusEl.textContent='🟢 أسعار محدّثة'; statusEl.className='calc-status live'; }
 
     if(adminUnlocked){
       document.getElementById('rateAdmTry').value = rates.tryRate;
@@ -3622,16 +3706,8 @@ async function loadRatesFromCloud(){
       if(r.dateStr) document.getElementById('adminLastSaved').textContent = `${r.dateStr} — ${r.timeStr||''}`;
     }
 
-    // Cache locally as backup
-    localStorage.setItem('halou_rates', JSON.stringify({
-      newSyp: rates.newSyp, oldSyp: rates.oldSyp, tryRate: rates.tryRate,
-      dateStr: r.dateStr||'', timeStr: r.timeStr||''
-    }));
-
   } catch(e){
-    console.warn('Cloud fetch failed:', e.message);
-    statusEl.textContent = '🟡 أسعار الصرف جاهزة';
-    statusEl.className   = 'calc-status manual';
+    if(statusEl){ statusEl.textContent='🟡 أسعار الصرف جاهزة'; statusEl.className='calc-status manual'; }
     loadLocalRates();
   }
 }
@@ -4497,11 +4573,16 @@ checkNotifBanner();
 // ── تحديث تلقائي من تلغرام لجميع المستخدمين ──
 async function autoFetchForAllUsers() {
   try {
+    showRateLoading();
     const html = await fetchTelegramHTML();
     const { newSyp: newSypVal, oldSyp: oldSypVal } = extractRateFromHTML(html);
 
-    if (newSypVal === rates.newSyp) return; // لم يتغير السعر
+    if (newSypVal === rates.newSyp) {
+      hideRateNotif(); // لم يتغير — أخفِ الإشعار
+      return;
+    }
 
+    const prevRate = rates.newSyp; // السعر القديم قبل التحديث
     rates.newSyp = newSypVal;
     rates.oldSyp = oldSypVal;
 
@@ -4518,16 +4599,46 @@ async function autoFetchForAllUsers() {
     }));
 
     applyRatesToUI(dateStr, timeStr, 'telegram');
+    showRateUpdated(prevRate, newSypVal);
 
+    // ✅ دائماً انشر على JSONBin — بغض النظر عن حالة الأدمن
+    // هذا يمنع loadRatesFromCloud من الرجوع للسعر القديم
+    await pushRateToCloud(newSypVal, oldSypVal, dateStr, timeStr);
+
+    // تحديث حقول الأدمن إذا كان مفتوحاً
     if (typeof adminUnlocked !== 'undefined' && adminUnlocked) {
       const newEl = document.getElementById('rateAdmNew');
       const oldEl = document.getElementById('rateAdmOld');
       if (newEl) newEl.value = newSypVal;
       if (oldEl) oldEl.value = oldSypVal;
-      if (typeof saveAdminRates === 'function') saveAdminRates();
+      const adEl = document.getElementById('adminLastSaved');
+      if (adEl) adEl.textContent = dateStr + ' — ' + timeStr + ' 📡';
     }
   } catch(e) {
-    // صامت — يجرب مرة أخرى بعد 5 دقائق
+    hideRateNotif(); // أخفِ الإشعار عند الفشل الصامت
+  }
+}
+
+// دالة نشر السعر على JSONBin مباشرة (بدون حاجة لفتح لوحة الأدمن)
+async function pushRateToCloud(newSyp, oldSyp, dateStr, timeStr) {
+  if (!BIN_ID || !API_KEY) return;
+  try {
+    const payload = {
+      newSyp, oldSyp,
+      tryRate: rates.tryRate || 44.5,
+      dateStr, timeStr,
+      source: 'telegram',
+      tgUpdatedAt: Date.now()
+    };
+    await fetch(`${JSONBIN_BASE}/${BIN_ID}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+      body: JSON.stringify(payload)
+    });
+    // حفظ محلي أيضاً
+    localStorage.setItem('halou_rates', JSON.stringify(payload));
+  } catch(e) {
+    // فشل النشر — لا بأس، السعر محفوظ محلياً
   }
 }
 
@@ -5602,6 +5713,50 @@ function initShamcashImages() {
 const TG_CHANNEL = 'https://t.me/s/aa123456hhn';
 let   tgAutoInterval = null;
 let   tgAutoOn = false;
+
+// ══ RATE UPDATE NOTIFICATION ══
+let _rateNotifTimer = null;
+
+function showRateLoading() {
+  const b = document.getElementById('rateNotifBanner');
+  const icon = document.getElementById('rnIcon');
+  const title = document.getElementById('rnTitle');
+  const detail = document.getElementById('rnDetail');
+  if (!b) return;
+  b.className = 'loading show';
+  icon.textContent = '🔄';
+  title.textContent = 'جاري تحديث السعر...';
+  detail.innerHTML = '<span style="color:rgba(255,255,255,0.7);font-size:10px;">📡 جاري الجلب من تلغرام</span>';
+  clearTimeout(_rateNotifTimer);
+}
+
+function showRateUpdated(oldRate, newRate) {
+  const b = document.getElementById('rateNotifBanner');
+  const icon = document.getElementById('rnIcon');
+  const title = document.getElementById('rnTitle');
+  const detail = document.getElementById('rnDetail');
+  if (!b) return;
+  b.className = 'success show';
+  icon.textContent = '✅';
+  title.textContent = 'تم تحديث سعر الصرف!';
+  if (oldRate && oldRate !== newRate) {
+    detail.innerHTML = `
+      <span class="rn-old">$1 = ${oldRate} ج.س</span>
+      <span class="rn-arrow">→</span>
+      <span class="rn-new">$1 = ${newRate} ج.س</span>
+    `;
+  } else {
+    detail.innerHTML = `<span class="rn-new">$1 = ${newRate} ج.س</span>`;
+  }
+  clearTimeout(_rateNotifTimer);
+  _rateNotifTimer = setTimeout(hideRateNotif, 6000);
+}
+
+function hideRateNotif() {
+  const b = document.getElementById('rateNotifBanner');
+  if (b) { b.classList.remove('show'); }
+  clearTimeout(_rateNotifTimer);
+}
 
 // ── قائمة proxies يُجرَّبون بالترتيب حتى ينجح أحدهم ──
 const TG_PROXIES = [
