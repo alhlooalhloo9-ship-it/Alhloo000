@@ -5943,14 +5943,46 @@ async function fetchViaProxy(targetUrl) {
 // ── استخراج سعر الشراء والمبيع من صفحة sp-today ──
 // يعمل مع الصفحتين العربية والإنجليزية
 function extractBuySell(html) {
-  // النمط العربي: "شراء\n\n13,000ل.س\n\nبيع\n\n13,080ل.س"
-  let m = html.match(/شراء[\s\S]{0,30}?([\d,]+)(?:ل\.س|SYP)[\s\S]{0,50}?بيع[\s\S]{0,30}?([\d,]+)(?:ل\.س|SYP)/);
-  // النمط الإنجليزي: "Buy\n\n288SYP\n\nSell\n\n292SYP"
-  if (!m) m = html.match(/Buy[\s\S]{0,30}?([\d,]+)(?:SYP|ل\.س)[\s\S]{0,50}?Sell[\s\S]{0,30}?([\d,]+)(?:SYP|ل\.س)/i);
-  if (!m) return null;
+  let buy = null, sell = null;
+
+  // النمط 1: جدول التحويل العربي "1 USD | 13,000 ل.س | 13,080 ل.س"
+  let m = html.match(/1\s+(?:USD|TRY|EUR)[^|]*\|\s*([\d,]+)\s*ل\.س[^|]*\|\s*([\d,]+)\s*ل\.س/i);
+  if (m) { buy = m[1]; sell = m[2]; }
+
+  // النمط 2: جدول التحويل الإنجليزي "1 TRY | 288 SYP | 292 SYP"
+  if (!sell) {
+    m = html.match(/1\s+(?:USD|TRY|EUR)[^|]*\|\s*([\d,]+)\s*SYP[^|]*\|\s*([\d,]+)\s*SYP/i);
+    if (m) { buy = m[1]; sell = m[2]; }
+  }
+
+  // النمط 3: FAQ عربي "هو 13,000 ل.س للشراء و 13,080 ل.س للبيع"
+  if (!sell) {
+    m = html.match(/([\d,]+)\s*ل\.س\s*للشراء\s*و\s*([\d,]+)\s*ل\.س\s*للبيع/);
+    if (m) { buy = m[1]; sell = m[2]; }
+  }
+
+  // النمط 4: FAQ إنجليزي "is 288 SYP for buying and 292 SYP for selling"
+  if (!sell) {
+    m = html.match(/is\s*([\d,]+)\s*SYP\s*for buying and\s*([\d,]+)\s*SYP\s*for selling/i);
+    if (m) { buy = m[1]; sell = m[2]; }
+  }
+
+  // النمط 5: شراء/بيع مرن مع مسافة 200 حرف
+  if (!sell) {
+    m = html.match(/شراء[\s\S]{0,200}?([\d,]{2,7})\s*(?:ل\.س|SYP)[\s\S]{0,200}?بيع[\s\S]{0,200}?([\d,]{2,7})\s*(?:ل\.س|SYP)/);
+    if (m) { buy = m[1]; sell = m[2]; }
+  }
+
+  // النمط 6: Buy/Sell مرن إنجليزي
+  if (!sell) {
+    m = html.match(/Buy[\s\S]{0,200}?([\d,]{2,7})\s*SYP[\s\S]{0,200}?Sell[\s\S]{0,200}?([\d,]{2,7})\s*SYP/i);
+    if (m) { buy = m[1]; sell = m[2]; }
+  }
+
+  if (!sell) return null;
   return {
-    buy:  parseInt(m[1].replace(/,/g, '')),
-    sell: parseInt(m[2].replace(/,/g, ''))
+    buy:  parseInt(String(buy).replace(/,/g, '')),
+    sell: parseInt(String(sell).replace(/,/g, ''))
   };
 }
 
@@ -5967,8 +5999,10 @@ async function fetchRatesFromSPToday() {
     showStatus(status, 'warning', '① جاري جلب سعر الدولار...');
     const usdHtml = await fetchViaProxy('https://sp-today.com/currency/us-dollar');
     const usdData = extractBuySell(usdHtml);
-    if (!usdData || usdData.sell < 5000)
-      throw new Error('تعذّر استخراج سعر الدولار (sell=' + (usdData?.sell ?? '?') + ')');
+    if (!usdData || usdData.sell < 5000) {
+      const preview = usdHtml.replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim().slice(0,200);
+      throw new Error('تعذّر استخراج سعر الدولار | معاينة: ' + preview);
+    }
 
     // ── ② جلب صفحة الليرة التركية ──
     showStatus(status, 'warning', '② جاري جلب سعر الليرة التركية...');
