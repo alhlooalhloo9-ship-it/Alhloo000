@@ -22,6 +22,51 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@400;500;700;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 <style>
 
+
+  /* ══ ORDERS & INSTALLS ANALYTICS ══ */
+  .an-order-card {
+    background: rgba(168,85,247,0.07);
+    border: 1px solid rgba(168,85,247,0.2);
+    border-radius: 12px; padding: 10px 12px;
+    margin-bottom: 7px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .an-order-card:hover, .an-order-card:active {
+    background: rgba(168,85,247,0.14);
+    border-color: rgba(168,85,247,0.45);
+  }
+  .an-order-card-header {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 5px;
+  }
+  .an-order-service { font-size: 12px; font-weight: 800; color: #a855f7; }
+  .an-order-price   { font-size: 12px; font-weight: 800; color: #4ade80; }
+  .an-order-meta    { font-size: 10px; color: rgba(255,255,255,0.4); display:flex; gap:10px; flex-wrap:wrap; }
+  .an-order-detail  {
+    display: none; margin-top: 8px;
+    padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.07);
+  }
+  .an-order-detail.open { display: block; }
+  .an-order-detail-row { display: flex; justify-content: space-between; font-size: 11px; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .an-order-detail-row:last-child { border: none; }
+  .an-order-detail-lbl  { color: rgba(255,255,255,0.4); }
+  .an-order-detail-val  { color: rgba(255,255,255,0.85); font-weight: 700; }
+  .an-orders-total {
+    background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.2);
+    border-radius: 10px; padding: 8px 12px; margin-bottom: 10px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .an-orders-total-lbl { font-size: 11px; color: rgba(255,255,255,0.5); }
+  .an-orders-total-val { font-size: 15px; font-weight: 900; color: #4ade80; }
+  .an-installs-kpi {
+    background: rgba(6,182,212,0.08); border: 1px solid rgba(6,182,212,0.2);
+    border-radius: 10px; padding: 10px 14px; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .an-installs-icon { font-size: 26px; }
+  .an-installs-num  { font-size: 22px; font-weight: 900; color: #06b6d4; }
+  .an-installs-lbl  { font-size: 10px; color: rgba(255,255,255,0.45); margin-top: 1px; }
+
   /* ══════════ FEEDBACK SYSTEM ══════════ */
   .fb-fab {
     position: fixed;
@@ -3170,6 +3215,34 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
             <div class="an-section-hdr">🎁 تتبع العروض</div>
             <div id="an-offers-stats" style="margin-bottom:10px;"></div>
 
+            <!-- ⑧ PWA Installs -->
+            <div class="an-section-hdr">📲 تحميلات التطبيق</div>
+            <div class="an-installs-kpi">
+              <div class="an-installs-icon">📲</div>
+              <div>
+                <div class="an-installs-num" id="an-installs-count">—</div>
+                <div class="an-installs-lbl">جهاز قام بتثبيت التطبيق</div>
+              </div>
+              <div style="margin-right:auto;text-align:left;">
+                <div style="font-size:10px;color:rgba(255,255,255,0.3);">آخر تثبيت:</div>
+                <div style="font-size:10px;color:#06b6d4;font-weight:700;" id="an-last-install">—</div>
+              </div>
+            </div>
+            <div id="an-installs-list" style="margin-bottom:10px;max-height:150px;overflow-y:auto;"></div>
+
+            <!-- ⑨ Orders list with full details -->
+            <div class="an-section-hdr" style="display:flex;justify-content:space-between;align-items:center;">
+              <span>📦 تفاصيل الطلبات</span>
+              <span id="an-orders-count-badge" style="font-size:10px;background:rgba(168,85,247,0.15);color:#a855f7;padding:2px 8px;border-radius:20px;font-weight:700;"></span>
+            </div>
+            <div id="an-orders-total-bar" style="display:none;" class="an-orders-total">
+              <span class="an-orders-total-lbl">💰 إجمالي المبالغ (تقريبي)</span>
+              <span class="an-orders-total-val" id="an-orders-grand-total">—</span>
+            </div>
+            <div id="an-orders-list" style="max-height:320px;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-bottom:10px;">
+              <div style="text-align:center;color:rgba(255,255,255,0.25);font-size:11px;padding:16px 0;">لا توجد طلبات مسجلة بعد</div>
+            </div>
+
             <!-- Controls -->
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px;">
               <button class="analytics-refresh-btn" onclick="loadAnalytics()">🔄 تحديث</button>
@@ -4143,11 +4216,13 @@ function isAnyCalcOpen() {
 function openCalc(){
   document.getElementById('calcOverlay').classList.add('open');
   document.querySelector('.float-calc-group').style.display = 'none';
+  const fbFab=document.getElementById('fbFab'); if(fbFab) fbFab.style.display='none';
   fetchLiveRates();
 }
 function closeCalc(){
   document.getElementById('calcOverlay').classList.remove('open');
   document.querySelector('.float-calc-group').style.display = 'flex';
+  const fbFab=document.getElementById('fbFab'); if(fbFab) fbFab.style.display=document.getElementById('home').classList.contains('active')?'flex':'none';
 }
 function closeCalcOutside(e){ if(e.target===document.getElementById('calcOverlay')) closeCalc(); }
 
@@ -5072,10 +5147,12 @@ let bc = {
 function openBasicCalc() {
   document.getElementById('basicCalcOverlay').classList.add('open');
   document.querySelector('.float-calc-group').style.display = 'none';
+  const fbFab=document.getElementById('fbFab'); if(fbFab) fbFab.style.display='none';
 }
 function closeBasicCalc() {
   document.getElementById('basicCalcOverlay').classList.remove('open');
   document.querySelector('.float-calc-group').style.display = 'flex';
+  const fbFab=document.getElementById('fbFab'); if(fbFab) fbFab.style.display=document.getElementById('home').classList.contains('active')?'flex':'none';
 }
 function closeBasicCalcOutside(e) {
   if (e.target === document.getElementById('basicCalcOverlay')) closeBasicCalc();
@@ -5221,6 +5298,9 @@ function goPage(id) {
   window.scrollTo(0, 0);
   updateFloatBack(id);
   history.pushState({ page: id }, '', '');
+  // إظهار/إخفاء زر الرسائل — فقط في الصفحة الرئيسية
+  const fbFab = document.getElementById('fbFab');
+  if (fbFab) fbFab.style.display = (id === 'home') ? 'flex' : 'none';
   // تتبع الصفحة في الإحصائيات
   if (typeof trackPageView === 'function') trackPageView(id);
 }
@@ -5439,7 +5519,15 @@ function sendOrder(){
   const phone = document.getElementById('phone-input').value.trim();
   document.getElementById('phone-input').blur();
   document.getElementById('notes-input').blur();
-  trackOrder(); // تتبع الطلب في الإحصائيات
+  const notes = (document.getElementById('notes-input') ? document.getElementById('notes-input').value.trim() : '');
+  trackOrder({
+    service:  currentOrder.service,
+    pkg:      currentOrder.pkg,
+    price:    currentOrder.price,
+    sypPrice: currentOrder.sypPrice || null,
+    contact:  phone,
+    notes:    notes
+  }); // تتبع الطلب في الإحصائيات
 
   // تعطيل الزر مؤقتاً ومؤشر التحميل
   const btn = document.getElementById('send-btn');
@@ -5529,7 +5617,27 @@ function trackPageView(pid) {
   if(sm[pid]){ const d=getAN(); if(d.services[pid]!==undefined){d.services[pid]++;saveAN(d);} }
 }
 
-function trackOrder() { const d=getAN(); d.orders++; saveAN(d); }
+function trackOrder(orderData) {
+  const d = getAN();
+  d.orders++;
+  // حفظ تفاصيل الطلب كاملة
+  if (!d.ordersList) d.ordersList = [];
+  if (orderData) {
+    d.ordersList.unshift({
+      id:       Date.now().toString(),
+      ts:       Date.now(),
+      date:     new Date().toLocaleString('ar-SY'),
+      service:  orderData.service  || '—',
+      pkg:      orderData.pkg      || '—',
+      price:    orderData.price    || '—',
+      sypPrice: orderData.sypPrice || null,
+      contact:  orderData.contact  || '—',
+      notes:    orderData.notes    || ''
+    });
+    if (d.ordersList.length > 300) d.ordersList = d.ordersList.slice(0, 300);
+  }
+  saveAN(d);
+}
 
 window.addEventListener('beforeunload', ()=>{
   const dur=Math.round((Date.now()-_ss)/1000);
@@ -5670,6 +5778,12 @@ function loadAnalytics() {
 
   // ⑦ Offers tracking
   renderOffersStats(allData);
+
+  // ⑧ PWA Installs
+  renderInstalls(allData);
+
+  // ⑨ Orders list with full details
+  renderOrdersList(allData, anPeriod);
 }
 
 // ── Chart (SVG-based, no library) ──
@@ -5897,6 +6011,120 @@ function renderActivityLog(sessions) {
 }
 
 // ── Offers Stats ──
+// ═══════════════════════════════════════════
+// تتبع تثبيت التطبيق (PWA Install)
+// ═══════════════════════════════════════════
+window.addEventListener('appinstalled', () => {
+  const d = getAN();
+  if (!d.installs) d.installs = [];
+  d.installs.push({
+    ts:   Date.now(),
+    date: new Date().toLocaleString('ar-SY'),
+    device: getDeviceInfo().device + ' / ' + getDeviceInfo().os
+  });
+  saveAN(d);
+  console.log('[PWA] ✅ تم تثبيت التطبيق');
+});
+
+// ═══════════════════════════════════════════
+// عرض قائمة الطلبات التفصيلية
+// ═══════════════════════════════════════════
+function renderOrdersList(data, period) {
+  const container = document.getElementById('an-orders-list');
+  const totalBar  = document.getElementById('an-orders-total-bar');
+  const countBadge = document.getElementById('an-orders-count-badge');
+  if (!container) return;
+
+  let orders = (data.ordersList || []);
+
+  // فلترة حسب الفترة
+  if (period && period !== 'all') {
+    const map = { today:86400000, week:604800000, month:2592000000, year:31536000000 };
+    const cutoff = Date.now() - (map[period] || 0);
+    orders = orders.filter(o => o.ts >= cutoff);
+  }
+
+  if (countBadge) countBadge.textContent = orders.length + ' طلب';
+
+  if (!orders.length) {
+    container.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.25);font-size:11px;padding:16px 0;">لا توجد طلبات في هذه الفترة</div>';
+    if (totalBar) totalBar.style.display = 'none';
+    return;
+  }
+
+  // حساب الإجمالي التقريبي
+  let grandTotalUSD = 0;
+  orders.forEach(o => {
+    const m = (o.price || '').match(/([\d.]+)/);
+    if (m) grandTotalUSD += parseFloat(m[1]);
+  });
+  if (totalBar) {
+    totalBar.style.display = 'flex';
+    const grandSYP = grandTotalUSD > 0 && rates && rates.newSyp
+      ? ' ≈ ' + Math.round(grandTotalUSD * rates.newSyp).toLocaleString() + ' ل.س'
+      : '';
+    document.getElementById('an-orders-grand-total').textContent =
+      '$' + grandTotalUSD.toFixed(2) + grandSYP;
+  }
+
+  const svcEmoji = { سيرياتيل:'🔴', MTN:'🟡', 'فري فاير':'🔥', ببجي:'🪖', جواكر:'🃏' };
+
+  container.innerHTML = orders.map((o, idx) => {
+    const emoji = svcEmoji[o.service] || '📦';
+    const sypLine = o.sypPrice ? `<div class="an-order-detail-row"><span class="an-order-detail-lbl">السعر بالليرة</span><span class="an-order-detail-val" style="color:#f5a623;">${o.sypPrice}</span></div>` : '';
+    const notesLine = o.notes ? `<div class="an-order-detail-row"><span class="an-order-detail-lbl">ملاحظات</span><span class="an-order-detail-val">${o.notes}</span></div>` : '';
+    return `
+    <div class="an-order-card" onclick="toggleOrderDetail('od_${idx}')">
+      <div class="an-order-card-header">
+        <div class="an-order-service">${emoji} ${o.service}</div>
+        <div class="an-order-price">${o.price}</div>
+      </div>
+      <div class="an-order-meta">
+        <span>📦 ${o.pkg}</span>
+        <span>📞 ${o.contact}</span>
+        <span>🕐 ${o.date}</span>
+      </div>
+      <div class="an-order-detail" id="od_${idx}">
+        <div class="an-order-detail-row"><span class="an-order-detail-lbl">الخدمة</span><span class="an-order-detail-val">${o.service}</span></div>
+        <div class="an-order-detail-row"><span class="an-order-detail-lbl">الباقة</span><span class="an-order-detail-val">${o.pkg}</span></div>
+        <div class="an-order-detail-row"><span class="an-order-detail-lbl">السعر بالدولار</span><span class="an-order-detail-val" style="color:#4ade80;">${o.price}</span></div>
+        ${sypLine}
+        <div class="an-order-detail-row"><span class="an-order-detail-lbl">رقم / معرف</span><span class="an-order-detail-val">${o.contact}</span></div>
+        ${notesLine}
+        <div class="an-order-detail-row"><span class="an-order-detail-lbl">التاريخ</span><span class="an-order-detail-val">${o.date}</span></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleOrderDetail(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════
+// عرض تحميلات التطبيق
+// ═══════════════════════════════════════════
+function renderInstalls(data) {
+  const installs = data.installs || [];
+  const countEl  = document.getElementById('an-installs-count');
+  const lastEl   = document.getElementById('an-last-install');
+  const listEl   = document.getElementById('an-installs-list');
+  if (countEl)  countEl.textContent  = installs.length;
+  if (lastEl)   lastEl.textContent   = installs.length > 0 ? installs[installs.length-1].date : 'لم يُسجَّل بعد';
+  if (listEl) {
+    if (!installs.length) {
+      listEl.innerHTML = '<div style="font-size:10px;color:rgba(255,255,255,0.25);text-align:center;padding:8px 0;">لم يُسجَّل أي تثبيت بعد</div>';
+    } else {
+      listEl.innerHTML = installs.slice().reverse().map(i => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:8px;background:rgba(6,182,212,0.06);margin-bottom:4px;font-size:10px;">
+          <span style="color:#06b6d4;">📲 ${i.device || 'جهاز غير محدد'}</span>
+          <span style="color:rgba(255,255,255,0.35);">${i.date}</span>
+        </div>`).join('');
+    }
+  }
+}
+
 function renderOffersStats(allData) {
   const el = document.getElementById('an-offers-stats');
   if (!el) return;
