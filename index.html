@@ -2857,6 +2857,26 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
             </div>
           </div>
 
+          <!-- SP-Today Fetch -->
+          <div style="background:rgba(16,185,129,0.07);border:1.5px solid rgba(16,185,129,0.22);border-radius:12px;padding:10px;margin-top:8px;">
+            <div style="font-size:11px;font-weight:800;color:#10B981;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:6px;">
+              <span style="display:flex;align-items:center;gap:5px;">🌐 الليرة اليوم (sp-today.com)</span>
+              <span style="font-size:9px;color:rgba(255,255,255,0.35);font-weight:400;">$+₺+€</span>
+            </div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:6px;" id="spLastFetch">آخر جلب: لم يتم بعد</div>
+            <div id="spStatus" style="font-size:10px;text-align:center;padding:5px;border-radius:8px;margin-bottom:8px;display:none;"></div>
+            <div style="display:flex;gap:6px;">
+              <button onclick="fetchRatesFromSPToday()" id="spFetchBtn"
+                style="flex:1;background:linear-gradient(135deg,#10B981,#059669);border:none;color:white;font-family:'Cairo',sans-serif;font-size:11px;font-weight:800;padding:8px;border-radius:10px;cursor:pointer;">
+                🌐 جلب من الليرة اليوم
+              </button>
+              <button onclick="toggleAutoFetchSP()" id="spAutoBtn"
+                style="flex:1;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);color:#10B981;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:8px;border-radius:10px;cursor:pointer;">
+                ⏱ تلقائي: إيقاف
+              </button>
+            </div>
+          </div>
+
           <div style="display:flex;gap:8px;justify-content:center;margin-top:10px;">
             <button onclick="saveAdminRates()" style="background:linear-gradient(135deg,#16a34a,#15803d);border:none;color:white;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:8px 18px;border-radius:20px;cursor:pointer;">☁️ حفظ ونشر للجميع</button>
             <button onclick="lockAdmin()" style="background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.4);font-family:'Cairo',sans-serif;font-size:11px;padding:8px 14px;border-radius:20px;cursor:pointer;">🔒 إقفال</button>
@@ -5885,15 +5905,179 @@ function toggleAutoFetch() {
   }
 }
 
+// ══════════════════════════════════════════════════════
+// جلب الأسعار من موقع الليرة اليوم (sp-today.com)
+// القيم المطلوبة:
+//   ① $1  = ج.س جديد  →  rates.newSyp
+//   ② $1  = ₺          →  rates.tryRate
+//   ③ ₺1  = ج.س جديد  →  rates.trySyp
+// المصدر: صفحتان مخصصتان (USD + TRY) للتحليل الموثوق
+// ══════════════════════════════════════════════════════
+let spAutoOn = false;
+let spAutoInterval = null;
+
+// ── جلب HTML عبر أول Proxy يعمل ──
+async function fetchViaProxy(targetUrl) {
+  const proxies = [
+    u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+    u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+    u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+    u => `https://cors.eu.org/${u}`,
+  ];
+  let lastErr = '';
+  for (const fn of proxies) {
+    try {
+      const res = await fetch(fn(targetUrl + '?t=' + Date.now()), {
+        cache: 'no-store',
+        signal: AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined
+      });
+      if (!res.ok) { lastErr = 'HTTP ' + res.status; continue; }
+      const text = await res.text();
+      if (text.length < 500) { lastErr = 'رد قصير'; continue; }
+      return text; // ✅ نجح
+    } catch(e) { lastErr = e.message || 'خطأ'; }
+  }
+  throw new Error('فشلت جميع الـ Proxies: ' + lastErr);
+}
+
+// ── استخراج سعر الشراء والمبيع من صفحة sp-today ──
+// يعمل مع الصفحتين العربية والإنجليزية
+function extractBuySell(html) {
+  // النمط العربي: "شراء\n\n13,000ل.س\n\nبيع\n\n13,080ل.س"
+  let m = html.match(/شراء[\s\S]{0,30}?([\d,]+)(?:ل\.س|SYP)[\s\S]{0,50}?بيع[\s\S]{0,30}?([\d,]+)(?:ل\.س|SYP)/);
+  // النمط الإنجليزي: "Buy\n\n288SYP\n\nSell\n\n292SYP"
+  if (!m) m = html.match(/Buy[\s\S]{0,30}?([\d,]+)(?:SYP|ل\.س)[\s\S]{0,50}?Sell[\s\S]{0,30}?([\d,]+)(?:SYP|ل\.س)/i);
+  if (!m) return null;
+  return {
+    buy:  parseInt(m[1].replace(/,/g, '')),
+    sell: parseInt(m[2].replace(/,/g, ''))
+  };
+}
+
+async function fetchRatesFromSPToday() {
+  const btn    = document.getElementById('spFetchBtn');
+  const status = document.getElementById('spStatus');
+  const lastEl = document.getElementById('spLastFetch');
+
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الجلب...'; }
+  showStatus(status, 'warning', '⏳ جاري الاتصال بـ sp-today.com...');
+
+  try {
+    // ── ① جلب صفحة الدولار ──
+    showStatus(status, 'warning', '① جاري جلب سعر الدولار...');
+    const usdHtml = await fetchViaProxy('https://sp-today.com/currency/us-dollar');
+    const usdData = extractBuySell(usdHtml);
+    if (!usdData || usdData.sell < 5000)
+      throw new Error('تعذّر استخراج سعر الدولار (sell=' + (usdData?.sell ?? '?') + ')');
+
+    // ── ② جلب صفحة الليرة التركية ──
+    showStatus(status, 'warning', '② جاري جلب سعر الليرة التركية...');
+    const tryHtml = await fetchViaProxy('https://sp-today.com/currency/turkish-lira');
+    const tryData = extractBuySell(tryHtml);
+    if (!tryData || tryData.sell < 10)
+      throw new Error('تعذّر استخراج سعر الليرة التركية (sell=' + (tryData?.sell ?? '?') + ')');
+
+    // ═══════════════════════════════════════
+    // ③ حساب القيم الثلاث المطلوبة
+    // ───────────────────────────────────────
+    // ① $1 = ج.س جديد  →  مبيع USD ÷ 100
+    const newNewSyp  = Math.round((usdData.sell / 100) * 10) / 10;
+    // ② $1 = ₺          →  مبيع USD ÷ مبيع TRY
+    const newTryRate = Math.round((usdData.sell / tryData.sell) * 100) / 100;
+    // ③ ₺1 = ج.س جديد  →  مبيع TRY ÷ 100
+    const newTrySyp  = Math.round((tryData.sell / 100) * 100) / 100;
+    // ق.س (للتوافق مع بقية التطبيق)
+    const newOldSyp  = usdData.sell;
+    // ═══════════════════════════════════════
+
+    const oldRate = rates.newSyp;
+
+    // ── تحديث كائن rates ──
+    rates.oldSyp  = newOldSyp;
+    rates.newSyp  = newNewSyp;
+    rates.tryRate = newTryRate;
+    rates.trySyp  = newTrySyp;   // ₺1 = X ج.س جديد
+
+    // ── تحديث حقول الإدمن ──
+    const rAdmOld = document.getElementById('rateAdmOld');
+    const rAdmNew = document.getElementById('rateAdmNew');
+    const rAdmTry = document.getElementById('rateAdmTry');
+    if (rAdmOld) rAdmOld.value = newOldSyp;
+    if (rAdmNew) rAdmNew.value = newNewSyp;
+    if (rAdmTry) rAdmTry.value = newTryRate;
+
+    // ── التاريخ والوقت ──
+    const now = new Date();
+    const days   = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    const months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    const dateStr = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+    const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+    if (lastEl) lastEl.textContent =
+      `${timeStr} | $1=${newNewSyp} ج.س | $1=${newTryRate}₺ | ₺1=${newTrySyp} ج.س`;
+
+    applyRatesToUI(dateStr, timeStr, 'sptoday');
+    showRateUpdated(oldRate, newNewSyp);
+    await saveAdminRates();
+
+    showStatus(status, 'success',
+      `✅ $1 = ${newNewSyp} ج.س | $1 = ${newTryRate} ₺ | ₺1 = ${newTrySyp} ج.س`);
+    setTimeout(() => { if(status) status.style.display='none'; }, 7000);
+
+  } catch(e) {
+    showStatus(status, 'error', '❌ ' + (e.message || 'خطأ'));
+    setTimeout(() => { if(status) status.style.display='none'; }, 8000);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🌐 جلب من الليرة اليوم'; }
+  }
+}
+
+function toggleAutoFetchSP() {
+  const btn = document.getElementById('spAutoBtn');
+  if (spAutoOn) {
+    clearInterval(spAutoInterval);
+    spAutoInterval = null;
+    spAutoOn = false;
+    if (btn) {
+      btn.textContent = '⏱ تلقائي: إيقاف';
+      btn.style.background = 'rgba(16,185,129,0.1)';
+      btn.style.borderColor = 'rgba(16,185,129,0.25)';
+      btn.style.color = '#10B981';
+    }
+    localStorage.removeItem('sp_auto_fetch');
+  } else {
+    spAutoOn = true;
+    fetchRatesFromSPToday();
+    spAutoInterval = setInterval(fetchRatesFromSPToday, 30 * 60 * 1000);
+    if (btn) {
+      btn.textContent = '⏱ تلقائي: تشغيل ✅';
+      btn.style.background = 'rgba(239,68,68,0.12)';
+      btn.style.borderColor = 'rgba(239,68,68,0.3)';
+      btn.style.color = '#EF4444';
+    }
+    localStorage.setItem('sp_auto_fetch', '1');
+  }
+}
+
+// استعادة حالة التلقائي عند فتح الصفحة
+window.addEventListener('load', () => {
+  if (localStorage.getItem('sp_auto_fetch') === '1') {
+    setTimeout(toggleAutoFetchSP, 3000);
+  }
+});
+
 // Update UI whenever rates change
 function applyRatesToUI(dateStr, timeStr, source) {
   // Rate update bar
   const ruText = document.querySelector('.rate-update-bar .ru-text') ||
                  document.querySelector('.ru-text');
   if (ruText) {
-    const srcLabel = source === 'telegram' ? ' 📡 تلغرام' : '';
+    const srcLabel = source === 'telegram' ? ' 📡 تلغرام'
+                   : source === 'sptoday'  ? ' 🌐 الليرة اليوم'
+                   : '';
     if (dateStr) {
-      ruText.textContent = `تم تحديث سعر الصرف بتاريخ ${dateStr} — الساعة ${timeStr||''}${srcLabel} | $1 = ${rates.newSyp} ج.س | ${rates.oldSyp} ق.س | ${rates.tryRate} ₺`;
+      const trySypPart = rates.trySyp ? ` | ₺1 = ${rates.trySyp} ج.س` : '';
+      ruText.textContent = `تم تحديث سعر الصرف بتاريخ ${dateStr} — الساعة ${timeStr||''}${srcLabel} | $1 = ${rates.newSyp} ج.س | ${rates.oldSyp} ق.س | $1 = ${rates.tryRate} ₺${trySypPart}`;
     }
   }
   // Calc card on home screen
