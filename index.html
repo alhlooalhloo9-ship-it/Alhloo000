@@ -21,6 +21,124 @@
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@400;500;700;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 <style>
+
+  /* ══════════ FEEDBACK SYSTEM ══════════ */
+  .fb-fab {
+    position: fixed;
+    bottom: 100px;
+    left: 16px;
+    z-index: 1002;
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #06b6d4, #3b82f6);
+    border: none; color: white; font-size: 22px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 18px rgba(6,182,212,0.5);
+    animation: fbPulse 2.8s ease-in-out infinite 0.5s;
+    transition: transform 0.2s;
+  }
+  .fb-fab:active { transform: scale(0.88); }
+  @keyframes fbPulse {
+    0%,100% { box-shadow: 0 4px 18px rgba(6,182,212,0.5), 0 0 0 0 rgba(6,182,212,0.3); }
+    50%      { box-shadow: 0 4px 18px rgba(6,182,212,0.5), 0 0 0 9px rgba(6,182,212,0); }
+  }
+  .fb-fab-badge {
+    position: absolute; top: -3px; right: -3px;
+    background: #ef4444; color: white;
+    font-size: 9px; font-weight: 800;
+    min-width: 17px; height: 17px;
+    border-radius: 9px; padding: 0 4px;
+    display: none; align-items: center; justify-content: center;
+    border: 2px solid #0d0d1a;
+  }
+  .fb-fab-badge.show { display: flex; }
+
+  /* Modal overlay */
+  .fb-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(6px);
+    z-index: 3000; display: none;
+    align-items: flex-end; justify-content: center;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .fb-overlay.open { display: flex; }
+  .fb-modal {
+    width: 100%; max-width: 480px;
+    background: linear-gradient(170deg, #1a1a2e, #16213e);
+    border: 1.5px solid rgba(6,182,212,0.25);
+    border-radius: 26px 26px 0 0;
+    padding: 14px 18px 28px;
+    animation: slideUpFb 0.35s cubic-bezier(0.175,0.885,0.32,1.275);
+  }
+  @keyframes slideUpFb {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  .fb-handle { width:40px; height:4px; background:rgba(255,255,255,0.15); border-radius:2px; margin:0 auto 14px; }
+  .fb-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .fb-header h3 { font-size:17px; font-weight:900; background:linear-gradient(135deg,#06b6d4,#3b82f6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .fb-close { width:34px; height:34px; background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.12); border-radius:50%; color:rgba(255,255,255,0.7); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+
+  /* Type chips */
+  .fb-types { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+  .fb-type-btn {
+    padding: 6px 12px; border-radius: 20px; border: 1.5px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6);
+    font-family: 'Cairo', sans-serif; font-size: 11px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .fb-type-btn.sel {
+    background: linear-gradient(135deg, #06b6d4, #3b82f6);
+    border-color: transparent; color: white;
+  }
+
+  /* Textarea */
+  .fb-textarea {
+    width: 100%; min-height: 90px; max-height: 160px;
+    background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 14px; color: white; font-family: 'Cairo', sans-serif;
+    font-size: 13px; padding: 12px 14px; resize: none; outline: none;
+    line-height: 1.7; box-sizing: border-box; direction: rtl;
+    transition: border-color 0.2s;
+  }
+  .fb-textarea:focus { border-color: #06b6d4; }
+  .fb-textarea::placeholder { color: rgba(255,255,255,0.3); }
+  .fb-name-input {
+    width: 100%; margin-top: 8px;
+    background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 12px; color: white; font-family: 'Cairo', sans-serif;
+    font-size: 12px; padding: 9px 14px; outline: none; box-sizing: border-box;
+    direction: rtl; transition: border-color 0.2s;
+  }
+  .fb-name-input:focus { border-color: #06b6d4; }
+  .fb-name-input::placeholder { color: rgba(255,255,255,0.3); }
+  .fb-send-btn {
+    width: 100%; margin-top: 12px; padding: 13px;
+    background: linear-gradient(135deg, #06b6d4, #3b82f6);
+    border: none; border-radius: 14px; color: white;
+    font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 800;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  .fb-send-btn:disabled { opacity: 0.5; }
+  .fb-status { margin-top: 8px; font-size: 11px; text-align: center; min-height: 16px; }
+
+  /* Admin inbox tab */
+  .fb-msg-card {
+    background: rgba(6,182,212,0.06); border: 1px solid rgba(6,182,212,0.18);
+    border-radius: 12px; padding: 10px 12px; margin-bottom: 8px;
+    position: relative;
+  }
+  .fb-msg-card.unread { border-color: rgba(6,182,212,0.5); background: rgba(6,182,212,0.1); }
+  .fb-msg-type { font-size: 9px; font-weight: 800; color: #06b6d4; letter-spacing: 1px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+  .fb-msg-type .fb-unread-dot { width:7px; height:7px; border-radius:50%; background:#06b6d4; display:inline-block; }
+  .fb-msg-text { font-size: 12px; color: rgba(255,255,255,0.85); line-height: 1.7; margin-bottom: 6px; }
+  .fb-msg-meta { font-size: 9px; color: rgba(255,255,255,0.35); display: flex; justify-content: space-between; }
+  .fb-empty { text-align:center; padding:30px 0; color:rgba(255,255,255,0.3); font-size:13px; }
+  .fb-inbox-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .fb-inbox-title { font-size:12px; font-weight:800; color:#06b6d4; display:flex; align-items:center; gap:6px; }
+  .fb-mark-all-btn { font-size:10px; background:rgba(6,182,212,0.12); border:1px solid rgba(6,182,212,0.3); color:#06b6d4; border-radius:8px; padding:4px 10px; cursor:pointer; font-family:'Cairo',sans-serif; font-weight:700; }
+
   :root {
     --gold: #e94560; --gold2: #f5a623;
     --syriatel-color: #e63946; --mtn-color: #ffb703;
@@ -2668,6 +2786,41 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
   <button class="float-calc-btn currency-btn" onclick="openCalc()" title="حاسبة العملات">💱</button>
 </div>
 
+
+<!-- ══ FEEDBACK FAB ══ -->
+<button class="fb-fab" id="fbFab" onclick="openFeedback()" title="اقتراحات ورسائل">
+  💬
+  <span class="fb-fab-badge" id="fbBadge"></span>
+</button>
+
+<!-- ══ FEEDBACK MODAL ══ -->
+<div class="fb-overlay" id="fbOverlay" onclick="closeFeedbackOutside(event)">
+  <div class="fb-modal">
+    <div class="fb-handle"></div>
+    <div class="fb-header">
+      <h3>💬 راسلنا</h3>
+      <button class="fb-close" onclick="closeFeedback()">✕</button>
+    </div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-bottom:10px;">شاركنا رأيك أو اقتراحك وسنأخذه بعين الاعتبار 🙏</div>
+    <!-- نوع الرسالة -->
+    <div class="fb-types" id="fbTypes">
+      <button class="fb-type-btn sel" data-type="اقتراح" onclick="selectFbType(this)">💡 اقتراح</button>
+      <button class="fb-type-btn" data-type="إعجاب" onclick="selectFbType(this)">❤️ إعجاب</button>
+      <button class="fb-type-btn" data-type="مشكلة" onclick="selectFbType(this)">🔧 مشكلة</button>
+      <button class="fb-type-btn" data-type="سؤال" onclick="selectFbType(this)">❓ سؤال</button>
+      <button class="fb-type-btn" data-type="أخرى" onclick="selectFbType(this)">💬 أخرى</button>
+    </div>
+    <!-- النص -->
+    <textarea class="fb-textarea" id="fbText" placeholder="اكتب رسالتك هنا..." maxlength="500"></textarea>
+    <div style="text-align:left;font-size:9px;color:rgba(255,255,255,0.25);margin-top:3px;" id="fbCharCount">0 / 500</div>
+    <!-- الاسم اختياري -->
+    <input class="fb-name-input" id="fbName" type="text" placeholder="اسمك (اختياري)" maxlength="40">
+    <!-- إرسال -->
+    <button class="fb-send-btn" id="fbSendBtn" onclick="submitFeedback()">إرسال الرسالة ✉️</button>
+    <div class="fb-status" id="fbStatus"></div>
+  </div>
+</div>
+
 <!-- BASIC CALCULATOR MODAL -->
 <div class="basic-calc-overlay" id="basicCalcOverlay" onclick="closeBasicCalcOutside(event)">
   <div class="basic-calc-modal">
@@ -2817,6 +2970,7 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
         <div class="admin-section-tab">
           <button class="admin-tab-btn active" onclick="switchAdminTab('rates',this)">💱 أسعار الصرف</button>
           <button class="admin-tab-btn" onclick="switchAdminTab('offers',this)">🎁 العروض</button>
+          <button class="admin-tab-btn" onclick="switchAdminTab('inbox',this)" id="inboxTabBtn">💬 رسائل <span id="inboxUnreadBadge" style="display:none;background:#ef4444;color:white;border-radius:8px;padding:1px 5px;font-size:9px;margin-right:2px;"></span></button>
           <button class="admin-tab-btn" onclick="openAnalyticsWithPw(this)">📊 إحصائيات</button>
         </div>
 
@@ -2880,6 +3034,18 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
           <div style="display:flex;gap:8px;justify-content:center;margin-top:10px;">
             <button onclick="saveAdminRates()" style="background:linear-gradient(135deg,#16a34a,#15803d);border:none;color:white;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:8px 18px;border-radius:20px;cursor:pointer;">☁️ حفظ ونشر للجميع</button>
             <button onclick="lockAdmin()" style="background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.4);font-family:'Cairo',sans-serif;font-size:11px;padding:8px 14px;border-radius:20px;cursor:pointer;">🔒 إقفال</button>
+          </div>
+        </div>
+
+
+        <!-- TAB: INBOX (رسائل المستخدمين) -->
+        <div class="admin-tab-content" id="adminTabInbox">
+          <div class="fb-inbox-header">
+            <div class="fb-inbox-title">💬 رسائل المستخدمين <span id="inboxCount" style="font-size:10px;color:rgba(255,255,255,0.4);font-weight:400;"></span></div>
+            <button class="fb-mark-all-btn" onclick="markAllFbRead()">✓ قراءة الكل</button>
+          </div>
+          <div id="adminInboxList">
+            <div class="fb-empty">⏳ جاري التحميل...</div>
           </div>
         </div>
 
@@ -4006,6 +4172,8 @@ function switchAdminTab(tab, btn) {
   document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('adminTab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+  // تحميل الرسائل عند فتح تاب الصندوق
+  if (tab === 'inbox') loadFeedbackForAdmin();
 }
 
 function goOfferStep(step) {
@@ -4085,8 +4253,13 @@ async function addOffer() {
   activeOffers.unshift(offer);
   showOfferSyncStatus('⏳ جاري النشر...','#a855f7');
   await saveOffersToCloud();
-  showOfferSyncStatus('✅ تم نشر العرض للجميع!','#4ade80');
-  setTimeout(()=>{ const el=document.getElementById('offerSyncStatus'); if(el) el.style.display='none'; },3000);
+  const synced = localStorage.getItem('halou_offers_synced');
+  if (synced === '1') {
+    showOfferSyncStatus('✅ تم النشر وحفظه على السحابة!','#4ade80');
+  } else {
+    showOfferSyncStatus('⚠️ تم الحفظ محلياً فقط — تحقق من الاتصال ثم افتح الإدمن مجدداً','#fb923c');
+  }
+  setTimeout(()=>{ const el=document.getElementById('offerSyncStatus'); if(el) el.style.display='none'; },6000);
 
   selectedOfferPkg = null;
   goOfferStep(1);
@@ -4485,6 +4658,23 @@ async function loadOffersFromCloud() {
       localStorage.setItem('halou_last_offer_id', freshOffers[0].id);
     }
 
+    // ── إذا السحابة فارغة، تحقق من localStorage قبل الاستبدال ──
+    if (freshOffers.length === 0) {
+      try {
+        const local = JSON.parse(localStorage.getItem('halou_offers') || '[]');
+        const localFresh = local.filter(o => Date.now() < o.expiresAt);
+        if (localFresh.length > 0) {
+          console.log('[Offers] ☁️ السحابة فارغة — إعادة رفع', localFresh.length, 'عرض من localStorage');
+          activeOffers = localFresh;
+          saveOffersToCloud(); // أعد المزامنة تلقائياً
+          renderOffers();
+          updateOffersCount();
+          if (adminUnlocked) renderAdminOffers();
+          return;
+        }
+      } catch(e2) {}
+    }
+
     activeOffers = freshOffers;
     renderOffers();
     updateOffersCount();
@@ -4538,21 +4728,29 @@ function sendPushNotification(title, body) {
 }
 
 async function saveOffersToCloud() {
+  // دائماً احفظ محلياً أولاً — هذا الخط الأول للدفاع
+  localStorage.setItem('halou_offers', JSON.stringify(activeOffers));
+  localStorage.setItem('halou_offers_ts', Date.now().toString());
   try {
     const res = await fetch(`https://api.jsonbin.io/v3/b/${OFFERS_BIN}/latest?t=${Date.now()}`, {
       headers: { 'X-Master-Key': API_KEY }
     });
+    if (!res.ok) throw new Error('GET failed: ' + res.status);
     const data = await res.json();
     const current = data.record || {};
     const updated = { ...current, offers: activeOffers };
-    await fetch(`https://api.jsonbin.io/v3/b/${OFFERS_BIN}`, {
+    const putRes = await fetch(`https://api.jsonbin.io/v3/b/${OFFERS_BIN}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
       body: JSON.stringify(updated)
     });
-    localStorage.setItem('halou_offers', JSON.stringify(activeOffers));
+    if (!putRes.ok) throw new Error('PUT failed: ' + putRes.status);
+    // تأكيد النجاح
+    localStorage.setItem('halou_offers_synced', '1');
+    console.log('[Offers] ✅ حُفظ على السحابة بنجاح —', activeOffers.length, 'عرض');
   } catch(e) {
-    localStorage.setItem('halou_offers', JSON.stringify(activeOffers));
+    localStorage.setItem('halou_offers_synced', '0');
+    console.warn('[Offers] ⚠️ فشل الحفظ على السحابة — محفوظ محلياً فقط:', e.message);
   }
 }
 
@@ -4588,6 +4786,18 @@ function checkNotifBanner() {
 loadRatesFromCloud();
 loadOffersFromCloud();
 setInterval(loadOffersFromCloud, 60000);
+// تحميل عدد الرسائل غير المقروءة للـ badge
+(async () => {
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${OFFERS_BIN}/latest?t=${Date.now()}`, {
+      headers: { 'X-Master-Key': API_KEY }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    allFeedback = data.record.feedback || [];
+    updateFbBadge();
+  } catch(e) {}
+})();
 checkNotifBanner();
 
 // ── تحديث تلقائي من تلغرام لجميع المستخدمين ──
@@ -6129,6 +6339,217 @@ function applyRatesToUI(dateStr, timeStr, source) {
 </script>
 
 <script>
+// ═══════════════════════════════════════════════════════════════
+// نظام رسائل المستخدمين (Feedback System)
+// التخزين: JSONBin (حقل feedback[]) + localStorage (نسخة احتياطية)
+// الرسائل لا تُحذف أبداً — فقط تُعلَّم كمقروءة
+// ═══════════════════════════════════════════════════════════════
+
+let fbSelectedType = 'اقتراح';
+let allFeedback    = [];   // كل الرسائل (يقرأها الأدمن)
+
+// ── فتح / إغلاق الـ Modal ──
+function openFeedback() {
+  document.getElementById('fbOverlay').classList.add('open');
+  document.getElementById('fbStatus').textContent = '';
+  document.getElementById('fbText').value = '';
+  document.getElementById('fbName').value = '';
+  document.getElementById('fbCharCount').textContent = '0 / 500';
+  document.getElementById('fbText').focus();
+}
+function closeFeedback() {
+  document.getElementById('fbOverlay').classList.remove('open');
+}
+function closeFeedbackOutside(e) {
+  if (e.target === document.getElementById('fbOverlay')) closeFeedback();
+}
+
+// ── عدّاد الحروف ──
+document.addEventListener('DOMContentLoaded', () => {
+  const ta = document.getElementById('fbText');
+  if (ta) ta.addEventListener('input', () => {
+    document.getElementById('fbCharCount').textContent = ta.value.length + ' / 500';
+  });
+});
+
+// ── اختيار نوع الرسالة ──
+function selectFbType(btn) {
+  document.querySelectorAll('.fb-type-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  fbSelectedType = btn.dataset.type;
+}
+
+// ── إرسال الرسالة ──
+async function submitFeedback() {
+  const text = (document.getElementById('fbText').value || '').trim();
+  const name = (document.getElementById('fbName').value || '').trim();
+  const statusEl = document.getElementById('fbStatus');
+  const btn = document.getElementById('fbSendBtn');
+
+  if (!text) {
+    statusEl.style.color = '#fb923c';
+    statusEl.textContent = '⚠️ الرجاء كتابة رسالتك أولاً';
+    return;
+  }
+
+  btn.disabled = true;
+  statusEl.style.color = 'rgba(255,255,255,0.5)';
+  statusEl.textContent = '⏳ جاري الإرسال...';
+
+  const msg = {
+    id:        Date.now().toString(),
+    type:      fbSelectedType,
+    text,
+    name:      name || 'مجهول',
+    createdAt: Date.now(),
+    read:      false
+  };
+
+  try {
+    // اقرأ البيانات الحالية من JSONBin
+    const getRes = await fetch(`https://api.jsonbin.io/v3/b/${OFFERS_BIN}/latest?t=${Date.now()}`, {
+      headers: { 'X-Master-Key': API_KEY }
+    });
+    if (!getRes.ok) throw new Error('GET ' + getRes.status);
+    const data = await getRes.json();
+    const current = data.record || {};
+    const updatedFb = [msg, ...(current.feedback || [])]; // أضف الجديد في الأول
+
+    const putRes = await fetch(`https://api.jsonbin.io/v3/b/${OFFERS_BIN}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+      body: JSON.stringify({ ...current, feedback: updatedFb })
+    });
+    if (!putRes.ok) throw new Error('PUT ' + putRes.status);
+
+    // احفظ محلياً أيضاً
+    localStorage.setItem('halou_feedback_sent', JSON.stringify(
+      [msg, ...JSON.parse(localStorage.getItem('halou_feedback_sent') || '[]')].slice(0, 20)
+    ));
+
+    statusEl.style.color = '#4ade80';
+    statusEl.textContent = '✅ شكراً! تم إرسال رسالتك بنجاح 🙏';
+    document.getElementById('fbText').value = '';
+    document.getElementById('fbName').value = '';
+    setTimeout(closeFeedback, 2200);
+  } catch(e) {
+    // احفظ محلياً كـ backup
+    const pendingList = JSON.parse(localStorage.getItem('halou_fb_pending') || '[]');
+    pendingList.unshift(msg);
+    localStorage.setItem('halou_fb_pending', JSON.stringify(pendingList.slice(0, 30)));
+
+    statusEl.style.color = '#4ade80';
+    statusEl.textContent = '✅ تم استلام رسالتك، شكراً!';
+    document.getElementById('fbText').value = '';
+    setTimeout(closeFeedback, 2000);
+    console.warn('[Feedback] cloud save failed, saved locally:', e.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── تحميل الرسائل (للأدمن فقط) ──
+async function loadFeedbackForAdmin() {
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${OFFERS_BIN}/latest?t=${Date.now()}`, {
+      headers: { 'X-Master-Key': API_KEY }
+    });
+    if (!res.ok) throw new Error('fetch ' + res.status);
+    const data = await res.json();
+    allFeedback = data.record.feedback || [];
+    renderAdminInbox();
+    updateFbBadge();
+
+    // أيضاً ادمج أي رسائل pending من localStorage
+    const pending = JSON.parse(localStorage.getItem('halou_fb_pending') || '[]');
+    if (pending.length > 0) {
+      const merged = [...pending, ...allFeedback];
+      allFeedback = merged;
+      // ارفع للسحابة
+      const current = data.record || {};
+      await fetch(`https://api.jsonbin.io/v3/b/${OFFERS_BIN}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+        body: JSON.stringify({ ...current, feedback: merged })
+      });
+      localStorage.removeItem('halou_fb_pending');
+      renderAdminInbox();
+      updateFbBadge();
+    }
+  } catch(e) {
+    console.warn('[Feedback] load failed:', e.message);
+    document.getElementById('adminInboxList').innerHTML =
+      '<div class="fb-empty">⚠️ تعذّر تحميل الرسائل — تحقق من الاتصال</div>';
+  }
+}
+
+// ── رسم الرسائل في لوحة الأدمن ──
+function renderAdminInbox() {
+  const container = document.getElementById('adminInboxList');
+  if (!container) return;
+  const countEl = document.getElementById('inboxCount');
+  if (countEl) countEl.textContent = '(' + allFeedback.length + ' رسالة)';
+
+  if (allFeedback.length === 0) {
+    container.innerHTML = '<div class="fb-empty">📭 لا توجد رسائل بعد</div>';
+    return;
+  }
+
+  const typeEmoji = { 'اقتراح':'💡', 'إعجاب':'❤️', 'مشكلة':'🔧', 'سؤال':'❓', 'أخرى':'💬' };
+  container.innerHTML = allFeedback.map(m => {
+    const d = new Date(m.createdAt);
+    const dateStr = d.toLocaleDateString('ar-SY', { day:'numeric', month:'short', year:'numeric' });
+    const timeStr = d.toLocaleTimeString('ar-SY', { hour:'2-digit', minute:'2-digit' });
+    const emoji = typeEmoji[m.type] || '💬';
+    return `<div class="fb-msg-card ${m.read ? '' : 'unread'}" id="fbmsg_${m.id}">
+      <div class="fb-msg-type">
+        ${!m.read ? '<span class="fb-unread-dot"></span>' : ''}
+        ${emoji} ${m.type}
+      </div>
+      <div class="fb-msg-text">${m.text.replace(/</g,'&lt;')}</div>
+      <div class="fb-msg-meta">
+        <span>👤 ${(m.name||'مجهول').replace(/</g,'&lt;')}</span>
+        <span>${dateStr} — ${timeStr}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── تحديث الـ badge ──
+function updateFbBadge() {
+  const unread = allFeedback.filter(m => !m.read).length;
+  const badge = document.getElementById('fbBadge');
+  const adminBadge = document.getElementById('inboxUnreadBadge');
+  if (badge) {
+    if (unread > 0) { badge.textContent = unread > 9 ? '9+' : unread; badge.classList.add('show'); }
+    else { badge.classList.remove('show'); }
+  }
+  if (adminBadge) {
+    if (unread > 0) { adminBadge.textContent = unread; adminBadge.style.display = 'inline'; }
+    else { adminBadge.style.display = 'none'; }
+  }
+}
+
+// ── تعليم جميع الرسائل كمقروءة ──
+async function markAllFbRead() {
+  if (!allFeedback.length) return;
+  allFeedback = allFeedback.map(m => ({ ...m, read: true }));
+  renderAdminInbox();
+  updateFbBadge();
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${OFFERS_BIN}/latest?t=${Date.now()}`, {
+      headers: { 'X-Master-Key': API_KEY }
+    });
+    const data = await res.json();
+    const current = data.record || {};
+    await fetch(`https://api.jsonbin.io/v3/b/${OFFERS_BIN}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+      body: JSON.stringify({ ...current, feedback: allFeedback })
+    });
+  } catch(e) { console.warn('[Feedback] markRead save failed:', e.message); }
+}
+
 // ===== SERVICE WORKER INLINE (PWA) =====
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
