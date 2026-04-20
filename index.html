@@ -23,6 +23,65 @@
 <style>
 
 
+
+  /* ══ REPLY SYSTEM ══ */
+  .fb-reply-box {
+    margin-top: 8px; padding-top: 8px;
+    border-top: 1px dashed rgba(6,182,212,0.25);
+  }
+  .fb-reply-existing {
+    background: linear-gradient(135deg, rgba(6,182,212,0.12), rgba(59,130,246,0.08));
+    border: 1px solid rgba(6,182,212,0.3);
+    border-radius: 10px; padding: 8px 10px; margin-bottom: 6px;
+  }
+  .fb-reply-label {
+    font-size: 9px; font-weight: 800; color: #06b6d4;
+    letter-spacing: 1px; margin-bottom: 4px;
+  }
+  .fb-reply-text {
+    font-size: 11px; color: rgba(255,255,255,0.85); line-height: 1.6;
+  }
+  .fb-reply-date { font-size: 9px; color: rgba(255,255,255,0.3); margin-top: 3px; }
+  .fb-reply-input {
+    width: 100%; background: rgba(255,255,255,0.06);
+    border: 1.5px solid rgba(6,182,212,0.25); border-radius: 10px;
+    color: white; font-family: 'Cairo', sans-serif; font-size: 12px;
+    padding: 8px 10px; resize: none; outline: none; direction: rtl;
+    box-sizing: border-box; min-height: 60px; transition: border-color 0.2s;
+  }
+  .fb-reply-input:focus { border-color: #06b6d4; }
+  .fb-reply-input::placeholder { color: rgba(255,255,255,0.25); }
+  .fb-reply-send-btn {
+    margin-top: 5px; padding: 7px 14px;
+    background: linear-gradient(135deg, #06b6d4, #3b82f6);
+    border: none; border-radius: 8px; color: white;
+    font-family: 'Cairo', sans-serif; font-size: 11px; font-weight: 800;
+    cursor: pointer; transition: opacity 0.2s; float: left;
+  }
+  .fb-reply-send-btn:disabled { opacity: 0.5; }
+  .fb-reply-toggle-btn {
+    font-size: 10px; background: rgba(6,182,212,0.1);
+    border: 1px solid rgba(6,182,212,0.25); color: #06b6d4;
+    border-radius: 8px; padding: 4px 10px; cursor: pointer;
+    font-family: 'Cairo', sans-serif; font-weight: 700; margin-top: 6px;
+  }
+  /* إشعار الرد للزبون */
+  .fb-reply-notif {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 1.5px solid rgba(6,182,212,0.4);
+    border-radius: 16px; padding: 12px 18px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    z-index: 4000; min-width: 260px; max-width: 340px;
+    animation: slideUpFb 0.3s ease;
+    display: none;
+  }
+  .fb-reply-notif.show { display: block; }
+  .fb-rn-title { font-size: 12px; font-weight: 800; color: #06b6d4; margin-bottom: 5px; }
+  .fb-rn-text  { font-size: 11px; color: rgba(255,255,255,0.8); line-height: 1.6; }
+  .fb-rn-close { position: absolute; top: 8px; left: 10px; background: none; border: none; color: rgba(255,255,255,0.4); font-size: 16px; cursor: pointer; line-height: 1; }
+  .fb-rn-orig  { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 5px; border-top: 1px solid rgba(255,255,255,0.07); padding-top: 5px; }
+
   /* ══ ORDERS & INSTALLS ANALYTICS ══ */
   .an-order-card {
     background: rgba(168,85,247,0.07);
@@ -2825,6 +2884,15 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
   <span id="floatBackLabel">رجوع</span>
 </button>
 
+
+<!-- ══ REPLY NOTIFICATION (للزبون) ══ -->
+<div class="fb-reply-notif" id="fbReplyNotif">
+  <button class="fb-rn-close" onclick="document.getElementById('fbReplyNotif').classList.remove('show')">✕</button>
+  <div class="fb-rn-title">💬 رد من مركز الحلو</div>
+  <div class="fb-rn-text" id="fbRnText">—</div>
+  <div class="fb-rn-orig" id="fbRnOrig"></div>
+</div>
+
 <!-- FLOATING CALCULATOR BUTTONS (bottom-left) -->
 <div class="float-calc-group">
   <button class="float-calc-btn basic-btn" onclick="openBasicCalc()" title="حاسبة">🔢</button>
@@ -3730,14 +3798,29 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
       </div>
     </div>
     <div class="payment-section">
-      <div class="pay-title">💳 الرجاء الدفع على هذا الحساب</div>
-      <a href="https://wa.me/963932183955?text=أريد+الدفع+عبر+شام+كاش" target="_blank">
-        <img id="shamcashImgConfirm" src="" alt="شام كاش" style="width:100%;max-width:230px;border-radius:12px;border:2px solid rgba(255,255,255,0.1);box-shadow:var(--shadow);">
-      </a>
-      <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:6px;">اضغط على الصورة لفتح واتساب</div>
+      <div class="pay-title">💳 الدفع عبر شام كاش</div>
+      <img id="shamcashImgConfirm" src="" alt="شام كاش"
+        style="width:100%;max-width:260px;border-radius:14px;border:2px solid rgba(255,255,255,0.15);box-shadow:var(--shadow);display:block;margin:0 auto 6px;">
+      <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:10px;text-align:center;">📌 اضغط مطولاً على الصورة لحفظها</div>
     </div>
-    <a href="#" class="confirm-whatsapp-btn" id="confirm-wa-btn" target="_blank">
-      <span>💬</span><span>إعادة إرسال الطلب</span>
+
+    <!-- زر المشاركة مع الصورة -->
+    <button class="submit-btn" id="confirm-share-btn" onclick="shareOrderWithImage()"
+      style="background:linear-gradient(135deg,#25d366,#128c7e);width:100%;margin-bottom:10px;border:none;color:white;font-family:'Cairo',sans-serif;font-size:15px;font-weight:800;padding:15px;border-radius:50px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 20px rgba(37,211,102,0.4);">
+      <span>📤</span><span>إرسال الطلب مع صورة الدفع</span>
+    </button>
+
+    <!-- تلميح للـ fallback -->
+    <div id="confirmImgHint" style="display:none;background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.3);border-radius:12px;padding:10px 14px;margin-bottom:10px;font-size:11px;color:#f5a623;text-align:center;line-height:1.8;">
+      ⚠️ لم تُرسَل الصورة تلقائياً<br>
+      اضغط مطولاً على صورة شام كاش أعلاه واحفظها،<br>
+      ثم أرسلها يدوياً في واتساب مع رسالة الطلب
+    </div>
+
+    <!-- fallback نص فقط -->
+    <a href="#" class="confirm-whatsapp-btn" id="confirm-wa-btn" target="_blank"
+      style="display:none;background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.3);">
+      <span>💬</span><span>فتح واتساب (نص فقط)</span>
     </a>
   </div>
   <div class="bottom-space"></div>
@@ -4875,21 +4958,38 @@ setInterval(loadOffersFromCloud, 60000);
 })();
 checkNotifBanner();
 
-// ── تحديث تلقائي من تلغرام لجميع المستخدمين ──
+// ── تحديث تلقائي من sp-today.com لجميع المستخدمين ──
 async function autoFetchForAllUsers() {
   try {
     showRateLoading();
-    const html = await fetchTelegramHTML();
-    const { newSyp: newSypVal, oldSyp: oldSypVal } = extractRateFromHTML(html);
 
-    if (newSypVal === rates.newSyp) {
-      hideRateNotif(); // لم يتغير — أخفِ الإشعار
+    // ① جلب صفحة الدولار
+    const usdHtml = await fetchViaProxy('https://sp-today.com/currency/us-dollar');
+    const usdData = extractBuySell(usdHtml);
+    if (!usdData || usdData.sell < 5000) throw new Error('USD parse fail');
+
+    // ② جلب صفحة الليرة التركية
+    const tryHtml = await fetchViaProxy('https://sp-today.com/currency/turkish-lira');
+    const tryData = extractBuySell(tryHtml);
+    if (!tryData || tryData.sell < 10) throw new Error('TRY parse fail');
+
+    // ③ حساب القيم
+    const newNewSyp  = Math.round((usdData.sell / 100) * 10) / 10;  // ج.س جديد
+    const newOldSyp  = usdData.sell;                                  // ق.س قديم
+    const newTryRate = Math.round((usdData.sell / tryData.sell) * 100) / 100; // $1=₺
+    const newTrySyp  = Math.round((tryData.sell / 100) * 100) / 100; // ₺1=ج.س
+
+    // لم يتغير شيء؟
+    if (newNewSyp === rates.newSyp && newTryRate === rates.tryRate) {
+      hideRateNotif();
       return;
     }
 
-    const prevRate = rates.newSyp; // السعر القديم قبل التحديث
-    rates.newSyp = newSypVal;
-    rates.oldSyp = oldSypVal;
+    const prevRate = rates.newSyp;
+    rates.newSyp  = newNewSyp;
+    rates.oldSyp  = newOldSyp;
+    rates.tryRate = newTryRate;
+    rates.trySyp  = newTrySyp;
 
     const now = new Date();
     const days=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
@@ -4897,50 +4997,53 @@ async function autoFetchForAllUsers() {
     const dateStr = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
     const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
 
+    // حفظ محلي
     localStorage.setItem('halou_rates', JSON.stringify({
-      newSyp: newSypVal, oldSyp: oldSypVal,
-      tryRate: rates.tryRate || 44.5,
-      dateStr, timeStr, source: 'telegram'
+      newSyp: newNewSyp, oldSyp: newOldSyp,
+      tryRate: newTryRate, trySyp: newTrySyp,
+      dateStr, timeStr, source: 'sptoday'
     }));
 
-    applyRatesToUI(dateStr, timeStr, 'telegram');
-    showRateUpdated(prevRate, newSypVal);
+    applyRatesToUI(dateStr, timeStr, 'sptoday');
+    showRateUpdated(prevRate, newNewSyp);
 
-    // ✅ دائماً انشر على JSONBin — بغض النظر عن حالة الأدمن
-    // هذا يمنع loadRatesFromCloud من الرجوع للسعر القديم
-    await pushRateToCloud(newSypVal, oldSypVal, dateStr, timeStr);
+    // نشر على JSONBin لمزامنة جميع المستخدمين
+    await pushRateToCloud(newNewSyp, newOldSyp, dateStr, timeStr, newTryRate, newTrySyp);
 
     // تحديث حقول الأدمن إذا كان مفتوحاً
     if (typeof adminUnlocked !== 'undefined' && adminUnlocked) {
-      const newEl = document.getElementById('rateAdmNew');
-      const oldEl = document.getElementById('rateAdmOld');
-      if (newEl) newEl.value = newSypVal;
-      if (oldEl) oldEl.value = oldSypVal;
+      const fNew = document.getElementById('rateAdmNew');
+      const fOld = document.getElementById('rateAdmOld');
+      const fTry = document.getElementById('rateAdmTry');
+      if (fNew) fNew.value = newNewSyp;
+      if (fOld) fOld.value = newOldSyp;
+      if (fTry) fTry.value = newTryRate;
       const adEl = document.getElementById('adminLastSaved');
-      if (adEl) adEl.textContent = dateStr + ' — ' + timeStr + ' 📡';
+      if (adEl) adEl.textContent = dateStr + ' — ' + timeStr + ' 🌐';
     }
   } catch(e) {
-    hideRateNotif(); // أخفِ الإشعار عند الفشل الصامت
+    hideRateNotif();
+    console.warn('[AutoFetch] sp-today failed:', e.message);
   }
 }
 
 // دالة نشر السعر على JSONBin مباشرة (بدون حاجة لفتح لوحة الأدمن)
-async function pushRateToCloud(newSyp, oldSyp, dateStr, timeStr) {
+async function pushRateToCloud(newSyp, oldSyp, dateStr, timeStr, tryRate, trySyp) {
   if (!BIN_ID || !API_KEY) return;
   try {
     const payload = {
       newSyp, oldSyp,
-      tryRate: rates.tryRate || 44.5,
+      tryRate: tryRate || rates.tryRate || 44.5,
+      trySyp:  trySyp  || rates.trySyp  || null,
       dateStr, timeStr,
-      source: 'telegram',
-      tgUpdatedAt: Date.now()
+      source: 'sptoday',
+      updatedAt: Date.now()
     };
     await fetch(`${JSONBIN_BASE}/${BIN_ID}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
       body: JSON.stringify(payload)
     });
-    // حفظ محلي أيضاً
     localStorage.setItem('halou_rates', JSON.stringify(payload));
   } catch(e) {
     // فشل النشر — لا بأس، السعر محفوظ محلياً
@@ -4948,7 +5051,7 @@ async function pushRateToCloud(newSyp, oldSyp, dateStr, timeStr) {
 }
 
 // تشغيل بعد 5 ثواني من التحميل، ثم كل 5 دقائق
-setTimeout(autoFetchForAllUsers, 5000);
+autoFetchForAllUsers(); // جلب فوري عند فتح التطبيق
 setInterval(autoFetchForAllUsers, 5 * 60 * 1000);
 
 // ===== RENDER PACKAGES =====
@@ -5301,6 +5404,15 @@ function goPage(id) {
   // إظهار/إخفاء زر الرسائل — فقط في الصفحة الرئيسية
   const fbFab = document.getElementById('fbFab');
   if (fbFab) fbFab.style.display = (id === 'home') ? 'flex' : 'none';
+  // إعادة تعيين أزرار صفحة التأكيد عند الدخول إليها
+  if (id === 'confirm') {
+    const shareBtn = document.getElementById('confirm-share-btn');
+    const hintEl   = document.getElementById('confirmImgHint');
+    const waBtn    = document.getElementById('confirm-wa-btn');
+    if (shareBtn) { shareBtn.innerHTML='<span>📤</span><span>إرسال الطلب مع صورة الدفع</span>'; shareBtn.style.opacity='1'; }
+    if (hintEl)   hintEl.style.display   = 'none';
+    if (waBtn)    waBtn.style.display    = 'none';
+  }
   // تتبع الصفحة في الإحصائيات
   if (typeof trackPageView === 'function') trackPageView(id);
 }
@@ -5482,38 +5594,52 @@ async function buildAndSendWA(phone, imgUrl) {
   const now = new Date();
   const dateStr = now.toLocaleDateString('ar-SY') + ' ' + now.toLocaleTimeString('ar-SY');
   const sypLine = currentOrder.sypPrice ? `\n🇸🇾 السعر بالليرة: ${currentOrder.sypPrice}` : '';
-  const msg = `🌟 *طلب جديد - مركز الحلو للشحن*\n\n📦 الخدمة: ${currentOrder.service}\n💎 الباقة: ${currentOrder.pkg}\n💵 السعر بالدولار: ${currentOrder.price}${sypLine}\n📞 الرقم/المعرف: ${phone}\n📅 التاريخ: ${dateStr}\n💳 طريقة الدفع: شام كاش\n📷 صورة الدفع بالأسفل 👇`;
+  const msg = `⭐ *طلب جديد – مركز الحلو للشحن*\n\n📦 الخدمة: ${currentOrder.service}\n💎 الباقة: ${currentOrder.pkg}\n💵 السعر بالدولار: ${currentOrder.price}${sypLine}\n📞 الرقم/المعرف: ${phone}\n📅 التاريخ: ${dateStr}\n💳 طريقة الدفع: شام كاش\n📷 صورة الدفع بالأسفل 👇`;
   const waURL = `https://wa.me/963932183955?text=${encodeURIComponent(msg)}`;
 
   document.getElementById('c-service').textContent = currentOrder.service;
-  document.getElementById('c-pkg').textContent = currentOrder.pkg;
-  document.getElementById('c-price').textContent = currentOrder.price;
-  document.getElementById('c-phone').textContent = phone;
-  document.getElementById('c-date').textContent = dateStr;
-  document.getElementById('confirm-wa-btn').href = waURL;
+  document.getElementById('c-pkg').textContent     = currentOrder.pkg;
+  document.getElementById('c-price').textContent   = currentOrder.price;
+  document.getElementById('c-phone').textContent   = phone;
+  document.getElementById('c-date').textContent    = dateStr;
+  document.getElementById('confirm-wa-btn').href   = waURL;
 
-  // ── محاولة مشاركة الصورة مع النص عبر Web Share API ──
-  const canShareFiles = navigator.canShare && navigator.canShare({ files: [new File([], 'test.jpg')] });
+  window._lastOrderMsg     = msg;
+  window._lastOrderWaURL   = waURL;
+  window._lastOrderImgBlob = null;
 
-  if (canShareFiles) {
+  try {
+    const res  = await fetch(SHAMCASH_B64);
+    const blob = await res.blob();
+    window._lastOrderImgBlob = new File([blob], 'shamcash-payment.jpg', { type: 'image/jpeg' });
+  } catch(e) {}
+
+  goPage('confirm');
+}
+
+async function shareOrderWithImage() {
+  const msg   = window._lastOrderMsg   || '';
+  const waURL = window._lastOrderWaURL || 'https://wa.me/963932183955';
+  const file  = window._lastOrderImgBlob;
+  const shareBtn  = document.getElementById('confirm-share-btn');
+  const hintEl    = document.getElementById('confirmImgHint');
+
+  if (file && navigator.share) {
     try {
-      // تحويل base64 إلى File
-      const res = await fetch(SHAMCASH_B64);
-      const blob = await res.blob();
-      const file = new File([blob], 'shamcash-payment.jpg', { type: 'image/jpeg' });
-      await navigator.share({
-        text: msg,
-        files: [file]
-      });
-      goPage('confirm');
+      if (shareBtn) { shareBtn.innerHTML = '<span>⏳</span><span>جاري الإرسال...</span>'; shareBtn.style.opacity='0.7'; }
+      await navigator.share({ text: msg, files: [file] });
+      if (shareBtn) { shareBtn.innerHTML = '<span>✅</span><span>تم الإرسال بنجاح!</span>'; }
       return;
     } catch(e) {
-      // إذا رفض المستخدم أو فشل → fallback لواتساب عادي
+      if (shareBtn) { shareBtn.innerHTML = '<span>📤</span><span>إرسال مع الصورة</span>'; shareBtn.style.opacity='1'; }
     }
   }
-  // Fallback: فتح واتساب بالنص فقط
-  window.location.href = waURL;
+
+  // fallback: واتساب بالنص + تعليمات لحفظ الصورة يدوياً
+  if (hintEl) hintEl.style.display = 'block';
+  window.open(waURL, '_blank');
 }
+
 
 function sendOrder(){
   const phone = document.getElementById('phone-input').value.trim();
@@ -6630,7 +6756,9 @@ async function submitFeedback() {
     text,
     name:      name || 'مجهول',
     createdAt: Date.now(),
-    read:      false
+    read:      false,
+    deviceId:  getDeviceId(),   // لتوصيل الرد للجهاز الصحيح
+    reply:     null             // يملأه الأدمن لاحقاً
   };
 
   try {
@@ -6729,6 +6857,26 @@ function renderAdminInbox() {
     const dateStr = d.toLocaleDateString('ar-SY', { day:'numeric', month:'short', year:'numeric' });
     const timeStr = d.toLocaleTimeString('ar-SY', { hour:'2-digit', minute:'2-digit' });
     const emoji = typeEmoji[m.type] || '💬';
+
+    // إذا يوجد رد سابق
+    const replyHtml = m.reply ? `
+      <div class="fb-reply-existing">
+        <div class="fb-reply-label">✅ ردك</div>
+        <div class="fb-reply-text">${m.reply.text.replace(/</g,'&lt;')}</div>
+        <div class="fb-reply-date">${new Date(m.reply.at).toLocaleString('ar-SY')}</div>
+      </div>` : '';
+
+    // منطقة الرد (مخفية افتراضياً)
+    const replyBtn = `<button class="fb-reply-toggle-btn" onclick="toggleReplyBox('rbox_${m.id}', this)">
+      ${m.reply ? '✏️ تعديل الرد' : '↩️ رد'}
+    </button>
+    <div class="fb-reply-box" id="rbox_${m.id}" style="display:none;">
+      <textarea class="fb-reply-input" id="rtxt_${m.id}" placeholder="اكتب ردك هنا...">${m.reply ? m.reply.text : ''}</textarea>
+      <button class="fb-reply-send-btn" onclick="sendReply('${m.id}')" id="rbtn_${m.id}">إرسال الرد ✉️</button>
+      <div style="clear:both;"></div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.25);margin-top:4px;">سيظهر الرد للزبون عند فتح التطبيق</div>
+    </div>`;
+
     return `<div class="fb-msg-card ${m.read ? '' : 'unread'}" id="fbmsg_${m.id}">
       <div class="fb-msg-type">
         ${!m.read ? '<span class="fb-unread-dot"></span>' : ''}
@@ -6739,6 +6887,8 @@ function renderAdminInbox() {
         <span>👤 ${(m.name||'مجهول').replace(/</g,'&lt;')}</span>
         <span>${dateStr} — ${timeStr}</span>
       </div>
+      ${replyHtml}
+      ${replyBtn}
     </div>`;
   }).join('');
 }
@@ -6777,6 +6927,121 @@ async function markAllFbRead() {
     });
   } catch(e) { console.warn('[Feedback] markRead save failed:', e.message); }
 }
+
+
+// ═══════════════════════════════════════════════════════
+// نظام الرد على رسائل الزبائن
+// ═══════════════════════════════════════════════════════
+
+function toggleReplyBox(boxId, btn) {
+  const box = document.getElementById(boxId);
+  if (!box) return;
+  const isOpen = box.style.display !== 'none';
+  box.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) {
+    // فوكس على الـ textarea
+    const ta = box.querySelector('.fb-reply-input');
+    if (ta) setTimeout(() => ta.focus(), 100);
+  }
+}
+
+// ── إرسال الرد (أدمن فقط) ──
+async function sendReply(msgId) {
+  const textarea = document.getElementById('rtxt_' + msgId);
+  const btn      = document.getElementById('rbtn_' + msgId);
+  if (!textarea) return;
+
+  const replyText = textarea.value.trim();
+  if (!replyText) {
+    textarea.style.borderColor = '#ef4444';
+    setTimeout(() => textarea.style.borderColor = '', 1500);
+    return;
+  }
+
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الإرسال...'; }
+
+  // ابحث عن الرسالة في allFeedback وأضف الرد
+  const msgIdx = allFeedback.findIndex(m => m.id === msgId);
+  if (msgIdx === -1) return;
+
+  allFeedback[msgIdx].reply = {
+    text: replyText,
+    at:   Date.now()
+  };
+  allFeedback[msgIdx].read = true; // تعليم كمقروءة تلقائياً
+
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${OFFERS_BIN}/latest?t=${Date.now()}`, {
+      headers: { 'X-Master-Key': API_KEY }
+    });
+    if (!res.ok) throw new Error('GET ' + res.status);
+    const data = await res.json();
+    const current = data.record || {};
+    const putRes = await fetch(`https://api.jsonbin.io/v3/b/${OFFERS_BIN}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+      body: JSON.stringify({ ...current, feedback: allFeedback })
+    });
+    if (!putRes.ok) throw new Error('PUT ' + putRes.status);
+
+    // أعد رسم الصندوق
+    renderAdminInbox();
+    updateFbBadge();
+    console.log('[Reply] ✅ تم إرسال الرد');
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'إرسال الرد ✉️'; }
+    alert('❌ فشل حفظ الرد: ' + e.message);
+  }
+}
+
+// ── فحص الردود الجديدة للزبون عند فتح التطبيق ──
+async function checkForReplies() {
+  const myDeviceId = getDeviceId();
+  // الرسائل التي أرسلها هذا الجهاز
+  const sentMsgs = JSON.parse(localStorage.getItem('halou_feedback_sent') || '[]');
+  if (!sentMsgs.length) return;
+
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${OFFERS_BIN}/latest?t=${Date.now()}`, {
+      headers: { 'X-Master-Key': API_KEY }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const allMsgs = data.record.feedback || [];
+
+    // الرسائل التي لها رد ولم يُقرأ الرد بعد
+    const lastSeenReply = localStorage.getItem('halou_last_seen_reply') || '';
+    const myMsgsWithReply = allMsgs.filter(m =>
+      m.deviceId === myDeviceId &&
+      m.reply &&
+      m.id !== lastSeenReply
+    );
+
+    if (myMsgsWithReply.length === 0) return;
+
+    // أظهر آخر رد
+    const newest = myMsgsWithReply[0];
+    const notif  = document.getElementById('fbReplyNotif');
+    const txtEl  = document.getElementById('fbRnText');
+    const origEl = document.getElementById('fbRnOrig');
+
+    if (!notif || !txtEl) return;
+    txtEl.textContent  = newest.reply.text;
+    origEl.textContent = 'رسالتك: ' + newest.text.slice(0, 60) + (newest.text.length > 60 ? '...' : '');
+    notif.classList.add('show');
+
+    // احفظ أنه تم عرض هذا الرد
+    localStorage.setItem('halou_last_seen_reply', newest.id);
+
+    // إغلاق تلقائي بعد 10 ثوانٍ
+    setTimeout(() => notif.classList.remove('show'), 10000);
+  } catch(e) {
+    // لا شيء — صمت
+  }
+}
+
+// فحص الردود عند فتح التطبيق بعد ثانيتين
+setTimeout(checkForReplies, 2000);
 
 // ===== SERVICE WORKER INLINE (PWA) =====
 if ('serviceWorker' in navigator) {
