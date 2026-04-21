@@ -82,6 +82,136 @@
   .fb-rn-close { position: absolute; top: 8px; left: 10px; background: none; border: none; color: rgba(255,255,255,0.4); font-size: 16px; cursor: pointer; line-height: 1; }
   .fb-rn-orig  { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 5px; border-top: 1px solid rgba(255,255,255,0.07); padding-top: 5px; }
 
+
+  /* ══ 5-FIELD CALCULATOR — NEW DESIGN ══ */
+  .conv-grid-5 {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 10px;
+  }
+
+  /* المستطيل: أيقونة | اسم العملة : القيمة | مسح */
+  .conv-row {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,0.05);
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    padding: 0 10px 0 12px;
+    gap: 8px;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    cursor: text;
+    min-height: 54px;
+    overflow: hidden;
+  }
+  .conv-row.active-row { background: rgba(255,255,255,0.08); }
+
+  .conv-row.usd-row  { border-color: rgba(245,166,35,0.3); }
+  .conv-row.try-row  { border-color: rgba(167,139,250,0.3); }
+  .conv-row.new-row  { border-color: rgba(74,222,128,0.3); }
+  .conv-row.old-row  { border-color: rgba(251,146,60,0.3); }
+  .conv-row.gold-row { border-color: rgba(245,166,35,0.45); background: rgba(245,166,35,0.03); }
+
+  .conv-row.usd-row.active-row  { border-color:#f5a623; box-shadow:0 0 0 2px rgba(245,166,35,0.15); }
+  .conv-row.try-row.active-row  { border-color:#a78bfa; box-shadow:0 0 0 2px rgba(167,139,250,0.15); }
+  .conv-row.new-row.active-row  { border-color:#4ade80; box-shadow:0 0 0 2px rgba(74,222,128,0.15); }
+  .conv-row.old-row.active-row  { border-color:#fb923c; box-shadow:0 0 0 2px rgba(251,146,60,0.15); }
+  .conv-row.gold-row.active-row { border-color:#f5a623; box-shadow:0 0 0 2px rgba(245,166,35,0.2); }
+
+  /* أيقونة العملة */
+  .cr-icon { font-size: 20px; flex-shrink: 0; }
+
+  /* اسم العملة ورمزها */
+  .cr-name {
+    flex-shrink: 0;
+    width: 70px;
+  }
+  .cr-name-text {
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.3;
+    white-space: nowrap;
+  }
+  .cr-sym {
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 1.3;
+  }
+  .usd-row  .cr-sym { color: #f5a623; }
+  .try-row  .cr-sym { color: #a78bfa; }
+  .new-row  .cr-sym { color: #4ade80; }
+  .old-row  .cr-sym { color: #fb923c; }
+  .gold-row .cr-sym { color: #f5a623; }
+
+  /* فاصل رأسي */
+  .cr-sep {
+    width: 1px;
+    height: 28px;
+    background: rgba(255,255,255,0.1);
+    flex-shrink: 0;
+  }
+
+  /* حقل الإدخال — يملأ باقي العرض */
+  .cr-input {
+    flex: 1;
+    min-width: 0;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    font-family: 'Cairo', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    direction: ltr;
+    text-align: right;
+    padding: 14px 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: text;
+    /* ضمان ظهور النص على كل المتصفحات */
+    opacity: 1;
+    -webkit-opacity: 1;
+    pointer-events: auto;
+    z-index: 1;
+    position: relative;
+  }
+  .cr-input::placeholder {
+    color: rgba(255,255,255,0.18);
+    font-size: 14px;
+    font-weight: 400;
+  }
+  /* إزالة أسهم number input */
+  .cr-input::-webkit-outer-spin-button,
+  .cr-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .cr-input[type=number] { -moz-appearance: textfield; }
+
+  /* زر المسح */
+  .cr-clear {
+    width: 24px; height: 24px;
+    background: rgba(255,255,255,0.08);
+    border: none; border-radius: 50%;
+    color: rgba(255,255,255,0.4);
+    font-size: 11px; cursor: pointer;
+    display: none; align-items: center; justify-content: center;
+    flex-shrink: 0; padding: 0;
+    transition: background 0.15s;
+  }
+  .conv-row.active-row .cr-clear { display: flex; }
+  .cr-clear:active { background: rgba(255,255,255,0.15); }
+
+  /* فاصل الذهب */
+  .conv-row-divider {
+    text-align: center;
+    font-size: 9px;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 2px;
+    margin: 1px 0;
+    font-family: 'Cairo', sans-serif;
+  }
+
   /* ══ ORDERS & INSTALLS ANALYTICS ══ */
   .an-order-card {
     background: rgba(168,85,247,0.07);
@@ -243,6 +373,99 @@
   .fb-inbox-title { font-size:12px; font-weight:800; color:#06b6d4; display:flex; align-items:center; gap:6px; }
   .fb-mark-all-btn { font-size:10px; background:rgba(6,182,212,0.12); border:1px solid rgba(6,182,212,0.3); color:#06b6d4; border-radius:8px; padding:4px 10px; cursor:pointer; font-family:'Cairo',sans-serif; font-weight:700; }
 
+  /* ══════════════════════════════════════
+     WELCOME + TICKER STRIPS
+     الشريط ①: ترحيب ثابت
+     الشريط ②: شريط إخباري متحرك
+  ═══════════════════════════════════════ */
+  .welcome-strip {
+    position: fixed;
+    top: env(safe-area-inset-top, 0px);
+    left: 0; right: 0;
+    height: 26px;
+    z-index: 1002;
+    background: linear-gradient(90deg, #0d0d1a 0%, #1a1040 35%, #0d1a3a 65%, #0d0d1a 100%);
+    border-bottom: 1px solid rgba(245,166,35,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .welcome-strip-text {
+    font-family: 'Amiri', 'Tajawal', serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    background: linear-gradient(90deg, #f5a623, #fff8e7, #f5a623, #e94560, #f5a623);
+    background-size: 300% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: welcomeShine 4s linear infinite;
+    white-space: nowrap;
+  }
+  @keyframes welcomeShine {
+    0%   { background-position: 0% center; }
+    100% { background-position: 300% center; }
+  }
+
+  /* ── الشريط المتحرك ── */
+  .ticker-strip {
+    position: fixed;
+    top: calc(26px + env(safe-area-inset-top, 0px));
+    left: 0; right: 0;
+    height: 28px;
+    z-index: 1002;
+    background: linear-gradient(90deg, #0a1628 0%, #0d1f3c 50%, #0a1628 100%);
+    border-bottom: 1px solid rgba(6,182,212,0.25);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+  /* ── شريط لا نهائي سلس 100% ──
+     ticker-inner = نسختان متطابقتان جنباً لجنب
+     يتحرك الـ inner من 0 إلى -50% (عرض نسخة واحدة)
+     عند -50% يرجع لـ 0 فوراً — لا يُرى الانقطاع لأن النسختين متطابقتان
+  ── */
+  .ticker-inner {
+    display: inline-flex;   /* inline-flex حتى يتمدد حسب المحتوى */
+    align-items: center;
+    white-space: nowrap;
+    will-change: transform;
+    /* يسار → يمين: translateX من 0 إلى -50% */
+    animation: tickerSeamless 22s linear infinite;
+  }
+  .ticker-track {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  @keyframes tickerSeamless {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .ticker-strip:hover .ticker-inner { animation-play-state: paused; }
+  .ticker-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0 18px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.9);
+    border-right: 1px solid rgba(255,255,255,0.1);
+    direction: rtl;
+  }
+  .ticker-item:last-child { border-right: none; }
+  .ticker-item .t-label { color: rgba(255,255,255,0.45); font-size: 10px; }
+  .ticker-item .t-val   { color: #06b6d4; font-weight: 900; }
+  .ticker-item .t-val.gold { color: #f5a623; }
+  .ticker-item .t-val.lira { color: #4ade80; }
+  .ticker-sep { color: rgba(255,255,255,0.2); padding: 0 4px; font-size: 14px; }
+  .ticker-loading { color: rgba(255,255,255,0.35); font-size: 10px; font-family: 'Cairo', sans-serif; padding: 0 16px; }
+
   :root {
     --gold: #e94560; --gold2: #f5a623;
     --syriatel-color: #e63946; --mtn-color: #ffb703;
@@ -254,9 +477,9 @@
     font-family: 'Cairo', sans-serif;
     background: linear-gradient(135deg, #0d0d1a 0%, #1a1a2e 40%, #16213e 100%);
     min-height: 100vh; color: #fff; overflow-x: hidden;
-    padding-top: calc(72px + env(safe-area-inset-top, 0px));
+    padding-top: calc(126px + env(safe-area-inset-top, 0px));
   }
-  body.light-mode { padding-top: calc(72px + env(safe-area-inset-top, 0px)); }
+  body.light-mode { padding-top: calc(126px + env(safe-area-inset-top, 0px)); }
   body::before {
     content:''; position:fixed; inset:0;
     background-image:
@@ -878,7 +1101,7 @@
     position:fixed; inset:0;
     background:rgba(0,0,0,0.75);
     backdrop-filter:blur(10px);
-    z-index:999; display:none;
+    z-index:2000; display:none;
     align-items:flex-end; justify-content:center;
   }
   .calc-overlay.open { display:flex; }
@@ -1013,10 +1236,10 @@
     -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid rgba(255,255,255,0.07);
     position: fixed;
-    top: 0; left: 0; right: 0;
+    top: calc(54px + env(safe-area-inset-top, 0px)); left: 0; right: 0;
     z-index: 999;
-    height: calc(60px + env(safe-area-inset-top, 0px));
-    min-height: 72px;
+    height: 60px;
+    min-height: 60px;
     box-sizing: border-box;
   }
   body.light-mode .top-bar {
@@ -1122,6 +1345,21 @@
   body.light-mode .try-field .conv-input { color: #6d28d9; }
   body.light-mode .old-field .conv-input { color: #c2410c; }
   body.light-mode .new-field .conv-input { color: #166534; }
+  /* ── light mode للمستطيلات الخمسة ── */
+  body.light-mode .conv-row { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.12); }
+  body.light-mode .conv-row.active-row { background: rgba(0,0,0,0.08); }
+  body.light-mode .cr-input { color: #1a1a2e !important; -webkit-text-fill-color: #1a1a2e !important; }
+  body.light-mode .cr-input::placeholder { color: rgba(0,0,0,0.25) !important; }
+  body.light-mode .cr-name-text { color: rgba(0,0,0,0.5) !important; }
+  body.light-mode .cr-sep { background: rgba(0,0,0,0.12) !important; }
+  body.light-mode .cr-clear { background: rgba(0,0,0,0.07) !important; color: rgba(0,0,0,0.4) !important; }
+  body.light-mode .conv-row-divider { color: rgba(0,0,0,0.25) !important; }
+  body.light-mode .usd-row  .cr-sym { color: #b45309 !important; }
+  body.light-mode .try-row  .cr-sym { color: #6d28d9 !important; }
+  body.light-mode .new-row  .cr-sym { color: #166534 !important; }
+  body.light-mode .old-row  .cr-sym { color: #c2410c !important; }
+  body.light-mode .gold-row .cr-sym { color: #b45309 !important; }
+  body.light-mode .gold-row { background: rgba(180,83,9,0.04) !important; }
   body.light-mode .pkg-card { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); }
   body.light-mode .order-summary { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); }
   body.light-mode .order-summary .key { color: rgba(0,0,0,0.45); }
@@ -2866,6 +3104,18 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
 
 
 <!-- TOP BAR: Clock + Date + Mode Toggle -->
+<!-- ══ WELCOME STRIP ① ══ -->
+<div class="welcome-strip">
+  <span class="welcome-strip-text">✦ شُكراً لاختياركم تطبيق مركز الحلو ✦</span>
+</div>
+
+<!-- ══ TICKER STRIP ② ══ -->
+<div class="ticker-strip" id="tickerStrip">
+  <div class="ticker-inner" id="tickerInner">
+    <span class="ticker-loading" id="tickerLoading">⏳ جاري تحميل الأسعار...</span>
+  </div>
+</div>
+
 <div class="top-bar">
   <div class="top-bar-clock">
     <div class="clock-time" id="clockTime">00:00:00</div>
@@ -3021,55 +3271,79 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
       </div>
     </div>
 
-    <!-- 4 bidirectional input fields -->
-    <div class="conv-grid">
+    <!-- 5 مستطيلات أفقية -->
+    <div class="conv-grid-5">
 
-      <!-- USD -->
-      <div class="conv-field usd-field" id="field-usd">
-        <button class="conv-clear-btn" onclick="clearField('usd')">✕</button>
-        <div class="conv-field-header">
-          <span class="conv-field-flag">🇺🇸</span>
-          <span class="conv-field-label">دولار أمريكي</span>
-          <span class="conv-field-symbol">$</span>
+      <!-- دولار أمريكي -->
+      <div class="conv-row usd-row" id="field-usd" onclick="document.getElementById('inp-usd').focus()">
+        <span class="cr-icon">🇺🇸</span>
+        <div class="cr-name">
+          <div class="cr-name-text">دولار أمريكي</div>
+          <div class="cr-sym">$ USD</div>
         </div>
-        <input class="conv-input" id="inp-usd" type="number" placeholder="0.00" min="0" step="0.01"
-          oninput="convertFrom('usd')" onfocus="setActive('usd')">
+        <div class="cr-sep"></div>
+        <input class="cr-input" id="inp-usd" type="text" inputmode="decimal"
+          placeholder="اكتب هنا"
+          oninput="convertFrom5('usd')" onfocus="setActive5('usd')">
+        <button class="cr-clear" onclick="event.stopPropagation();clearAll5()">✕</button>
       </div>
 
-      <!-- TRY -->
-      <div class="conv-field try-field" id="field-try">
-        <button class="conv-clear-btn" onclick="clearField('try')">✕</button>
-        <div class="conv-field-header">
-          <span class="conv-field-flag">🇹🇷</span>
-          <span class="conv-field-label">ليرة تركية</span>
-          <span class="conv-field-symbol">₺</span>
+      <!-- ليرة تركية -->
+      <div class="conv-row try-row" id="field-try" onclick="document.getElementById('inp-try').focus()">
+        <span class="cr-icon">🇹🇷</span>
+        <div class="cr-name">
+          <div class="cr-name-text">ليرة تركية</div>
+          <div class="cr-sym">₺ TRY</div>
         </div>
-        <input class="conv-input" id="inp-try" type="number" placeholder="0.00" min="0" step="0.01"
-          oninput="convertFrom('try')" onfocus="setActive('try')">
+        <div class="cr-sep"></div>
+        <input class="cr-input" id="inp-try" type="text" inputmode="decimal"
+          placeholder="اكتب هنا"
+          oninput="convertFrom5('try')" onfocus="setActive5('try')">
+        <button class="cr-clear" onclick="event.stopPropagation();clearAll5()">✕</button>
       </div>
 
-      <!-- OLD SYP -->
-      <div class="conv-field old-field" id="field-old">
-        <button class="conv-clear-btn" onclick="clearField('old')">✕</button>
-        <div class="conv-field-header">
-          <span class="conv-field-flag">🇸🇾</span>
-          <span class="conv-field-label">سوري قديم</span>
-          <span class="conv-field-symbol" style="color:#fb923c">ق.س</span>
+      <!-- ليرة سورية جديدة -->
+      <div class="conv-row new-row" id="field-new" onclick="document.getElementById('inp-new').focus()">
+        <span class="cr-icon">🇸🇾</span>
+        <div class="cr-name">
+          <div class="cr-name-text">ليرة سورية جديدة</div>
+          <div class="cr-sym">ج.س</div>
         </div>
-        <input class="conv-input" id="inp-old" type="number" placeholder="0" min="0" step="1"
-          oninput="convertFrom('old')" onfocus="setActive('old')">
+        <div class="cr-sep"></div>
+        <input class="cr-input" id="inp-new" type="text" inputmode="decimal"
+          placeholder="اكتب هنا"
+          oninput="convertFrom5('new')" onfocus="setActive5('new')">
+        <button class="cr-clear" onclick="event.stopPropagation();clearAll5()">✕</button>
       </div>
 
-      <!-- NEW SYP -->
-      <div class="conv-field new-field" id="field-new">
-        <button class="conv-clear-btn" onclick="clearField('new')">✕</button>
-        <div class="conv-field-header">
-          <span class="conv-field-flag">🆕</span>
-          <span class="conv-field-label">سوري جديد</span>
-          <span class="conv-field-symbol" style="color:#4ade80">ج.س</span>
+      <!-- ليرة سورية قديمة -->
+      <div class="conv-row old-row" id="field-old" onclick="document.getElementById('inp-old').focus()">
+        <span class="cr-icon">🇸🇾</span>
+        <div class="cr-name">
+          <div class="cr-name-text">ليرة سورية قديمة</div>
+          <div class="cr-sym" style="color:#fb923c">ق.س</div>
         </div>
-        <input class="conv-input" id="inp-new" type="number" placeholder="0" min="0" step="1"
-          oninput="convertFrom('new')" onfocus="setActive('new')">
+        <div class="cr-sep"></div>
+        <input class="cr-input" id="inp-old" type="text" inputmode="decimal"
+          placeholder="اكتب هنا"
+          oninput="convertFrom5('old')" onfocus="setActive5('old')">
+        <button class="cr-clear" onclick="event.stopPropagation();clearAll5()">✕</button>
+      </div>
+
+      <div class="conv-row-divider">✦ ذهب ✦</div>
+
+      <!-- ذهب عيار 24 -->
+      <div class="conv-row gold-row" id="field-gold" onclick="document.getElementById('inp-gold').focus()">
+        <span class="cr-icon">🥇</span>
+        <div class="cr-name">
+          <div class="cr-name-text">ذهب عيار 24</div>
+          <div class="cr-sym">غرام</div>
+        </div>
+        <div class="cr-sep"></div>
+        <input class="cr-input" id="inp-gold" type="text" inputmode="decimal"
+          placeholder="اكتب هنا"
+          oninput="convertFrom5('gold')" onfocus="setActive5('gold')">
+        <button class="cr-clear" onclick="event.stopPropagation();clearAll5()">✕</button>
       </div>
 
     </div>
@@ -4083,6 +4357,16 @@ function nvAdjust(delta) {
 
 // Update calc UI elements when rates change
 function updateNewCalcUI() {
+  // تحديث placeholder حقل الذهب بالسعر الحالي
+  const goldInp = document.getElementById('inp-gold');
+  if (goldInp && tickerGoldPrice) {
+    goldInp.placeholder = '1 غ = $' + tickerGoldPrice.toFixed(2);
+  }
+  // إعادة حساب إذا كان هناك قيمة مدخلة
+  if (activeRow5) {
+    const inp = document.getElementById('inp-' + activeRow5);
+    if (inp && inp.value) convertFrom5(activeRow5);
+  }
   // update ru-text in rate-update-bar
   const ruText = document.querySelector('.rate-update-bar .ru-text') || document.querySelector('.ru-text');
   if (ruText) {
@@ -4109,23 +4393,25 @@ function rerenderAllPkgs() {
   });
 }
 
-function applyRatesToUI(dateStr, timeStr){
-  const ruText = document.querySelector('.ru-text');
-  if(ruText){
-    if(dateStr && timeStr){
-      ruText.textContent = `آخر تحديث: ${dateStr} — الساعة ${timeStr} | $1 = ${rates.newSyp} ج.س | ${rates.oldSyp} ق.س | ${rates.tryRate} ₺`;
-    } else if(dateStr){
-      ruText.textContent = `آخر تحديث: ${dateStr} | $1 = ${rates.newSyp} ج.س | ${rates.oldSyp} ق.س | ${rates.tryRate} ₺`;
-    }
+// applyRatesToUI — تعريف واحد فقط في الأسفل (سطر ~6935)
+// هذا alias للتوافق مع الاستدعاءات القديمة
+function applyRatesToUI(dateStr, timeStr, source) {
+  const ruText = document.querySelector('.rate-update-bar .ru-text') ||
+                 document.querySelector('.ru-text');
+  if (ruText && dateStr) {
+    const srcLabel = source === 'sptoday' ? ' 🌐 الليرة اليوم'
+                   : source === 'telegram' ? ' 📡 تلغرام' : '';
+    const trySypPart = rates.trySyp ? ` | ₺1 = ${rates.trySyp} ج.س` : '';
+    ruText.textContent = `آخر تحديث: ${dateStr}${timeStr ? ' — ' + timeStr : ''}${srcLabel} | $1 = ${rates.newSyp} ج.س | ${rates.oldSyp} ق.س | $1 = ${rates.tryRate} ₺${trySypPart}`;
   }
   const calcCard = document.querySelector('.calc-sq-rate');
-  if(calcCard) calcCard.innerHTML = `$1 = ${rates.newSyp} ج.س<br>$1 = ${rates.tryRate} ₺`;
+  if (calcCard) calcCard.innerHTML = `$1 = ${rates.newSyp} ج.س<br>$1 = ${rates.tryRate} ₺`;
   updateNewCalcUI();
-  // ✅ إعادة رسم الباقات بالسعر الجديد
   rerenderAllPkgs();
-  if(adminUnlocked && dateStr && document.getElementById('adminLastSaved')){
+  if (adminUnlocked && dateStr && document.getElementById('adminLastSaved')) {
     document.getElementById('adminLastSaved').textContent = `${dateStr} — ${timeStr||''}`;
   }
+  updateTickerIfReady();
 }
 
 // ===== SAVE RATES TO CLOUD =====
@@ -4172,7 +4458,11 @@ async function saveAdminRates(){
 }
 
 // ===== AUTO-REFRESH every 60s for all users =====
-async function fetchLiveRates(){ await loadRatesFromCloud(); }
+async function fetchLiveRates(){
+  await loadRatesFromCloud();
+  // جلب أسعار محدّثة من sp-today عند فتح الحاسبة
+  autoFetchForAllUsers().catch(()=>{});
+}
 setInterval(loadRatesFromCloud, 60000);
 
 function restoreBinCredsToUI(){ /* credentials hardcoded */ }
@@ -4201,32 +4491,12 @@ function setVal(id, val){
 }
 
 function convertFrom(source){
-  setActive(source);
-  const raw=parseFloat(document.getElementById('inp-'+source).value);
-  if(isNaN(raw)){
-    ['usd','try','old','new'].filter(f=>f!==source).forEach(f=>setVal(f,''));
-    return;
-  }
-
-  // Convert source → USD exactly
-  let usd;
-  if(source==='usd') usd=raw;
-  else if(source==='try') usd=raw/rates.tryRate;
-  else if(source==='old') usd=raw/rates.oldSyp;
-  else if(source==='new') usd=raw/rates.newSyp;
-
-  // USD → all others — rounded to 1 decimal for SYP, 2 for USD/TRY
-  if(source!=='usd') setVal('usd', fmt(usd, 2));
-  if(source!=='try') setVal('try', fmt(usd * rates.tryRate, 1));
-  if(source!=='old') setVal('old', fmt(usd * rates.oldSyp, 1));
-  if(source!=='new') setVal('new', fmt(usd * rates.newSyp, 1));
+  // محوّل للتوافق — يستدعي النسخة الخماسية
+  convertFrom5(source);
 }
 
 function clearField(field){
-  document.getElementById('inp-'+field).value='';
-  ['usd','try','old','new'].forEach(f=>setVal(f,''));
-  activeField=null;
-  document.querySelectorAll('.conv-field').forEach(f=>f.classList.remove('active-field'));
+  clearAll5();
 }
 
 // ===== ADMIN UNLOCK (tap gear icon 4 times) =====
@@ -5231,6 +5501,22 @@ const WN_KEY = 'halou_seen_version';
 function closeWhatsNew() {
   document.getElementById('whatsNewOverlay').classList.remove('open');
   localStorage.setItem(WN_KEY, CURRENT_VERSION);
+}
+
+
+function checkWelcome() {
+  // تحقق إذا رأى المستخدم رسالة الترحيب من قبل
+  const seen = localStorage.getItem(WELCOME_SEEN_KEY);
+  if (!seen) {
+    // أظهر رسالة الترحيب إذا وجدت
+    const overlay = document.getElementById('whatsNewOverlay');
+    if (overlay) {
+      overlay.classList.add('open');
+    }
+    localStorage.setItem(WELCOME_SEEN_KEY, '1');
+  }
+  // تحقق من الإشعارات
+  checkNotifBanner();
 }
 
 // checkWelcome يُستدعى من الأسفل بعد تعريف الدالة
@@ -6665,30 +6951,7 @@ window.addEventListener('load', () => {
 });
 
 // Update UI whenever rates change
-function applyRatesToUI(dateStr, timeStr, source) {
-  // Rate update bar
-  const ruText = document.querySelector('.rate-update-bar .ru-text') ||
-                 document.querySelector('.ru-text');
-  if (ruText) {
-    const srcLabel = source === 'telegram' ? ' 📡 تلغرام'
-                   : source === 'sptoday'  ? ' 🌐 الليرة اليوم'
-                   : '';
-    if (dateStr) {
-      const trySypPart = rates.trySyp ? ` | ₺1 = ${rates.trySyp} ج.س` : '';
-      ruText.textContent = `تم تحديث سعر الصرف بتاريخ ${dateStr} — الساعة ${timeStr||''}${srcLabel} | $1 = ${rates.newSyp} ج.س | ${rates.oldSyp} ق.س | $1 = ${rates.tryRate} ₺${trySypPart}`;
-    }
-  }
-  // Calc card on home screen
-  const calcCard = document.querySelector('.calc-sq-rate');
-  if (calcCard) calcCard.innerHTML = `$1 = ${rates.newSyp} ج.س<br>$1 = ${rates.tryRate} ₺`;
-  // Update converter
-  if (typeof convertFrom === 'function') {
-    try { convertFrom(null); } catch(e){}
-  }
-  updateNewCalcUI();
-  // ✅ إعادة رسم الباقات بالسعر الجديد — هذا يجعل السعر متطابقاً مع الحاسبة
-  rerenderAllPkgs();
-}
+// applyRatesToUI — التعريف موجود في الأعلى
 
 </script>
 
@@ -7042,6 +7305,180 @@ async function checkForReplies() {
 
 // فحص الردود عند فتح التطبيق بعد ثانيتين
 setTimeout(checkForReplies, 2000);
+
+
+// ═══════════════════════════════════════════════════════
+// TICKER STRIP — شريط الأسعار المتحرك
+// يجلب: USD/SYP + USD/TRY (من rates) + ذهب 24K (من sp-today)
+// ═══════════════════════════════════════════════════════
+let tickerGoldPrice = null;      // سعر غرام الذهب 24K بالدولار
+let tickerLastFetch  = 0;
+
+async function fetchGoldPrice() {
+  const GOLD_URL = 'https://sp-today.com/gold/ounce';
+  try {
+    const html = await fetchViaProxy(GOLD_URL);
+
+    // النمط الأول: "للغرام\n\n$153.99USD"
+    let m = html.match(/للغرام[\s\S]{0,30}\$([\d.]+)\s*USD/);
+    if (!m) {
+      // النمط الثاني: "24K\n\n$154.00/g"
+      m = html.match(/24K[\s\S]{0,30}\$([\d,]+)\/g/i);
+    }
+    if (!m) {
+      // النمط الثالث: من جدول الإحصائيات "السعر/غرام$153.99"
+      m = html.match(/السعر\/غرام[\s\S]{0,10}\$([\d.]+)/);
+    }
+    if (!m) {
+      // النمط الرابع: من قسم الـ FAQ بالإنجليزي
+      m = html.match(/\$([\d.]+)\/g\b/i);
+    }
+    if (m) {
+      const val = parseFloat(m[1].replace(/,/g, ''));
+      if (val > 50 && val < 50000) {
+        tickerGoldPrice = val;
+        console.log('[Ticker] ذهب 24K = $' + val + '/g');
+        return val;
+      }
+    }
+    console.warn('[Ticker] لم يستطع استخراج سعر الذهب');
+    return null;
+  } catch(e) {
+    console.warn('[Ticker] gold fetch error:', e.message);
+    return null;
+  }
+}
+
+function buildTickerHTML() {
+  const usd  = rates.newSyp  || '—';
+  const try_ = rates.tryRate || '—';
+  const gold = tickerGoldPrice ? tickerGoldPrice.toFixed(2) : '—';
+
+  const items = [
+    { icon:'🇸🇾', label:'دولار أمريكي واحد = ', val: usd + ' ليرة سورية جديدة', cls:'lira' },
+    { icon:'🇹🇷', label:'دولار أمريكي واحد = ', val: try_ + ' ليرة تركية',      cls:'' },
+    { icon:'🥇', label:'غرام الذهب عيار 24 = ', val: '$' + gold + ' دولار',    cls:'gold' },
+  ];
+
+  return items.map(item =>
+    `<span class="ticker-item">
+      <span>${item.icon}</span>
+      <span class="t-label">${item.label}</span>
+      <span class="t-val ${item.cls}">${item.val}</span>
+    </span>`
+  ).join('<span class="ticker-sep">◆</span>');
+}
+
+function updateTicker() {
+  const inner   = document.getElementById('tickerInner');
+  const loading = document.getElementById('tickerLoading');
+  if (!inner) return;
+  if (loading) loading.style.display = 'none';
+
+  const html = buildTickerHTML();
+  // نسختان ملتصقتان → حلقة لا نهائية سلسة
+  inner.innerHTML =
+    `<div class="ticker-track" id="tt1">${html}</div>` +
+    `<div class="ticker-track" id="tt2" aria-hidden="true">${html}</div>`;
+}
+
+async function initTicker() {
+  // جلب سعر الذهب
+  await fetchGoldPrice();
+  // ابنِ الشريط
+  updateTicker();
+  // تحديث كل 10 دقائق
+  setInterval(async () => {
+    await fetchGoldPrice();
+    updateTicker();
+  }, 10 * 60 * 1000);
+}
+
+// ابدأ بعد ثانيتين (بعد تحميل الأسعار)
+setTimeout(initTicker, 2000);
+
+// تحديث الشريط عند تغيير الأسعار — يُستدعى من applyRatesToUI
+function updateTickerIfReady() {
+  const inner = document.getElementById('tickerInner');
+  const loading = document.getElementById('tickerLoading');
+  if (inner && (!loading || loading.style.display === 'none')) {
+    updateTicker();
+  }
+}
+
+
+// ═══════════════════════════════════════════════════════
+// حاسبة العملات الخماسية (5 مستطيلات)
+// USD ↔ TRY ↔ SYP جديد ↔ SYP قديم ↔ ذهب 24K (غرام)
+// ═══════════════════════════════════════════════════════
+const FIELDS_5 = ['usd','try','new','old','gold'];
+let activeRow5 = null;
+
+function setActive5(field) {
+  activeRow5 = field;
+  FIELDS_5.forEach(f => {
+    const row = document.getElementById('field-' + f);
+    if (row) row.classList.toggle('active-row', f === field);
+  });
+}
+
+function clearAll5() {
+  FIELDS_5.forEach(f => {
+    const inp = document.getElementById('inp-' + f);
+    if (inp) inp.value = '';
+    const row = document.getElementById('field-' + f);
+    if (row) row.classList.remove('active-row');
+  });
+  activeRow5 = null;
+}
+
+function convertFrom5(source) {
+  setActive5(source);
+  const inpEl = document.getElementById('inp-' + source);
+  if (!inpEl) return;
+  // تنظيف النص: إزالة الفواصل، قبول النقطة كفاصل عشري
+  const cleaned = inpEl.value.replace(/,/g, '').replace(/[^0-9.]/g, '');
+  const raw = parseFloat(cleaned);
+
+  if (isNaN(raw) || cleaned === '') {
+    FIELDS_5.filter(f => f !== source).forEach(f => {
+      const el = document.getElementById('inp-' + f);
+      if (el) el.value = '';
+    });
+    return;
+  }
+
+  const gp = tickerGoldPrice || 154; // سعر غرام الذهب 24K بالدولار
+
+  // ── تحويل إلى دولار ──
+  let usd;
+  if      (source === 'usd')  usd = raw;
+  else if (source === 'try')  usd = raw / rates.tryRate;
+  else if (source === 'new')  usd = raw / rates.newSyp;
+  else if (source === 'old')  usd = raw / rates.oldSyp;
+  else if (source === 'gold') usd = raw * gp;
+
+  // ── دولار → باقي الحقول ──
+  const set5 = (f, val) => {
+    const el = document.getElementById('inp-' + f);
+    if (el && f !== source) el.value = val;
+  };
+
+  set5('usd',  fmt5(usd,              2));
+  set5('try',  fmt5(usd * rates.tryRate, 1));
+  set5('new',  fmt5(usd * rates.newSyp,  0));
+  set5('old',  fmt5(usd * rates.oldSyp,  0));
+  set5('gold', fmt5(usd / gp,            3));
+}
+
+function fmt5(val, dec) {
+  if (isNaN(val) || !isFinite(val) || val === 0) return '';
+  if (dec === 0) return Math.round(val).toLocaleString('en-US');
+  return parseFloat(val.toFixed(dec)).toLocaleString('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: dec
+  });
+}
 
 // ===== SERVICE WORKER INLINE (PWA) =====
 if ('serviceWorker' in navigator) {
