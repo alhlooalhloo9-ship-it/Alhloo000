@@ -2990,8 +2990,281 @@ body.light-mode .nv-main-input { color: var(--txt); }
 body.light-mode .nv-syp-card { background: var(--card) !important; }
 
 /* ══════════════════════════════════════
-   RATE UPDATE NOTIFICATION BANNER
+   PRICE LOADING SPLASH SCREEN — v2
 ══════════════════════════════════════ */
+#priceSplash {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #080d1a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow: hidden;
+  transition: opacity 0.7s cubic-bezier(0.4,0,0.2,1),
+              transform 0.7s cubic-bezier(0.4,0,0.2,1);
+}
+#priceSplash::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(245,166,35,0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(233,69,96,0.12) 0%, transparent 60%);
+  pointer-events: none;
+}
+#priceSplash::after {
+  content: '';
+  position: absolute;
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(245,166,35,0.06) 0%, transparent 70%);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -60%);
+  animation: splashGlow 3s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes splashGlow {
+  from { transform: translate(-50%, -60%) scale(1);   opacity: 0.6; }
+  to   { transform: translate(-50%, -60%) scale(1.25); opacity: 1; }
+}
+#priceSplash.hidden {
+  opacity: 0;
+  transform: scale(1.04);
+  pointer-events: none;
+}
+/* ── الشعار ── */
+.ps-logo-wrap {
+  position: relative;
+  margin-bottom: 18px;
+  z-index: 1;
+}
+.ps-logo {
+  font-size: 60px;
+  display: block;
+  animation: psLogoPulse 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 28px rgba(245,166,35,0.7));
+}
+@keyframes psLogoPulse {
+  0%,100% { transform: scale(1)    rotate(-2deg); filter: drop-shadow(0 0 20px rgba(245,166,35,0.5)); }
+  50%      { transform: scale(1.1)  rotate(2deg);  filter: drop-shadow(0 0 40px rgba(245,166,35,1)); }
+}
+.ps-ring {
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  border: 2px solid rgba(245,166,35,0.25);
+  animation: psRingExpand 2s ease-in-out infinite;
+}
+.ps-ring2 {
+  position: absolute;
+  inset: -26px;
+  border-radius: 50%;
+  border: 1px solid rgba(245,166,35,0.12);
+  animation: psRingExpand 2s ease-in-out infinite 0.4s;
+}
+@keyframes psRingExpand {
+  0%,100% { transform: scale(1);    opacity: 0.5; }
+  50%      { transform: scale(1.12); opacity: 0.15; }
+}
+/* ── النصوص ── */
+.ps-title {
+  font-family: 'Tajawal', sans-serif;
+  font-size: 26px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #f5a623 0%, #fff4d6 50%, #f5a623 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: psShine 2.5s linear infinite;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+  z-index: 1;
+}
+@keyframes psShine { to { background-position: 200% center; } }
+.ps-sub {
+  font-size: 12px;
+  color: rgba(255,255,255,0.3);
+  font-family: 'Cairo', sans-serif;
+  margin-bottom: 36px;
+  letter-spacing: 1px;
+  z-index: 1;
+}
+/* ── البطاقة الرئيسية ── */
+.ps-card {
+  width: 100%;
+  max-width: 320px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 20px 18px;
+  backdrop-filter: blur(10px);
+  z-index: 1;
+  margin-bottom: 20px;
+}
+/* ── شريط التقدم ── */
+.ps-bar-wrap {
+  width: 100%;
+  height: 3px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.ps-bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #f5a623, #e94560, #a855f7, #f5a623);
+  background-size: 300% auto;
+  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  animation: psBarMove 2s linear infinite;
+}
+@keyframes psBarMove { to { background-position: 300% center; } }
+/* ── خطوات التحميل ── */
+.ps-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ps-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Cairo', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.25);
+  transition: color 0.35s ease;
+}
+.ps-step.active { color: rgba(255,255,255,0.85); }
+.ps-step.done   { color: #4ade80; }
+/* ── نقطة الحالة ── */
+.ps-step-dot {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px;
+  transition: all 0.35s ease;
+  position: relative;
+}
+.ps-step.active .ps-step-dot {
+  border-color: #f5a623;
+  background: rgba(245,166,35,0.15);
+  animation: psDotPulse 1s ease-in-out infinite;
+}
+.ps-step.active .ps-step-dot::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: #f5a623;
+  animation: psDotCore 1s ease-in-out infinite;
+}
+@keyframes psDotPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(245,166,35,0.4); }
+  50%      { box-shadow: 0 0 0 5px rgba(245,166,35,0); }
+}
+@keyframes psDotCore {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.5; transform: scale(0.6); }
+}
+.ps-step.done .ps-step-dot {
+  border-color: #4ade80;
+  background: rgba(74,222,128,0.15);
+}
+.ps-step.done .ps-step-dot::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  color: #4ade80;
+  border-radius: 50%;
+  background: none;
+  animation: none;
+}
+.ps-step-icon { font-size: 15px; flex-shrink: 0; }
+.ps-step-text { flex: 1; }
+.ps-step-val {
+  font-size: 11px;
+  font-weight: 900;
+  color: #f5a623;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  white-space: nowrap;
+}
+.ps-step.done .ps-step-val { opacity: 1; }
+/* ── رسالة البطء ── */
+.ps-slow-msg {
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  font-family: 'Cairo', sans-serif;
+  text-align: center;
+  line-height: 1.8;
+  display: none;
+  z-index: 1;
+  margin-bottom: 10px;
+}
+.ps-slow-msg.show { display: block; }
+/* ── زر التخطي ── */
+.ps-skip-btn {
+  display: none;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 50px;
+  color: rgba(255,255,255,0.5);
+  font-family: 'Cairo', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 9px 22px;
+  cursor: pointer;
+  z-index: 1;
+  transition: all 0.2s;
+  letter-spacing: 0.3px;
+}
+.ps-skip-btn.show { display: block; }
+.ps-skip-btn:active { background: rgba(255,255,255,0.12); transform: scale(0.97); }
+/* ── نقاط التحميل المتحركة في الأسفل ── */
+.ps-dots {
+  display: flex;
+  gap: 6px;
+  margin-top: 28px;
+  z-index: 1;
+}
+.ps-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(245,166,35,0.4);
+  animation: psBounceDot 1.4s ease-in-out infinite;
+}
+.ps-dot:nth-child(2) { animation-delay: 0.2s; }
+.ps-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes psBounceDot {
+  0%,80%,100% { transform: scale(0.6); opacity: 0.3; }
+  40%          { transform: scale(1.2); opacity: 1; }
+}
+  gap: 10px;
+  font-family: 'Cairo', sans-serif;
+  font-size: 11px;
+  color: rgba(255,255,255,0.25);
+  transition: color 0.3s, opacity 0.3s;
+  opacity: 0.4;
+}
+.ps-step.active {
+  color: rgba(255,255,255,0.9);
+  opacity: 1;
+}
+.ps-step.done {
+  color: #4ade80;
+  opacity: 1;
+}
+
 #rateNotifBanner {
   position: fixed;
   top: calc(70px + env(safe-area-inset-top, 0px));
@@ -3048,7 +3321,82 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
 </head>
 <body>
 
-<!-- ===== OFFER NOTIFICATION POPUP ===== -->
+<!-- ═══════════════════════════════════════════
+     PRICE LOADING SPLASH SCREEN
+════════════════════════════════════════════ -->
+<div id="priceSplash">
+
+  <!-- خلفية النجوم -->
+  <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
+    <div style="position:absolute;width:2px;height:2px;background:rgba(255,255,255,0.6);border-radius:50%;top:15%;left:20%;animation:psBounceDot 2.1s ease-in-out infinite;"></div>
+    <div style="position:absolute;width:1px;height:1px;background:rgba(245,166,35,0.8);border-radius:50%;top:30%;left:75%;animation:psBounceDot 1.7s ease-in-out infinite 0.5s;"></div>
+    <div style="position:absolute;width:2px;height:2px;background:rgba(255,255,255,0.4);border-radius:50%;top:70%;left:10%;animation:psBounceDot 2.4s ease-in-out infinite 1s;"></div>
+    <div style="position:absolute;width:1px;height:1px;background:rgba(233,69,96,0.7);border-radius:50%;top:80%;left:85%;animation:psBounceDot 1.9s ease-in-out infinite 0.3s;"></div>
+    <div style="position:absolute;width:2px;height:2px;background:rgba(168,85,247,0.5);border-radius:50%;top:55%;left:90%;animation:psBounceDot 2.2s ease-in-out infinite 0.8s;"></div>
+  </div>
+
+  <!-- الشعار -->
+  <div class="ps-logo-wrap">
+    <div class="ps-ring"></div>
+    <div class="ps-ring2"></div>
+    <span class="ps-logo">💎</span>
+  </div>
+
+  <div class="ps-title">مركز الحلو للشحن</div>
+  <div class="ps-sub">جاري تحميل أسعار الصرف اللحظية</div>
+
+  <!-- البطاقة -->
+  <div class="ps-card">
+
+    <!-- شريط التقدم -->
+    <div class="ps-bar-wrap">
+      <div class="ps-bar-fill" id="psBarFill"></div>
+    </div>
+
+    <!-- خطوات التحميل -->
+    <div class="ps-steps">
+
+      <div class="ps-step" id="psStep1">
+        <div class="ps-step-dot"></div>
+        <span class="ps-step-icon">🇸🇾</span>
+        <span class="ps-step-text">الليرة السورية / الدولار</span>
+        <span class="ps-step-val" id="psVal1"></span>
+      </div>
+
+      <div class="ps-step" id="psStep2">
+        <div class="ps-step-dot"></div>
+        <span class="ps-step-icon">🇹🇷</span>
+        <span class="ps-step-text">الليرة التركية / الدولار</span>
+        <span class="ps-step-val" id="psVal2"></span>
+      </div>
+
+      <div class="ps-step" id="psStep3">
+        <div class="ps-step-dot"></div>
+        <span class="ps-step-icon">🥇</span>
+        <span class="ps-step-text">سعر الذهب عيار 24K</span>
+        <span class="ps-step-val" id="psVal3"></span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- نقاط متحركة -->
+  <div class="ps-dots">
+    <div class="ps-dot"></div>
+    <div class="ps-dot"></div>
+    <div class="ps-dot"></div>
+  </div>
+
+  <!-- رسالة البطء -->
+  <div class="ps-slow-msg" id="psSlowMsg">
+    الاتصال بطيء... يُرجى الانتظار قليلاً<br>
+    أو اضغط لاستخدام الأسعار المحفوظة
+  </div>
+  <button class="ps-skip-btn" id="psSkipBtn" onclick="dismissSplash(true)">
+    ⚡ استخدام الأسعار المحفوظة
+  </button>
+
+</div>
 <div class="offer-notif-overlay" id="offerNotifOverlay">
   <div class="offer-notif-box">
     <div class="offer-notif-tag">🎁 عرض خاص من مركز الحلو</div>
@@ -3418,18 +3766,22 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
             </div>
           </div>
 
-          <!-- SP-Today Fetch -->
+          <!-- SP-Today + TCMB Fetch -->
           <div style="background:rgba(16,185,129,0.07);border:1.5px solid rgba(16,185,129,0.22);border-radius:12px;padding:10px;margin-top:8px;">
-            <div style="font-size:11px;font-weight:800;color:#10B981;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:6px;">
-              <span style="display:flex;align-items:center;gap:5px;">🌐 الليرة اليوم (sp-today.com)</span>
-              <span style="font-size:9px;color:rgba(255,255,255,0.35);font-weight:400;">$+₺+€</span>
+            <div style="font-size:11px;font-weight:800;color:#10B981;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;gap:6px;">
+              <span style="display:flex;align-items:center;gap:5px;">🌐 تحديث الأسعار التلقائي</span>
+              <span style="font-size:9px;color:rgba(255,255,255,0.35);font-weight:400;">$+₺+🥇</span>
+            </div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:6px;line-height:1.6;">
+              🇸🇾 سعر الدولار: <span style="color:#4ade80;">sp-today.com</span> &nbsp;|&nbsp;
+              🇹🇷 الليرة التركية: <span style="color:#a78bfa;">TCMB → ER-API → Frankfurter → sp-today</span>
             </div>
             <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:6px;" id="spLastFetch">آخر جلب: لم يتم بعد</div>
             <div id="spStatus" style="font-size:10px;text-align:center;padding:5px;border-radius:8px;margin-bottom:8px;display:none;"></div>
             <div style="display:flex;gap:6px;">
               <button onclick="fetchRatesFromSPToday()" id="spFetchBtn"
                 style="flex:1;background:linear-gradient(135deg,#10B981,#059669);border:none;color:white;font-family:'Cairo',sans-serif;font-size:11px;font-weight:800;padding:8px;border-radius:10px;cursor:pointer;">
-                🌐 جلب من الليرة اليوم
+                🔄 جلب الأسعار الآن
               </button>
               <button onclick="toggleAutoFetchSP()" id="spAutoBtn"
                 style="flex:1;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);color:#10B981;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:8px;border-radius:10px;cursor:pointer;">
@@ -5258,8 +5610,105 @@ function checkNotifBanner() {
   document.getElementById('notifBanner').style.display = 'flex';
 }
 
+// ═══════════════════════════════════════════════════════
+// PRICE LOADING SPLASH — يحجب الصفحة حتى تكتمل الأسعار
+// الجلب متوازي (parallel) للسرعة القصوى
+// ═══════════════════════════════════════════════════════
+let _splashDone = false;
+let _splashSlowTimer = null;
+
+function _splashStep(n, state, val) {
+  const el = document.getElementById('psStep' + n);
+  if (!el) return;
+  el.classList.remove('active', 'done');
+  if (state) el.classList.add(state);
+  if (val !== undefined) {
+    const valEl = document.getElementById('psVal' + n);
+    if (valEl) valEl.textContent = val;
+  }
+}
+
+function _splashProgress(pct) {
+  const bar = document.getElementById('psBarFill');
+  if (bar) bar.style.width = pct + '%';
+}
+
+function dismissSplash(skipped) {
+  if (_splashDone) return;
+  _splashDone = true;
+  if (_splashSlowTimer) clearTimeout(_splashSlowTimer);
+  _splashProgress(100);
+  if (!skipped) {
+    _splashStep(1, 'done');
+    _splashStep(2, 'done');
+    _splashStep(3, 'done');
+  }
+  setTimeout(() => {
+    const splash = document.getElementById('priceSplash');
+    if (splash) splash.classList.add('hidden');
+    setTimeout(() => { if (splash) splash.remove(); }, 750);
+  }, skipped ? 50 : 350);
+}
+
+async function startupLoadPrices() {
+  // تشغيل كل الخطوات نشطة فوراً
+  _splashStep(1, 'active');
+  _splashStep(2, 'active');
+  _splashStep(3, 'active');
+  _splashProgress(8);
+
+  // مؤقت "بطيء": 6 ثواني
+  _splashSlowTimer = setTimeout(() => {
+    const msg = document.getElementById('psSlowMsg');
+    const btn = document.getElementById('psSkipBtn');
+    if (msg) msg.classList.add('show');
+    if (btn) btn.classList.add('show');
+  }, 6000);
+
+  // مؤقت أقصى: 14 ثانية → تخطي تلقائي
+  const forceSkip = setTimeout(() => dismissSplash(true), 14000);
+
+  // ══ الجلب المتوازي — كل المصادر دفعة واحدة ══
+  const results = await Promise.allSettled([
+    // ① SYP من JSONBin (محلي/سحابة)
+    loadRatesFromCloud(),
+    // ② TRY من TCMB/ER-API/Frankfurter
+    fetchTCMBRate(),
+    // ③ Gold
+    fetchGoldPrice()
+  ]);
+
+  clearTimeout(forceSkip);
+
+  // ── معالجة نتيجة ① SYP ──
+  _splashProgress(55);
+  _splashStep(1, 'done', rates.newSyp ? `$1 = ${rates.newSyp} ج.س` : '');
+
+  // ── معالجة نتيجة ② TRY ──
+  const tryResult = results[1];
+  if (tryResult.status === 'fulfilled' && tryResult.value) {
+    rates.tryRate = Math.round(tryResult.value * 100) / 100;
+  }
+  _splashProgress(80);
+  _splashStep(2, 'done', rates.tryRate ? `$1 = ${rates.tryRate} ₺` : '');
+
+  // ── معالجة نتيجة ③ Gold ──
+  _splashProgress(95);
+  _splashStep(3, 'done', tickerGoldPrice ? `$${tickerGoldPrice.toFixed(0)}/غ` : '');
+
+  // تحديث الواجهة بالأسعار المجلوبة
+  applyRatesToUI(null, null);
+
+  dismissSplash(false);
+
+  // بعد الإغلاق: ابدأ الشريط والدورة التلقائية
+  setTimeout(initTicker, 400);
+  setTimeout(() => autoFetchForAllUsers().catch(() => {}), 1000);
+}
+
 // ===== STARTUP =====
-loadRatesFromCloud();
+// الـ splash يحجب الصفحة ويجلب الأسعار — لا نستدعي loadRatesFromCloud مستقلاً
+startupLoadPrices();
 loadOffersFromCloud();
 setInterval(loadOffersFromCloud, 60000);
 // تحميل عدد الرسائل غير المقروءة للـ badge
@@ -5276,26 +5725,101 @@ setInterval(loadOffersFromCloud, 60000);
 })();
 checkNotifBanner();
 
+// ══════════════════════════════════════════════════════
+// جلب سعر الليرة التركية من البنك المركزي التركي (TCMB)
+// API رسمي مجاني — يعيد XML بسعر USD/TRY
+// ══════════════════════════════════════════════════════
+async function fetchTCMBRate() {
+  // ── Source 1: TCMB XML الرسمي (عبر proxy) ──
+  try {
+    const xml = await fetchViaProxy('https://www.tcmb.gov.tr/kurlar/today.xml');
+    // استخراج سعر USD من XML
+    // النمط: <Currency CurrencyCode="USD"> ... <ForexSelling>XX.XXXX</ForexSelling>
+    const usdMatch = xml.match(/CurrencyCode="USD"[\s\S]{0,500}?<ForexSelling>([\d.]+)<\/ForexSelling>/i);
+    if (usdMatch) {
+      const usdTry = parseFloat(usdMatch[1]);
+      if (usdTry > 10 && usdTry < 200) {
+        console.log('[TCMB] USD/TRY =', usdTry);
+        return usdTry; // هذا هو $1 = ₺X
+      }
+    }
+  } catch(e) { console.warn('[TCMB] XML failed:', e.message); }
+
+  // ── Source 2: exchangerate-api (JSON مجاني بدون key) ──
+  try {
+    const res = await fetch(
+      'https://open.er-api.com/v6/latest/USD',
+      { cache: 'no-store', signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      const usdTry = data?.rates?.TRY;
+      if (usdTry && usdTry > 10 && usdTry < 200) {
+        console.log('[ER-API] USD/TRY =', usdTry);
+        return usdTry;
+      }
+    }
+  } catch(e) { console.warn('[ER-API] failed:', e.message); }
+
+  // ── Source 3: فرانكفورت API (مجاني بدون key) ──
+  try {
+    const res = await fetch(
+      'https://api.frankfurter.app/latest?from=USD&to=TRY',
+      { cache: 'no-store', signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      const usdTry = data?.rates?.TRY;
+      if (usdTry && usdTry > 10 && usdTry < 200) {
+        console.log('[Frankfurter] USD/TRY =', usdTry);
+        return usdTry;
+      }
+    }
+  } catch(e) { console.warn('[Frankfurter] failed:', e.message); }
+
+  return null; // كل المصادر فشلت
+}
+
 // ── تحديث تلقائي من sp-today.com لجميع المستخدمين ──
 async function autoFetchForAllUsers() {
   try {
     showRateLoading();
 
-    // ① جلب صفحة الدولار
+    // ① جلب صفحة الدولار السوري من sp-today
     const usdHtml = await fetchViaProxy('https://sp-today.com/currency/us-dollar');
     const usdData = extractBuySell(usdHtml);
     if (!usdData || usdData.sell < 5000) throw new Error('USD parse fail');
 
-    // ② جلب صفحة الليرة التركية
-    const tryHtml = await fetchViaProxy('https://sp-today.com/currency/turkish-lira');
-    const tryData = extractBuySell(tryHtml);
-    if (!tryData || tryData.sell < 10) throw new Error('TRY parse fail');
+    // ② جلب سعر USD/TRY — TCMB أولاً ثم sp-today احتياطاً
+    let usdTryRate = null;
+
+    // المصدر الأول: TCMB + ER-API + Frankfurter
+    usdTryRate = await fetchTCMBRate();
+
+    // المصدر الاحتياطي: sp-today
+    if (!usdTryRate) {
+      console.log('[AutoFetch] TCMB failed, fallback to sp-today for TRY...');
+      try {
+        const tryHtml = await fetchViaProxy('https://sp-today.com/currency/turkish-lira');
+        const tryData = extractBuySell(tryHtml);
+        if (tryData && tryData.sell > 10) {
+          // sp-today يعطي SYP/TRY → نحسب USD/TRY
+          usdTryRate = Math.round((usdData.sell / tryData.sell) * 100) / 100;
+        }
+      } catch(e2) { console.warn('[AutoFetch] sp-today TRY also failed:', e2.message); }
+    }
+
+    // إذا فشل كل شيء → احتفظ بالسعر الحالي
+    if (!usdTryRate) {
+      usdTryRate = rates.tryRate || 38.5;
+      console.warn('[AutoFetch] كل مصادر TRY فشلت، نبقى على السعر الحالي:', usdTryRate);
+    }
 
     // ③ حساب القيم
-    const newNewSyp  = Math.round((usdData.sell / 100) * 10) / 10;  // ج.س جديد
-    const newOldSyp  = usdData.sell;                                  // ق.س قديم
-    const newTryRate = Math.round((usdData.sell / tryData.sell) * 100) / 100; // $1=₺
-    const newTrySyp  = Math.round((tryData.sell / 100) * 100) / 100; // ₺1=ج.س
+    const newNewSyp  = Math.round((usdData.sell / 100) * 10) / 10;     // ج.س جديد
+    const newOldSyp  = usdData.sell;                                     // ق.س قديم
+    const newTryRate = Math.round(usdTryRate * 100) / 100;               // $1 = ₺
+    const newTrySyp  = Math.round((usdData.sell / usdTryRate / 100) * 100) / 100; // ₺1 = ج.س
 
     // لم يتغير شيء؟
     if (newNewSyp === rates.newSyp && newTryRate === rates.tryRate) {
@@ -5319,7 +5843,7 @@ async function autoFetchForAllUsers() {
     localStorage.setItem('halou_rates', JSON.stringify({
       newSyp: newNewSyp, oldSyp: newOldSyp,
       tryRate: newTryRate, trySyp: newTrySyp,
-      dateStr, timeStr, source: 'sptoday'
+      dateStr, timeStr, source: 'sptoday+tcmb'
     }));
 
     applyRatesToUI(dateStr, timeStr, 'sptoday');
@@ -5346,7 +5870,7 @@ async function autoFetchForAllUsers() {
     }
   } catch(e) {
     hideRateNotif();
-    console.warn('[AutoFetch] sp-today failed:', e.message);
+    console.warn('[AutoFetch] failed:', e.message);
   }
 }
 
@@ -6649,7 +7173,7 @@ function showRateLoading() {
   b.className = 'loading show';
   icon.textContent = '🔄';
   title.textContent = 'جاري تحديث السعر...';
-  detail.innerHTML = '<span style="color:rgba(255,255,255,0.7);font-size:10px;">📡 جاري الجلب من الليرة اليوم</span>';
+  detail.innerHTML = '<span style="color:rgba(255,255,255,0.7);font-size:10px;">📡 TCMB · sp-today · ER-API</span>';
   clearTimeout(_rateNotifTimer);
 }
 
@@ -6895,11 +7419,11 @@ async function fetchRatesFromSPToday() {
   const lastEl = document.getElementById('spLastFetch');
 
   if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الجلب...'; }
-  showStatus(status, 'warning', '⏳ جاري الاتصال بـ sp-today.com...');
+  showStatus(status, 'warning', '⏳ جاري الاتصال...');
 
   try {
-    // ── ① جلب صفحة الدولار ──
-    showStatus(status, 'warning', '① جاري جلب سعر الدولار...');
+    // ── ① جلب صفحة الدولار السوري ──
+    showStatus(status, 'warning', '① جاري جلب سعر الدولار السوري...');
     const usdHtml = await fetchViaProxy('https://sp-today.com/currency/us-dollar');
     const usdData = extractBuySell(usdHtml);
     if (!usdData || usdData.sell < 5000) {
@@ -6907,23 +7431,29 @@ async function fetchRatesFromSPToday() {
       throw new Error('تعذّر استخراج سعر الدولار | معاينة: ' + preview);
     }
 
-    // ── ② جلب صفحة الليرة التركية ──
-    showStatus(status, 'warning', '② جاري جلب سعر الليرة التركية...');
-    const tryHtml = await fetchViaProxy('https://sp-today.com/currency/turkish-lira');
-    const tryData = extractBuySell(tryHtml);
-    if (!tryData || tryData.sell < 10)
-      throw new Error('تعذّر استخراج سعر الليرة التركية (sell=' + (tryData?.sell ?? '?') + ')');
+    // ── ② جلب سعر USD/TRY — TCMB أولاً ثم sp-today احتياطاً ──
+    showStatus(status, 'warning', '② جاري جلب سعر الليرة التركية (TCMB → sp-today)...');
+    let usdTryRate = await fetchTCMBRate();
+
+    if (!usdTryRate) {
+      // احتياط: sp-today
+      showStatus(status, 'warning', '② TCMB/ER-API فشل، جاري المحاولة عبر sp-today...');
+      const tryHtml = await fetchViaProxy('https://sp-today.com/currency/turkish-lira');
+      const tryData = extractBuySell(tryHtml);
+      if (!tryData || tryData.sell < 10)
+        throw new Error('تعذّر استخراج سعر الليرة التركية من جميع المصادر');
+      usdTryRate = Math.round((usdData.sell / tryData.sell) * 100) / 100;
+    }
 
     // ═══════════════════════════════════════
     // ③ حساب القيم الثلاث المطلوبة
-    // ───────────────────────────────────────
     // ① $1 = ج.س جديد  →  مبيع USD ÷ 100
     const newNewSyp  = Math.round((usdData.sell / 100) * 10) / 10;
-    // ② $1 = ₺          →  مبيع USD ÷ مبيع TRY
-    const newTryRate = Math.round((usdData.sell / tryData.sell) * 100) / 100;
-    // ③ ₺1 = ج.س جديد  →  مبيع TRY ÷ 100
-    const newTrySyp  = Math.round((tryData.sell / 100) * 100) / 100;
-    // ق.س (للتوافق مع بقية التطبيق)
+    // ② $1 = ₺          →  من TCMB مباشرة
+    const newTryRate = Math.round(usdTryRate * 100) / 100;
+    // ③ ₺1 = ج.س جديد  →  ج.س ÷ ₺
+    const newTrySyp  = Math.round((usdData.sell / usdTryRate / 100) * 100) / 100;
+    // ق.س (للتوافق)
     const newOldSyp  = usdData.sell;
     // ═══════════════════════════════════════
 
@@ -7552,8 +8082,8 @@ function updateTickerIfReady() {
   // الأسعار تُقرأ لحظة العرض تلقائياً — لا حاجة لإعادة بناء
 }
 
-// ابدأ بعد ثانيتين (بعد تحميل الأسعار)
-setTimeout(initTicker, 2000);
+// الـ initTicker يُستدعى من startupLoadPrices بعد اكتمال الأسعار
+// setTimeout(initTicker, 2000); ← محذوف لتجنب التضارب
 
 
 // ═══════════════════════════════════════════════════════
