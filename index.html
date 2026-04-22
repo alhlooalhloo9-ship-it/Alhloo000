@@ -3348,9 +3348,16 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
   <!-- البطاقة -->
   <div class="ps-card">
 
-    <!-- شريط التقدم -->
+    <!-- شريط التقدم + النسبة المئوية -->
     <div class="ps-bar-wrap">
       <div class="ps-bar-fill" id="psBarFill"></div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:-12px;margin-bottom:16px;">
+      <span style="font-family:'Cairo',sans-serif;font-size:10px;color:rgba(255,255,255,0.25);letter-spacing:1px;">التحميل</span>
+      <div style="display:flex;align-items:baseline;gap:2px;">
+        <span id="psPct" style="font-family:'Cairo',sans-serif;font-size:22px;font-weight:900;background:linear-gradient(135deg,#f5a623,#e94560);-webkit-background-clip:text;-webkit-text-fill-color:transparent;transition:all 0.4s ease;line-height:1;">0</span>
+        <span style="font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;color:rgba(245,166,35,0.6);">%</span>
+      </div>
     </div>
 
     <!-- خطوات التحميل -->
@@ -3963,6 +3970,16 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
               <button class="analytics-clear-btn" onclick="clearAnalytics()">🗑 مسح البيانات</button>
             </div>
             <button class="analytics-clear-btn" style="width:100%;margin-top:5px;border-color:rgba(245,166,35,0.3);color:#f5a623;" onclick="resetWelcome()">🔄 إعادة رسالة الترحيب</button>
+
+            <!-- معلومات البين السحابي -->
+            <div id="anBinInfo" style="margin-top:8px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.15);border-radius:10px;padding:8px 10px;">
+              <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-bottom:4px;">☁️ مزامنة سحابية — Bin ID:</div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span id="anBinIdDisplay" style="font-size:10px;color:#06b6d4;font-weight:700;font-family:monospace;flex:1;word-break:break-all;">جاري الإنشاء...</span>
+                <button onclick="copyAnBinId()" style="font-size:10px;background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.3);color:#06b6d4;border-radius:6px;padding:3px 8px;cursor:pointer;font-family:'Cairo',sans-serif;white-space:nowrap;">نسخ</button>
+              </div>
+              <div style="font-size:9px;color:rgba(255,255,255,0.25);margin-top:4px;">البيانات ترفع للسحابة تلقائياً من كل الأجهزة</div>
+            </div>
           </div>
         </div>
 
@@ -5628,9 +5645,26 @@ function _splashStep(n, state, val) {
   }
 }
 
-function _splashProgress(pct) {
+let _currentPct = 0;
+let _pctTimer = null;
+
+function _splashProgress(targetPct) {
   const bar = document.getElementById('psBarFill');
-  if (bar) bar.style.width = pct + '%';
+  if (bar) bar.style.width = targetPct + '%';
+
+  // حرّك الرقم تدريجياً من القيمة الحالية للهدف
+  if (_pctTimer) clearInterval(_pctTimer);
+  const start = _currentPct;
+  const diff  = targetPct - start;
+  const steps = Math.max(1, Math.abs(diff));
+  let   step  = 0;
+  _pctTimer = setInterval(() => {
+    step++;
+    _currentPct = Math.round(start + (diff * step / steps));
+    const el = document.getElementById('psPct');
+    if (el) el.textContent = _currentPct;
+    if (step >= steps) clearInterval(_pctTimer);
+  }, 18); // ~18ms لكل رقم → حركة سلسة
 }
 
 function dismissSplash(skipped) {
@@ -5707,8 +5741,28 @@ async function startupLoadPrices() {
 }
 
 // ===== STARTUP =====
-// الـ splash يحجب الصفحة ويجلب الأسعار — لا نستدعي loadRatesFromCloud مستقلاً
-startupLoadPrices();
+// الـ splash يظهر فقط أول مرة — عند الرجوع من واتساب يتخطاه صامتاً
+(function() {
+  const alreadyLoaded = sessionStorage.getItem('halou_prices_loaded');
+  if (alreadyLoaded) {
+    // رجع المستخدم من واتساب أو تطبيق آخر — أخفِ الـ splash فوراً
+    const splash = document.getElementById('priceSplash');
+    if (splash) splash.remove();
+    _splashDone = true;
+    // حدّث الأسعار بصمت في الخلفية
+    loadRatesFromCloud().then(() => {
+      applyRatesToUI(null, null);
+      initTicker();
+      autoFetchForAllUsers().catch(() => {});
+    }).catch(() => {
+      autoFetchForAllUsers().catch(() => {});
+    });
+  } else {
+    // أول فتح حقيقي للتطبيق
+    sessionStorage.setItem('halou_prices_loaded', '1');
+    startupLoadPrices();
+  }
+})();
 loadOffersFromCloud();
 setInterval(loadOffersFromCloud, 60000);
 // تحميل عدد الرسائل غير المقروءة للـ badge
@@ -6544,13 +6598,116 @@ const AN_PW           = '1988';
 let   anPeriod        = 'today';
 let   anUnlocked      = false;
 
+// ══ BIN الإحصائيات السحابية — ينشأ تلقائياً عند أول استخدام ══
+const AN_BIN_STORAGE_KEY = 'halou_an_bin_id';
+let AN_BIN_ID = localStorage.getItem(AN_BIN_STORAGE_KEY) || null;
+
+async function getOrCreateAnBin() {
+  if (AN_BIN_ID) return AN_BIN_ID;
+  try {
+    const res = await fetch(`${JSONBIN_BASE}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': API_KEY,
+        'X-Bin-Name': 'halou-analytics',
+        'X-Bin-Private': 'true'
+      },
+      body: JSON.stringify({ sessions: [], orders: [], devices: {} })
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    AN_BIN_ID = data.metadata?.id || null;
+    if (AN_BIN_ID) {
+      localStorage.setItem(AN_BIN_STORAGE_KEY, AN_BIN_ID);
+      console.log('[Analytics] تم إنشاء bin جديد:', AN_BIN_ID);
+    }
+    return AN_BIN_ID;
+  } catch(e) {
+    console.warn('[Analytics] فشل إنشاء bin:', e.message);
+    return null;
+  }
+}
+
+// ── رفع حدث للسحابة (زيارة أو طلب) ──
+async function pushEventToCloud(type, payload) {
+  try {
+    const binId = await getOrCreateAnBin();
+    if (!binId) return;
+
+    // ① اقرأ البيانات الحالية
+    const res = await fetch(`${JSONBIN_BASE}/${binId}/latest?t=${Date.now()}`, {
+      headers: { 'X-Master-Key': API_KEY }
+    });
+    let cloud = { sessions: [], orders: [], devices: {} };
+    if (res.ok) {
+      const data = await res.json();
+      cloud = data.record || cloud;
+      if (!cloud.sessions) cloud.sessions = [];
+      if (!cloud.orders)   cloud.orders   = [];
+      if (!cloud.devices)  cloud.devices  = {};
+    }
+
+    if (type === 'session') {
+      cloud.sessions.unshift(payload);
+      if (cloud.sessions.length > 500) cloud.sessions = cloud.sessions.slice(0, 500);
+      cloud.devices[payload.device] = {
+        id:       payload.device,
+        nickname: payload.nickname,
+        di:       payload.di,
+        location: payload.location,
+        lastSeen: payload.ts,
+        visits:   ((cloud.devices[payload.device]?.visits) || 0) + 1
+      };
+    } else if (type === 'order') {
+      cloud.orders.unshift(payload);
+      if (cloud.orders.length > 300) cloud.orders = cloud.orders.slice(0, 300);
+      if (cloud.devices[payload.device]) {
+        cloud.devices[payload.device].lastOrder = payload.ts;
+      }
+    }
+
+    // ② ارفع البيانات المحدّثة
+    await fetch(`${JSONBIN_BASE}/${binId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+      body: JSON.stringify(cloud)
+    });
+  } catch(e) {
+    console.warn('[Analytics] cloud push failed:', e.message);
+  }
+}
+
+// ── قراءة الإحصائيات من السحابة ──
+async function fetchCloudAnalytics() {
+  try {
+    const binId = await getOrCreateAnBin();
+    if (!binId) return null;
+    const res = await fetch(`${JSONBIN_BASE}/${binId}/latest?t=${Date.now()}`, {
+      headers: { 'X-Master-Key': API_KEY }
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.record || null;
+  } catch(e) {
+    console.warn('[Analytics] cloud fetch failed:', e.message);
+    return null;
+  }
+}
+
 // ── Device ID ──
 function getDeviceId() {
   let id = localStorage.getItem(DEVICE_KEY);
   if (!id) { id = 'dv_' + Math.random().toString(36).substr(2,9) + '_' + Date.now().toString(36); localStorage.setItem(DEVICE_KEY,id); }
   return id;
 }
-function getNickname() { return localStorage.getItem(NICKNAME_KEY) || 'زائر'; }
+function getNickname() {
+  const saved = localStorage.getItem(NICKNAME_KEY);
+  if (saved && saved !== 'زائر' && saved.trim()) return saved;
+  // اسم تلقائي = اسم الجهاز من userAgent
+  const di = getDeviceInfo();
+  return di.device && di.device !== 'غير محدد' ? di.device : 'زائر';
+}
 
 // ── Device Info ──
 function getDeviceInfo() {
@@ -6598,6 +6755,21 @@ const _cs = { device:getDeviceId(), nickname:getNickname(), time:new Date().toLo
   if (!d.uniqueDevices.includes(getDeviceId())) { d.uniqueDevices.push(getDeviceId()); if(d.uniqueDevices.length>500) d.uniqueDevices=d.uniqueDevices.slice(-500); }
   saveAN(d);
   _cs.location = await getLocation();
+
+  // رفع حدث "دخول" للسحابة فوراً — لا ننتظر الإغلاق
+  setTimeout(() => {
+    pushEventToCloud('session', {
+      device:   _cs.device,
+      nickname: getNickname(),
+      time:     _cs.time,
+      ts:       _cs.ts,
+      duration: 0,          // سيُحدَّث عند الإغلاق
+      pages:    [],
+      location: _cs.location,
+      di:       _cs.di,
+      isEntry:  true        // علامة أن هذا حدث دخول وليس إغلاق
+    }).catch(()=>{});
+  }, 3000); // بعد 3 ثواني من التحميل
 })();
 
 function trackPageView(pid) {
@@ -6609,32 +6781,58 @@ function trackPageView(pid) {
 function trackOrder(orderData) {
   const d = getAN();
   d.orders++;
-  // حفظ تفاصيل الطلب كاملة
   if (!d.ordersList) d.ordersList = [];
-  if (orderData) {
-    d.ordersList.unshift({
-      id:       Date.now().toString(),
-      ts:       Date.now(),
-      date:     new Date().toLocaleString('ar-SY'),
-      service:  orderData.service  || '—',
-      pkg:      orderData.pkg      || '—',
-      price:    orderData.price    || '—',
-      sypPrice: orderData.sypPrice || null,
-      contact:  orderData.contact  || '—',
-      notes:    orderData.notes    || ''
-    });
-    if (d.ordersList.length > 300) d.ordersList = d.ordersList.slice(0, 300);
-  }
+  const order = {
+    id:       Date.now().toString(),
+    ts:       Date.now(),
+    date:     new Date().toLocaleString('ar-SY'),
+    service:  orderData.service  || '—',
+    pkg:      orderData.pkg      || '—',
+    price:    orderData.price    || '—',
+    sypPrice: orderData.sypPrice || null,
+    contact:  orderData.contact  || '—',
+    notes:    orderData.notes    || '',
+    // معلومات الجهاز مرفقة مع الطلب
+    device:   getDeviceId(),
+    nickname: getNickname(),
+    di:       getDeviceInfo(),
+    location: _cs.location || 'غير محدد'
+  };
+  d.ordersList.unshift(order);
+  if (d.ordersList.length > 300) d.ordersList = d.ordersList.slice(0, 300);
   saveAN(d);
+  // ⬆️ رفع الطلب للسحابة فوراً
+  pushEventToCloud('order', order).catch(()=>{});
 }
 
 window.addEventListener('beforeunload', ()=>{
   const dur=Math.round((Date.now()-_ss)/1000);
   if(dur<3) return;
+  const sessionData = {
+    device:   _cs.device,
+    nickname: getNickname(),
+    time:     _cs.time,
+    ts:       _cs.ts,
+    duration: dur,
+    pages:    _cs.pages.join(' ← '),
+    location: _cs.location,
+    di:       _cs.di,
+    endTs:    Date.now()
+  };
   const d=getAN();
-  d.sessions.push({ device:_cs.device, nickname:getNickname(), time:_cs.time, ts:_cs.ts, duration:dur, pages:_cs.pages.join(' ← '), location:_cs.location, di:_cs.di });
+  d.sessions.push(sessionData);
   d.totalTime+=dur; d.sessionCount++;
   saveAN(d);
+  // رفع للسحابة (beacon لضمان الإرسال عند الإغلاق)
+  try {
+    const payload = JSON.stringify({ record: null, type: 'session', data: sessionData });
+    navigator.sendBeacon && navigator.sendBeacon(
+      `${JSONBIN_BASE}/${AN_BIN_ID}`,
+      new Blob([payload], { type: 'application/json' })
+    );
+  } catch(e) {}
+  // رفع غير متزامن أيضاً
+  pushEventToCloud('session', sessionData).catch(()=>{});
 });
 
 // ── Period filter ──
@@ -6699,19 +6897,40 @@ function checkAnPw() {
 }
 
 // ── Main Dashboard Loader ──
-function loadAnalytics() {
+async function loadAnalytics() {
   if (!anUnlocked) return;
-  const allData = getAN();
-  const sessions = filterSessions(allData.sessions, anPeriod);
-  const now = Date.now();
-  const todayStr = new Date().toLocaleDateString('ar-SY');
 
-  // Update timestamp
+  // أظهر مؤشر تحميل
   const upd = document.getElementById('an-last-update');
+  if (upd) upd.textContent = '⏳ جاري تحميل البيانات...';
+
+  // اقرأ من السحابة أولاً، ثم دمج مع المحلي
+  const cloudData = await fetchCloudAnalytics();
+  const localData = getAN();
+
+  // دمج البيانات: السحابة هي المصدر الرئيسي + المحلي كاحتياط
+  const allData = {
+    totalVisits:   (cloudData?.sessions?.length || 0) + (localData.totalVisits || 0),
+    uniqueDevices: Object.keys(cloudData?.devices || {}),
+    orders:        (cloudData?.orders?.length || 0),
+    services:      localData.services || {},
+    sessions:      cloudData?.sessions || localData.sessions || [],
+    ordersList:    cloudData?.orders   || localData.ordersList || [],
+    devices:       cloudData?.devices  || {},
+    totalTime:     localData.totalTime || 0,
+    sessionCount:  localData.sessionCount || 0,
+    installs:      localData.installs || [],
+    offers:        localData.offers || {}
+  };
+
   if (upd) upd.textContent = 'آخر تحديث: ' + new Date().toLocaleTimeString('ar-SY');
 
+  const sessions  = filterSessions(allData.sessions, anPeriod);
+  const now       = Date.now();
+  const todayStr  = new Date().toLocaleDateString('ar-SY');
+
   // ① KPIs
-  const totalDisp = anPeriod==='all' ? allData.totalVisits : sessions.length;
+  const totalDisp = anPeriod==='all' ? allData.sessions.length : sessions.length;
   document.getElementById('an-total').textContent   = totalDisp.toLocaleString('ar-SY');
   document.getElementById('an-unique').textContent  = allData.uniqueDevices.length.toLocaleString('ar-SY');
   document.getElementById('an-orders').textContent  = allData.orders.toLocaleString('ar-SY');
@@ -6719,7 +6938,6 @@ function loadAnalytics() {
   const todayCount = allData.sessions.filter(s=>s.time && s.time.startsWith(todayStr)).length;
   document.getElementById('an-today').textContent = todayCount.toLocaleString('ar-SY');
 
-  // Active last hour
   const activeCount = allData.sessions.filter(s=>s.ts && (now-s.ts)<3600000).length;
   const activeEl = document.getElementById('an-active');
   if (activeEl) activeEl.textContent = activeCount.toLocaleString('ar-SY');
@@ -6731,6 +6949,10 @@ function loadAnalytics() {
     const avg=Math.round(filtTime/filtCount);
     document.getElementById('an-avgtime').textContent = Math.floor(avg/60)+'د '+String(avg%60).padStart(2,'0')+'ث';
   } else { document.getElementById('an-avgtime').textContent='—'; }
+
+  // حفظ مرجع لآخر بيانات سحابية
+  _lastCloudData = allData;
+  _updateBinIdDisplay();
 
   // ② Draw chart (7 days)
   drawVisitChart(allData.sessions);
@@ -6871,19 +7093,43 @@ function renderDeviceStats(sessions) {
 
 // ── Visitors List ──
 function renderVisitorsList(allData) {
-  const byDevice = {};
-  allData.sessions.forEach(s=>{
-    if(!s.device) return;
-    if(!byDevice[s.device]) byDevice[s.device]={nickname:s.nickname||'زائر',sessions:[],lastTime:0,location:'—',di:{}};
-    byDevice[s.device].sessions.push(s);
-    if((s.ts||0)>byDevice[s.device].lastTime){
-      byDevice[s.device].lastTime=s.ts||0;
-      if(s.nickname) byDevice[s.device].nickname=s.nickname;
-      if(s.location&&s.location!=='...') byDevice[s.device].location=s.location;
-      if(s.di) byDevice[s.device].di=s.di;
-    }
-  });
-  const visitors = Object.entries(byDevice).sort((a,b)=>b[1].lastTime-a[1].lastTime);
+  // استخدم devices من السحابة إذا توفرت، وإلا اجمع من الجلسات
+  let byDevice = {};
+
+  if (allData.devices && Object.keys(allData.devices).length > 0) {
+    // من السحابة مباشرة
+    byDevice = allData.devices;
+    // أضف sessions لكل جهاز
+    allData.sessions.forEach(s => {
+      if (!s.device) return;
+      if (!byDevice[s.device]) {
+        byDevice[s.device] = { id: s.device, nickname: s.nickname || getNicknameAuto(s.di), di: s.di || {}, location: s.location || '—', lastSeen: s.ts || 0, visits: 0 };
+      }
+      if (!byDevice[s.device].sessions) byDevice[s.device].sessions = [];
+      byDevice[s.device].sessions.push(s);
+      if ((s.ts || 0) > (byDevice[s.device].lastSeen || 0)) {
+        byDevice[s.device].lastSeen = s.ts;
+        if (s.location && s.location !== '...') byDevice[s.device].location = s.location;
+        if (s.nickname && s.nickname !== 'زائر') byDevice[s.device].nickname = s.nickname;
+      }
+    });
+  } else {
+    // fallback: اجمع من الجلسات
+    allData.sessions.forEach(s => {
+      if (!s.device) return;
+      if (!byDevice[s.device]) byDevice[s.device] = { nickname: s.nickname || 'زائر', sessions: [], lastSeen: 0, location: '—', di: {} };
+      if (!byDevice[s.device].sessions) byDevice[s.device].sessions = [];
+      byDevice[s.device].sessions.push(s);
+      if ((s.ts || 0) > byDevice[s.device].lastSeen) {
+        byDevice[s.device].lastSeen = s.ts || 0;
+        if (s.nickname) byDevice[s.device].nickname = s.nickname;
+        if (s.location && s.location !== '...') byDevice[s.device].location = s.location;
+        if (s.di) byDevice[s.device].di = s.di;
+      }
+    });
+  }
+
+  const visitors = Object.entries(byDevice).sort((a,b) => (b[1].lastSeen||0) - (a[1].lastSeen||0));
 
   const countEl = document.getElementById('an-users-count');
   if (countEl) countEl.textContent = visitors.length + ' مستخدم';
@@ -6891,55 +7137,90 @@ function renderVisitorsList(allData) {
   const vlist = document.getElementById('an-visitors-list');
   if (!vlist) return;
   if (!visitors.length) {
-    vlist.innerHTML='<div style="text-align:center;color:var(--txt3,rgba(255,255,255,0.25));font-size:11px;padding:16px 0">لا توجد زيارات مسجلة</div>';
+    vlist.innerHTML = '<div style="text-align:center;color:var(--txt3,rgba(255,255,255,0.25));font-size:11px;padding:16px 0">لا توجد زيارات مسجلة</div>';
     return;
   }
-  vlist.innerHTML = visitors.slice(0,50).map(([did,v],idx)=>{
-    const nick = (v.nickname && v.nickname!=='زائر مجهول') ? v.nickname : 'زائر';
-    const initial = nick.replace(/\s/g,'')[0] || '?';
-    const loc = (v.location&&v.location!=='غير محدد'&&v.location!=='...') ? v.location.split('/')[0].trim() : '—';
-    const lastD = v.lastTime ? new Date(v.lastTime).toLocaleDateString('ar-SY') : '—';
+  vlist.innerHTML = visitors.slice(0, 50).map(([did, v], idx) => {
+    const sessions = v.sessions || [];
+    const nick = (v.nickname && v.nickname !== 'زائر') ? v.nickname : getNicknameAuto(v.di);
+    const initial = nick.replace(/\s/g, '')[0] || '?';
+    const loc = (v.location && v.location !== 'غير محدد' && v.location !== '...') ? v.location.split('/')[0].trim() : '—';
+    const lastD = v.lastSeen ? new Date(v.lastSeen).toLocaleDateString('ar-SY') : '—';
     const colors = ['#5B5FEF','#10B981','#F59E0B','#EC4899','#14B8A6','#7C3AED'];
-    const col = colors[idx%colors.length];
-    const totalTime = v.sessions.reduce((a,s)=>a+(s.duration||0),0);
-    const avgTime = v.sessions.length ? Math.round(totalTime/v.sessions.length) : 0;
-    return `<div class="an-visitor-row" onclick="showVisitorDetail('${did}')">
+    const col = colors[idx % colors.length];
+    const totalTime = sessions.reduce((a, s) => a + (s.duration || 0), 0);
+    const di = v.di || {};
+    // كم طلب أرسل هذا الجهاز
+    const ordersCount = (allData.ordersList || allData.orders || []).filter(o => o.device === did).length;
+    return `<div class="an-visitor-row" onclick="showVisitorDetail('${did}', _lastCloudData)">
       <div class="an-visitor-avatar" style="background:${col}">${initial}</div>
       <div class="an-visitor-info">
-        <div class="an-visitor-name">${nick}</div>
-        <div class="an-visitor-meta">📍${loc} · ${v.di.os||'—'} · ${v.di.browser||'—'}</div>
+        <div class="an-visitor-name">${nick} ${ordersCount > 0 ? `<span style="font-size:9px;background:rgba(74,222,128,0.15);color:#4ade80;border-radius:6px;padding:1px 5px;margin-right:4px;">📦 ${ordersCount} طلب</span>` : ''}</div>
+        <div class="an-visitor-meta">📍${loc} · ${di.device || di.os || '—'} · ${di.browser || '—'}</div>
+        <div class="an-visitor-meta" style="margin-top:2px;">🔗 ${sessions.length} زيارة · ⏱ ${Math.floor(totalTime/60)}د · آخر دخول: ${lastD}</div>
       </div>
       <div style="text-align:left;flex-shrink:0;">
-        <div class="an-visitor-badge">${v.sessions.length} زيارة</div>
-        <div style="font-size:9px;color:var(--txt3,rgba(255,255,255,0.3));text-align:center;margin-top:2px;">${lastD}</div>
+        <div class="an-visitor-badge">${v.visits || sessions.length} زيارة</div>
       </div>
     </div>`;
   }).join('');
 }
 
+// اسم تلقائي من معلومات الجهاز
+function getNicknameAuto(di) {
+  if (!di) return 'زائر';
+  if (di.device && di.device !== 'غير محدد') return di.device;
+  if (di.os && di.os !== 'غير محدد') return di.os + ' ' + (di.browser || '');
+  return 'زائر';
+}
+
+// حفظ آخر بيانات سحابية للاستخدام في التفاصيل
+let _lastCloudData = null;
+
+function copyAnBinId() {
+  const id = AN_BIN_ID || localStorage.getItem(AN_BIN_STORAGE_KEY) || '—';
+  navigator.clipboard?.writeText(id).catch(()=>{});
+  const el = document.getElementById('anBinIdDisplay');
+  if (el) { const old = el.textContent; el.textContent = '✅ تم النسخ!'; setTimeout(()=>el.textContent=old, 1500); }
+}
+
+function _updateBinIdDisplay() {
+  const el = document.getElementById('anBinIdDisplay');
+  const id = AN_BIN_ID || localStorage.getItem(AN_BIN_STORAGE_KEY);
+  if (el) el.textContent = id || '⚠️ جاري الإنشاء...';
+}
+
 // ── Visitor Detail ──
-function showVisitorDetail(deviceId) {
-  const allData = getAN();
+function showVisitorDetail(deviceId, cloudData) {
+  const allData = cloudData || { sessions: getAN().sessions, orders: getAN().ordersList || [], devices: {} };
   const byDevice = {};
-  allData.sessions.forEach(s=>{
-    if(!s.device) return;
-    if(!byDevice[s.device]) byDevice[s.device]={nickname:s.nickname||'زائر',sessions:[],location:'—',di:{}};
+  allData.sessions.forEach(s => {
+    if (!s.device) return;
+    if (!byDevice[s.device]) byDevice[s.device] = { nickname: s.nickname || 'زائر', sessions: [], location: '—', di: {} };
     byDevice[s.device].sessions.push(s);
-    if(s.nickname) byDevice[s.device].nickname=s.nickname;
-    if(s.location&&s.location!=='...') byDevice[s.device].location=s.location;
-    if(s.di) byDevice[s.device].di=s.di;
+    if (s.nickname) byDevice[s.device].nickname = s.nickname;
+    if (s.location && s.location !== '...') byDevice[s.device].location = s.location;
+    if (s.di) byDevice[s.device].di = s.di;
   });
+  // أضف من devices السحابة إذا لم توجد جلسات
+  if (!byDevice[deviceId] && allData.devices && allData.devices[deviceId]) {
+    byDevice[deviceId] = { ...allData.devices[deviceId], sessions: [] };
+  }
   const v = byDevice[deviceId];
   if (!v) return;
-  const di = v.di||{};
-  const totalTime = v.sessions.reduce((a,s)=>a+(s.duration||0),0);
-  const avgTime   = v.sessions.length ? Math.round(totalTime/v.sessions.length) : 0;
-  const allPages  = v.sessions.flatMap(s=>s.pages?s.pages.split(' ← '):[]);
+  const di = v.di || {};
+  const sessions = v.sessions || [];
+  const totalTime = sessions.reduce((a, s) => a + (s.duration || 0), 0);
+  const avgTime   = sessions.length ? Math.round(totalTime / sessions.length) : 0;
+  const allPages  = sessions.flatMap(s => s.pages ? s.pages.split(' ← ') : []);
   const pageCounts = {};
-  allPages.forEach(p=>{ if(p) pageCounts[p]=(pageCounts[p]||0)+1; });
-  const topPage = Object.entries(pageCounts).sort((a,b)=>b[1]-a[1])[0];
+  allPages.forEach(p => { if (p) pageCounts[p] = (pageCounts[p] || 0) + 1; });
+  const topPage = Object.entries(pageCounts).sort((a, b) => b[1] - a[1])[0];
+  const nick = (v.nickname && v.nickname !== 'زائر') ? v.nickname : getNicknameAuto(di);
+  // طلبات هذا الجهاز
+  const deviceOrders = (allData.ordersList || allData.orders || []).filter(o => o.device === deviceId);
 
-  document.getElementById('vd-name').textContent = '👤 ' + v.nickname;
+  document.getElementById('vd-name').textContent = '👤 ' + nick;
   document.getElementById('vd-info').innerHTML = `
     <div class="an-vd-cell"><div class="an-vd-cell-lbl">📍 الموقع</div><div class="an-vd-cell-val">${v.location||'—'}</div></div>
     <div class="an-vd-cell"><div class="an-vd-cell-lbl">📱 الجهاز</div><div class="an-vd-cell-val">${di.device||'—'}</div></div>
