@@ -2990,8 +2990,60 @@ body.light-mode .nv-main-input { color: var(--txt); }
 body.light-mode .nv-syp-card { background: var(--card) !important; }
 
 /* ══════════════════════════════════════
-   PRICE LOADING SPLASH SCREEN — v2
+   INVOICE SYSTEM (pf-) — Admin Only
 ══════════════════════════════════════ */
+.pf-dashboard { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
+.pf-kpi { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:10px 6px; text-align:center; }
+.pf-kpi-val { font-size:18px; font-weight:900; color:#f5a623; font-family:'Tajawal',sans-serif; }
+.pf-kpi-lbl { font-size:9px; color:rgba(255,255,255,0.35); margin-top:2px; }
+.pf-service-btns { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:4px; }
+.pf-svc-btn { background:rgba(124,58,237,0.15); border:1px solid rgba(124,58,237,0.3); border-radius:10px; color:white; font-family:'Cairo',sans-serif; font-size:10px; font-weight:700; padding:8px 4px; cursor:pointer; transition:all .2s; }
+.pf-svc-btn:active { background:rgba(124,58,237,0.4); transform:scale(.97); }
+.pf-sec-title { font-size:11px; font-weight:800; color:rgba(255,255,255,0.6); }
+.pf-pkg-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:5px; max-height:200px; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+.pf-pkg-btn { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:9px; color:white; font-family:'Cairo',sans-serif; font-size:10px; font-weight:700; padding:7px 5px; cursor:pointer; text-align:center; transition:all .2s; line-height:1.4; }
+.pf-pkg-btn:active { background:rgba(245,166,35,0.2); border-color:#f5a623; transform:scale(.97); }
+.pf-pkg-price { display:block; font-size:9px; color:#f5a623; font-weight:900; margin-top:2px; }
+/* فاتورة في السجل */
+.pf-inv-row { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:9px 11px; margin-bottom:6px; cursor:pointer; transition:all .2s; display:flex; align-items:center; gap:8px; }
+.pf-inv-row:active { background:rgba(255,255,255,0.09); }
+.pf-inv-info { flex:1; min-width:0; }
+.pf-inv-pkg { font-size:11px; font-weight:800; color:white; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pf-inv-meta { font-size:9px; color:rgba(255,255,255,0.35); margin-top:2px; }
+.pf-inv-profit { font-size:13px; font-weight:900; color:#4ade80; flex-shrink:0; }
+/* حالة الفاتورة */
+.pf-status-badge { display:inline-block; border-radius:20px; padding:3px 10px; font-size:10px; font-weight:800; }
+.pf-status-pending  { background:rgba(251,191,36,0.15); color:#fbbf24; border:1px solid rgba(251,191,36,0.3); }
+.pf-status-done     { background:rgba(74,222,128,0.15); color:#4ade80; border:1px solid rgba(74,222,128,0.3); }
+.pf-status-cancelled{ background:rgba(248,113,113,0.15); color:#f87171; border:1px solid rgba(248,113,113,0.3); }
+/* Modal */
+.pf-modal-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); border-radius:28px 28px 0 0; z-index:20; display:flex; align-items:center; justify-content:center; padding:16px; overflow-y:auto; }
+.pf-modal-box { background:linear-gradient(170deg,#1a1a2e,#0f0f1e); border:1px solid rgba(255,255,255,0.12); border-radius:20px; padding:18px; width:100%; max-width:340px; }
+.pf-modal-title { font-size:15px; font-weight:900; color:white; text-align:center; margin-bottom:14px; }
+.pf-field-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.pf-field-lbl { font-size:10px; color:rgba(255,255,255,0.45); width:70px; flex-shrink:0; text-align:right; }
+.pf-field-val { font-size:11px; font-weight:700; color:white; flex:1; }
+.pf-input { flex:1; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:8px; color:white; font-family:'Cairo',sans-serif; font-size:11px; font-weight:700; padding:6px 10px; outline:none; direction:rtl; }
+.pf-input:focus { border-color:rgba(124,58,237,0.6); }
+.pf-profit-row .pf-profit-val { font-size:15px; font-weight:900; color:#4ade80; }
+.pf-btn-cancel { flex:1; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:10px; color:rgba(255,255,255,0.6); font-family:'Cairo',sans-serif; font-size:12px; font-weight:700; padding:10px; cursor:pointer; }
+.pf-btn-save { flex:2; background:linear-gradient(135deg,#7c3aed,#4f46e5); border:none; border-radius:10px; color:white; font-family:'Cairo',sans-serif; font-size:12px; font-weight:800; padding:10px; cursor:pointer; }
+/* الوصل/الفاتورة */
+.pf-receipt { background:linear-gradient(160deg,#111827,#0f172a); border:1px solid rgba(245,166,35,0.2); border-radius:14px; padding:16px; }
+.pf-receipt-header { text-align:center; margin-bottom:10px; }
+.pf-receipt-title { font-size:14px; font-weight:900; color:#f5a623; }
+.pf-receipt-sub { font-size:9px; color:rgba(255,255,255,0.3); margin-top:2px; }
+.pf-receipt-num { text-align:center; font-size:11px; font-weight:700; color:rgba(255,255,255,0.3); margin-bottom:10px; letter-spacing:1px; }
+.pf-receipt-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:11px; }
+.pf-receipt-row span:first-child { color:rgba(255,255,255,0.4); }
+.pf-receipt-row span:last-child { color:white; font-weight:700; }
+.pf-receipt-price span:last-child { color:#f5a623; font-size:13px; }
+.pf-receipt-profit { border-top:1.5px solid rgba(74,222,128,0.3); margin-top:4px; }
+.pf-receipt-profit span:last-child { color:#4ade80; font-size:15px; font-weight:900; }
+.pf-receipt-status-row { text-align:center; margin-top:10px; }
+.pf-act-btn { flex:1; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); border-radius:9px; color:white; font-family:'Cairo',sans-serif; font-size:11px; font-weight:700; padding:8px 4px; cursor:pointer; }
+.pf-act-green { background:rgba(74,222,128,0.12); border-color:rgba(74,222,128,0.3); color:#4ade80; }
+.pf-act-red { background:rgba(248,113,113,0.12); border-color:rgba(248,113,113,0.3); color:#f87171; }
 #priceSplash {
   position: fixed;
   inset: 0;
@@ -3685,6 +3737,7 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
           <button class="admin-tab-btn" onclick="switchAdminTab('offers',this)">🎁 العروض</button>
           <button class="admin-tab-btn" onclick="switchAdminTab('inbox',this)" id="inboxTabBtn">💬 رسائل <span id="inboxUnreadBadge" style="display:none;background:#ef4444;color:white;border-radius:8px;padding:1px 5px;font-size:9px;margin-right:2px;"></span></button>
           <button class="admin-tab-btn" onclick="openAnalyticsWithPw(this)">📊 إحصائيات</button>
+          <button class="admin-tab-btn" onclick="pf_openTab(this)">💰 فواتير</button>
         </div>
 
         <!-- TAB: RATES -->
@@ -4032,13 +4085,142 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
             </div>
           </div>
 
-          <div style="display:flex;justify-content:flex-end;margin-top:8px;">
-            <button onclick="lockAdmin()" style="background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.4);font-family:'Cairo',sans-serif;font-size:11px;padding:7px 14px;border-radius:20px;cursor:pointer;">🔒 إقفال</button>
+        <!-- TAB: INVOICES -->
+        <div class="admin-tab-content" id="adminTabInvoices">
+
+          <!-- Dashboard -->
+          <div class="pf-dashboard">
+            <div class="pf-kpi">
+              <div class="pf-kpi-val" id="pfKpiToday">$0</div>
+              <div class="pf-kpi-lbl">ربح اليوم</div>
+            </div>
+            <div class="pf-kpi">
+              <div class="pf-kpi-val" id="pfKpiMonth">$0</div>
+              <div class="pf-kpi-lbl">ربح الشهر</div>
+            </div>
+            <div class="pf-kpi">
+              <div class="pf-kpi-val" id="pfKpiCount">0</div>
+              <div class="pf-kpi-lbl">عدد الفواتير</div>
+            </div>
+          </div>
+
+          <!-- خيار السحابة -->
+          <div style="font-size:9px;color:rgba(255,255,255,0.25);text-align:center;margin-bottom:8px;" id="pfCloudStatus">☁️ جاري الاتصال بالسحابة...</div>
+
+          <!-- أزرار الخدمات -->
+          <div style="font-size:11px;font-weight:800;color:rgba(255,255,255,0.5);margin-bottom:6px;">📦 اختر الخدمة لإنشاء فاتورة:</div>
+          <div class="pf-service-btns">
+            <button class="pf-svc-btn" onclick="pf_showPkgs('syriatel')">🔴 سيرياتيل</button>
+            <button class="pf-svc-btn" onclick="pf_showPkgs('mtn')">🟡 MTN</button>
+            <button class="pf-svc-btn" onclick="pf_showPkgs('freefire')">🔥 فري فاير</button>
+            <button class="pf-svc-btn" onclick="pf_showPkgs('pubg')">🪖 ببجي</button>
+            <button class="pf-svc-btn" onclick="pf_showPkgs('joker')">🃏 جواكر</button>
+          </div>
+
+          <!-- قائمة الباقات -->
+          <div id="pfPkgList" style="display:none;margin-top:8px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <span class="pf-sec-title" id="pfPkgTitle">الباقات</span>
+              <button onclick="pf_hidePkgs()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:18px;cursor:pointer;padding:0;">✕</button>
+            </div>
+            <div id="pfPkgGrid" class="pf-pkg-grid"></div>
+          </div>
+
+          <!-- سجل الفواتير -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;margin-bottom:6px;">
+            <span class="pf-sec-title">🧾 سجل الفواتير</span>
+            <button onclick="pf_loadAndRender()" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:rgba(255,255,255,0.5);font-size:10px;font-family:'Cairo',sans-serif;padding:4px 10px;cursor:pointer;">🔄 تحديث</button>
+          </div>
+          <div id="pfInvoiceList" style="max-height:260px;overflow-y:auto;-webkit-overflow-scrolling:touch;"></div>
+
+        </div><!-- end adminTabInvoices -->
+
+        <!-- ══ MODAL: إنشاء فاتورة ══ -->
+        <div id="pfModal" class="pf-modal-overlay" style="display:none;" onclick="pf_closeModal(event)">
+          <div class="pf-modal-box">
+            <div class="pf-modal-title">🧾 إنشاء فاتورة</div>
+
+            <div class="pf-field-row">
+              <span class="pf-field-lbl">الخدمة</span>
+              <span class="pf-field-val" id="pfMService">—</span>
+            </div>
+            <div class="pf-field-row">
+              <span class="pf-field-lbl">الباقة</span>
+              <span class="pf-field-val" id="pfMPkg">—</span>
+            </div>
+            <div class="pf-field-row">
+              <span class="pf-field-lbl">سعر البيع $</span>
+              <input class="pf-input" type="text" inputmode="decimal" id="pfMPrice" placeholder="0.00" oninput="pf_calcProfit()">
+            </div>
+            <div class="pf-field-row">
+              <span class="pf-field-lbl">التكلفة $</span>
+              <input class="pf-input" type="text" inputmode="decimal" id="pfMCost" placeholder="0.00" oninput="pf_calcProfit()">
+            </div>
+            <div class="pf-field-row pf-profit-row">
+              <span class="pf-field-lbl">الربح $</span>
+              <span class="pf-field-val pf-profit-val" id="pfMProfit">—</span>
+            </div>
+            <div style="height:1px;background:rgba(255,255,255,0.08);margin:10px 0;"></div>
+            <div class="pf-field-row">
+              <span class="pf-field-lbl">اسم الزبون</span>
+              <input class="pf-input" type="text" id="pfMName" placeholder="اختياري">
+            </div>
+            <div class="pf-field-row">
+              <span class="pf-field-lbl">رقم / ID</span>
+              <input class="pf-input" type="text" inputmode="numeric" id="pfMPhone" placeholder="رقم الهاتف أو ID اللعبة">
+            </div>
+            <div class="pf-field-row">
+              <span class="pf-field-lbl">ملاحظة</span>
+              <input class="pf-input" type="text" id="pfMNote" placeholder="اختياري">
+            </div>
+
+            <div style="display:flex;gap:8px;margin-top:14px;">
+              <button class="pf-btn-cancel" onclick="pf_closeModal()">إلغاء</button>
+              <button class="pf-btn-save" onclick="pf_saveInvoice()">✅ حفظ الفاتورة</button>
+            </div>
           </div>
         </div>
 
-      </div>
-    </div>
+        <!-- ══ MODAL: عرض الفاتورة ══ -->
+        <div id="pfViewModal" class="pf-modal-overlay" style="display:none;" onclick="pf_closeViewModal(event)">
+          <div class="pf-modal-box" id="pfViewBox">
+            <div class="pf-receipt" id="pfReceiptEl">
+              <div class="pf-receipt-header">
+                <div style="font-size:22px;">🧾</div>
+                <div class="pf-receipt-title">مركز الحلو للشحن</div>
+                <div class="pf-receipt-sub" id="pvDate">—</div>
+              </div>
+              <div class="pf-receipt-num" id="pvNum">#000000</div>
+              <div class="pf-receipt-row"><span>الخدمة</span><span id="pvService">—</span></div>
+              <div class="pf-receipt-row"><span>الباقة</span><span id="pvPkg">—</span></div>
+              <div class="pf-receipt-row"><span>الزبون</span><span id="pvName">—</span></div>
+              <div class="pf-receipt-row"><span>الرقم / ID</span><span id="pvPhone">—</span></div>
+              <div class="pf-receipt-row pf-receipt-price"><span>سعر البيع</span><span id="pvPrice">—</span></div>
+              <div class="pf-receipt-row"><span>التكلفة</span><span id="pvCost">—</span></div>
+              <div class="pf-receipt-row pf-receipt-profit"><span>💰 الربح</span><span id="pvProfit">—</span></div>
+              <div class="pf-receipt-row" id="pvNoteRow"><span>ملاحظة</span><span id="pvNote">—</span></div>
+              <div class="pf-receipt-status-row">
+                <span id="pvStatus" class="pf-status-badge">—</span>
+              </div>
+            </div>
+            <!-- أزرار -->
+            <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;">
+              <button class="pf-act-btn" onclick="pf_copyInvoice()">📋 نسخ</button>
+              <button class="pf-act-btn" onclick="pf_shareInvoice()">📤 مشاركة</button>
+              <button class="pf-act-btn pf-act-green" onclick="pf_setStatus('done')">✅ منجز</button>
+              <button class="pf-act-btn pf-act-red" onclick="pf_setStatus('cancelled')">❌ ملغي</button>
+            </div>
+            <button class="pf-btn-cancel" style="width:100%;margin-top:8px;" onclick="pf_closeViewModal()">إغلاق</button>
+          </div>
+        </div>
+
+        <!-- زر الإقفال -->
+        <div style="display:flex;justify-content:flex-end;margin-top:10px;">
+          <button onclick="lockAdmin()" style="background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.4);font-family:'Cairo',sans-serif;font-size:11px;padding:7px 14px;border-radius:20px;cursor:pointer;">🔒 إقفال</button>
+        </div>
+
+      </div><!-- end admin-panel-inner -->
+    </div><!-- end admin-panel -->
 
     <!-- Password Modal -->
     <div id="pwModal" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(6px);border-radius:28px 28px 0 0;z-index:10;align-items:center;justify-content:center;flex-direction:column;gap:14px;">
@@ -4055,6 +4237,7 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
     </div>
   </div>
 </div>
+</div><!-- end calc-overlay -->
 
 <!-- HOME PAGE -->
 <div id="home" class="page active">
@@ -5634,64 +5817,73 @@ function dismissSplash(skipped) {
     if (splash) splash.classList.add('hidden');
     setTimeout(() => { if (splash) splash.remove(); }, 750);
   }, skipped ? 50 : 350);
+
+  // ضمان: الشريط يبدأ دائماً بعد إغلاق الـ splash
+  setTimeout(() => { if (!_tickerTimer) initTicker(); }, skipped ? 200 : 700);
 }
 
 async function startupLoadPrices() {
-  // تشغيل كل الخطوات نشطة فوراً
   _splashStep(1, 'active');
   _splashStep(2, 'active');
   _splashStep(3, 'active');
   _splashProgress(8);
 
-  // مؤقت "بطيء": 6 ثواني
+  // مؤقت "بطيء": 5 ثواني
   _splashSlowTimer = setTimeout(() => {
     const msg = document.getElementById('psSlowMsg');
     const btn = document.getElementById('psSkipBtn');
     if (msg) msg.classList.add('show');
     if (btn) btn.classList.add('show');
-  }, 6000);
+  }, 5000);
 
-  // مؤقت أقصى: 14 ثانية → تخطي تلقائي
-  const forceSkip = setTimeout(() => dismissSplash(true), 14000);
+  // ── ضمان بدء الشريط بعد 4 ثواني مهما حدث ──
+  const tickerGuarantee = setTimeout(() => {
+    if (!_tickerTimer) initTicker();
+  }, 4000);
 
-  // ══ الجلب المتوازي — فقط الأسعار الضرورية ══
-  const results = await Promise.allSettled([
-    // ① SYP من JSONBin (محلي/سحابة)
-    loadRatesFromCloud(),
-    // ② TRY من TCMB/ER-API/Frankfurter
-    fetchTCMBRate()
-  ]);
+  // ── إغلاق إجباري بعد 8 ثواني في كل الأحوال ──
+  const hardClose = setTimeout(() => {
+    dismissSplash(true);
+    if (!_tickerTimer) initTicker();
+  }, 8000);
 
-  clearTimeout(forceSkip);
-
-  // ── معالجة نتيجة ① SYP ──
-  _splashProgress(60);
-  _splashStep(1, 'done', rates.newSyp ? `$1 = ${rates.newSyp} ج.س` : `$1 = ${rates.newSyp||117.3} ج.س`);
-
-  // ── معالجة نتيجة ② TRY ──
-  const tryResult = results[1];
-  if (tryResult.status === 'fulfilled' && tryResult.value) {
-    rates.tryRate = Math.round(tryResult.value * 100) / 100;
+  // ── helper: promise مع timeout محدد ──
+  function withTimeout(promise, ms) {
+    return Promise.race([
+      promise,
+      new Promise(resolve => setTimeout(() => resolve(null), ms))
+    ]);
   }
+
+  // ① جلب الليرة السورية (timeout 5 ثواني)
+  await withTimeout(loadRatesFromCloud(), 5000).catch(() => {});
+  _splashProgress(45);
+  _splashStep(1, 'done', `$1 = ${rates.newSyp} ج.س`);
+
+  // ② جلب الليرة التركية (timeout 5 ثواني)
+  const tryRate = await withTimeout(fetchTCMBRate(), 5000).catch(() => null);
+  if (tryRate) rates.tryRate = Math.round(tryRate * 100) / 100;
   _splashProgress(85);
   _splashStep(2, 'done', `$1 = ${rates.tryRate} ₺`);
 
-  // ── الذهب: نضع "جاري التحميل" ونكمل بدونه ──
-  _splashProgress(95);
-  _splashStep(3, tickerGoldPrice ? 'done' : 'active',
-    tickerGoldPrice ? `$${tickerGoldPrice.toFixed(0)}/غ` : '⏳');
+  // ③ الذهب لا ننتظره — يُجلب في الخلفية بعد فتح التطبيق
+  _splashProgress(100);
+  _splashStep(3, 'active', '⏳');
 
-  // تحديث الواجهة بالأسعار المجلوبة
+  clearTimeout(tickerGuarantee);
+  clearTimeout(hardClose);
   applyRatesToUI(null, null);
-
   dismissSplash(false);
 
-  // بعد الإغلاق: ابدأ الشريط والدورة التلقائية
-  setTimeout(initTicker, 400);
-  setTimeout(() => autoFetchForAllUsers().catch(() => {}), 1000);
+  // ابدأ الشريط فوراً بعد إغلاق الـ splash
+  setTimeout(initTicker, 300);
+  setTimeout(() => autoFetchForAllUsers().catch(() => {}), 800);
 }
 
 // ===== STARTUP =====
+// ضمان مطلق: الشريط يبدأ بعد 5 ثواني مهما حدث
+setTimeout(() => { if (!_tickerTimer) initTicker(); }, 5000);
+
 // الـ splash يظهر فقط أول مرة — عند الرجوع من واتساب يتخطاه صامتاً
 (function() {
   const alreadyLoaded = sessionStorage.getItem('halou_prices_loaded');
@@ -6522,7 +6714,15 @@ function sendOrder(){
     sypPrice: currentOrder.sypPrice || null,
     contact:  phone,
     notes:    notes
-  }); // تتبع الطلب في الإحصائيات
+  });
+  // ── إنشاء فاتورة تلقائية معلقة ──
+  pf_createFromOrder({
+    service: currentOrder.service,
+    pkg:     currentOrder.pkg,
+    price:   currentOrder.price,
+    contact: phone,
+    notes:   notes
+  });
 
   // تعطيل الزر مؤقتاً ومؤشر التحميل
   const btn = document.getElementById('send-btn');
@@ -8106,7 +8306,48 @@ let tickerLastFetch  = 0;
 async function fetchGoldPrice() {
   const sig = (ms) => AbortSignal.timeout ? AbortSignal.timeout(ms) : undefined;
 
-  // ── Source 1: metals.live ──
+  // ── Source 1: open.er-api.com/XAU (نفس الـ API الذي يجلب سعر التركي) ──
+  try {
+    const res = await fetch('https://open.er-api.com/v6/latest/XAU', {
+      cache: 'no-store', signal: sig(5000)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      // XAU = 1 أوقية → نريد USD لكل أوقية ثم نقسم على 31.1035 للغرام
+      const usdPerOz = data?.rates?.USD;
+      if (usdPerOz && usdPerOz > 500) {
+        const grUSD = Math.round((usdPerOz / 31.1035) * 100) / 100;
+        if (grUSD > 20 && grUSD < 1000) {
+          tickerGoldPrice = grUSD;
+          localStorage.setItem('halou_gold_price', grUSD);
+          console.log('[Gold] er-api XAU =', usdPerOz, '$/oz →', grUSD, '$/g');
+          return grUSD;
+        }
+      }
+    }
+  } catch(e) { console.warn('[Gold] er-api XAU:', e.message); }
+
+  // ── Source 2: frankfurter.app (مجاني بدون key، يدعم XAU) ──
+  try {
+    const res = await fetch('https://api.frankfurter.app/latest?from=XAU&to=USD', {
+      cache: 'no-store', signal: sig(5000)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const usdPerOz = data?.rates?.USD;
+      if (usdPerOz && usdPerOz > 500) {
+        const grUSD = Math.round((usdPerOz / 31.1035) * 100) / 100;
+        if (grUSD > 20 && grUSD < 1000) {
+          tickerGoldPrice = grUSD;
+          localStorage.setItem('halou_gold_price', grUSD);
+          console.log('[Gold] frankfurter XAU =', usdPerOz, '$/oz →', grUSD, '$/g');
+          return grUSD;
+        }
+      }
+    }
+  } catch(e) { console.warn('[Gold] frankfurter XAU:', e.message); }
+
+  // ── Source 3: metals.live ──
   try {
     const res = await fetch('https://api.metals.live/v1/spot/gold', {
       cache: 'no-store', signal: sig(4000)
@@ -8116,49 +8357,26 @@ async function fetchGoldPrice() {
       const ozUSD = Array.isArray(data) ? data[0]?.gold : data?.gold;
       if (ozUSD && ozUSD > 500) {
         const grUSD = Math.round((ozUSD / 31.1035) * 100) / 100;
-        if (grUSD > 20 && grUSD < 10000) { tickerGoldPrice = grUSD; return grUSD; }
+        if (grUSD > 20 && grUSD < 1000) {
+          tickerGoldPrice = grUSD;
+          localStorage.setItem('halou_gold_price', grUSD);
+          console.log('[Gold] metals.live =', grUSD, '$/g');
+          return grUSD;
+        }
       }
     }
   } catch(e) { console.warn('[Gold] metals.live:', e.message); }
 
-  // ── Source 2: goldprice.org ──
-  try {
-    const res = await fetch('https://data-asg.goldprice.org/GetData/USD-XAU/1', {
-      cache: 'no-store', signal: sig(4000)
-    });
-    if (res.ok) {
-      const text = await res.text();
-      const m = text.match(/([\d.]+)/);
-      if (m) {
-        const ozUSD = parseFloat(m[1]);
-        if (ozUSD > 500) {
-          const grUSD = Math.round((ozUSD / 31.1035) * 100) / 100;
-          if (grUSD > 20) { tickerGoldPrice = grUSD; return grUSD; }
-        }
-      }
-    }
-  } catch(e) { console.warn('[Gold] goldprice.org:', e.message); }
+  // ── Source 4: حساب تقريبي من أسعار الصرف المتاحة ──
+  // إذا كان عندنا سعر الدولار بالليرة يمكن استخدام سعر الذهب المحفوظ
+  const savedGold = parseFloat(localStorage.getItem('halou_gold_price'));
+  if (savedGold && savedGold > 20) {
+    tickerGoldPrice = savedGold;
+    console.log('[Gold] من الذاكرة المحلية:', savedGold);
+    return savedGold;
+  }
 
-  // ── Source 3: sp-today عبر proxy ──
-  try {
-    const html = await fetchViaProxy('https://sp-today.com/gold/ounce');
-    let m = html.match(/للغرام[\s\S]{0,50}\$([\d,]+(?:\.\d+)?)\s*USD/);
-    if (!m) m = html.match(/24K[\s\S]{0,50}\$([\d,]+(?:\.\d+)?)\/g/i);
-    if (!m) m = html.match(/السعر\/غرام[\s\S]{0,30}\$([\d,]+(?:\.\d+)?)/);
-    if (!m) m = html.match(/\$([\d,]+(?:\.\d+)?)\/g\b/i);
-    if (!m) {
-      const ozM = html.match(/\$([\d,]+(?:\.\d+)?)(?:\s*\/\s*(?:oz|ounce))/i);
-      if (ozM) {
-        const oz = parseFloat(ozM[1].replace(/,/g,''));
-        if (oz > 500) { const g = Math.round((oz/31.1035)*100)/100; if(g>20){tickerGoldPrice=g;return g;} }
-      }
-    }
-    if (m) {
-      const val = parseFloat(m[1].replace(/,/g,''));
-      if (val > 20 && val < 10000) { tickerGoldPrice = val; return val; }
-    }
-  } catch(e) { console.warn('[Gold] sp-today:', e.message); }
-
+  console.warn('[Gold] كل المصادر فشلت');
   return null;
 }
 function buildTickerHTML() {
@@ -8225,6 +8443,327 @@ function _showTickerItem() {
 
   _tickerIdx = (_tickerIdx + 1) % items.length;
 }
+
+// ════════════════════════════════════════════════════════════════
+// نظام الفواتير الداخلي (PF) — أدمن فقط — معزول تماماً
+// ════════════════════════════════════════════════════════════════
+const PF_BIN_KEY    = 'halou_pf_bin_id';
+const PF_COSTS_KEY  = 'halou_pf_costs';
+const PF_LOCAL_KEY  = 'halou_pf_invoices';
+let   PF_BIN_ID     = localStorage.getItem(PF_BIN_KEY) || null;
+let   PF_costs      = JSON.parse(localStorage.getItem(PF_COSTS_KEY) || '{}');
+let   PF_invoices   = [];
+let   PF_currentInv = null; // الفاتورة المفتوحة حالياً في الـ modal
+
+// ── قاموس الخدمات ──
+const PF_SERVICES = {
+  syriatel: { label:'سيرياتيل 🔴', pkgs: ()=>SYRIATEL_PKGS },
+  mtn:      { label:'MTN 🟡',       pkgs: ()=>MTN_PKGS },
+  freefire: { label:'فري فاير 🔥',  pkgs: ()=>FF_PKGS },
+  pubg:     { label:'ببجي 🪖',      pkgs: ()=>PUBG_PKGS },
+  joker:    { label:'جواكر 🃏',     pkgs: ()=>JOKER_PKGS }
+};
+
+// ── فتح التاب ──
+function pf_openTab(btn) {
+  document.querySelectorAll('.admin-tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.admin-tab-content').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('adminTabInvoices').classList.add('active');
+  pf_loadAndRender();
+}
+
+// ══ السحابة ══
+async function pf_getOrCreateBin() {
+  if (PF_BIN_ID) return PF_BIN_ID;
+  try {
+    const r = await fetch(JSONBIN_BASE, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Master-Key':API_KEY,'X-Bin-Name':'halou-invoices','X-Bin-Private':'true'},
+      body: JSON.stringify({ invoices:[] })
+    });
+    if (!r.ok) return null;
+    const d = await r.json();
+    PF_BIN_ID = d.metadata?.id || null;
+    if (PF_BIN_ID) localStorage.setItem(PF_BIN_KEY, PF_BIN_ID);
+    return PF_BIN_ID;
+  } catch(e) { return null; }
+}
+
+async function pf_pushToCloud(invList) {
+  try {
+    const binId = await pf_getOrCreateBin();
+    if (!binId) return;
+    await fetch(`${JSONBIN_BASE}/${binId}`, {
+      method:'PUT',
+      headers:{'Content-Type':'application/json','X-Master-Key':API_KEY},
+      body: JSON.stringify({ invoices: invList })
+    });
+    document.getElementById('pfCloudStatus').textContent = '☁️ محفوظ في السحابة ✅';
+  } catch(e) {
+    document.getElementById('pfCloudStatus').textContent = '⚠️ فشل حفظ السحابة — محفوظ محلياً';
+  }
+}
+
+async function pf_fetchFromCloud() {
+  try {
+    const binId = await pf_getOrCreateBin();
+    if (!binId) return null;
+    const r = await fetch(`${JSONBIN_BASE}/${binId}/latest?t=${Date.now()}`, {
+      headers:{'X-Master-Key':API_KEY}
+    });
+    if (!r.ok) return null;
+    const d = await r.json();
+    return d.record?.invoices || [];
+  } catch(e) { return null; }
+}
+
+// ── تحميل وعرض ──
+async function pf_loadAndRender() {
+  document.getElementById('pfCloudStatus').textContent = '☁️ جاري التزامن مع السحابة...';
+  const cloud = await pf_fetchFromCloud();
+  if (cloud) {
+    PF_invoices = cloud;
+    localStorage.setItem(PF_LOCAL_KEY, JSON.stringify(cloud));
+  } else {
+    PF_invoices = JSON.parse(localStorage.getItem(PF_LOCAL_KEY) || '[]');
+    document.getElementById('pfCloudStatus').textContent = '⚠️ بيانات محلية (لا اتصال)';
+  }
+  pf_renderDashboard();
+  pf_renderList();
+}
+
+function pf_renderDashboard() {
+  const today = new Date().toLocaleDateString('ar-SY');
+  const thisMonth = new Date().toLocaleDateString('ar-SY',{month:'2-digit',year:'numeric'});
+  let todayProfit=0, monthProfit=0;
+  PF_invoices.filter(i=>i.status==='done').forEach(i=>{
+    const p = parseFloat(i.profit)||0;
+    if (i.date && i.date.startsWith(today)) todayProfit += p;
+    if (i.date && i.date.includes(thisMonth.slice(-4))) monthProfit += p;
+  });
+  document.getElementById('pfKpiToday').textContent  = '$'+todayProfit.toFixed(2);
+  document.getElementById('pfKpiMonth').textContent  = '$'+monthProfit.toFixed(2);
+  document.getElementById('pfKpiCount').textContent  = PF_invoices.length;
+}
+
+function pf_renderList() {
+  const el = document.getElementById('pfInvoiceList');
+  if (!PF_invoices.length) {
+    el.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.25);font-size:11px;padding:16px;">لا توجد فواتير بعد</div>';
+    return;
+  }
+  el.innerHTML = [...PF_invoices].reverse().slice(0,50).map(inv => {
+    const stMap = {pending:'⏳ معلق',done:'✅ منجز',cancelled:'❌ ملغي'};
+    const stCls = {pending:'pf-status-pending',done:'pf-status-done',cancelled:'pf-status-cancelled'};
+    const profit = parseFloat(inv.profit)||0;
+    return `<div class="pf-inv-row" onclick="pf_viewInvoice('${inv.id}')">
+      <div class="pf-inv-info">
+        <div class="pf-inv-pkg">${inv.service} — ${inv.pkg}</div>
+        <div class="pf-inv-meta">${inv.date||''} ${inv.customerPhone ? '· '+inv.customerPhone : ''}</div>
+        <div style="margin-top:3px;"><span class="pf-status-badge ${stCls[inv.status]||'pf-status-pending'}">${stMap[inv.status]||'⏳ معلق'}</span></div>
+      </div>
+      <div class="pf-inv-profit">${profit>0?'$'+profit.toFixed(2):'—'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── عرض الباقات ──
+let PF_currentService = null;
+function pf_showPkgs(svc) {
+  PF_currentService = svc;
+  const conf = PF_SERVICES[svc];
+  if (!conf) return;
+  document.getElementById('pfPkgTitle').textContent = conf.label;
+  const pkgs = conf.pkgs();
+  document.getElementById('pfPkgGrid').innerHTML = pkgs.map((p,i)=>{
+    const label = p.amount + (p.unit?' '+p.unit:'');
+    const price = p.price || '—';
+    return `<button class="pf-pkg-btn" onclick="pf_openModal('${svc}','${label.replace(/'/g,"\\'")}','${price}')">
+      ${label}<span class="pf-pkg-price">${price}</span>
+    </button>`;
+  }).join('');
+  document.getElementById('pfPkgList').style.display = 'block';
+}
+function pf_hidePkgs() { document.getElementById('pfPkgList').style.display='none'; }
+
+// ── فتح Modal إنشاء الفاتورة ──
+function pf_openModal(svc, pkgLabel, price) {
+  const priceNum = parseFloat(price.replace(/[^0-9.]/g,'')) || 0;
+  const savedCost = PF_costs[svc+'_'+pkgLabel] || '';
+  document.getElementById('pfMService').textContent = PF_SERVICES[svc]?.label || svc;
+  document.getElementById('pfMPkg').textContent     = pkgLabel;
+  document.getElementById('pfMPrice').value         = priceNum || '';
+  document.getElementById('pfMCost').value          = savedCost;
+  document.getElementById('pfMName').value          = '';
+  document.getElementById('pfMPhone').value         = '';
+  document.getElementById('pfMNote').value          = '';
+  document.getElementById('pfMProfit').textContent  = savedCost ? '$'+(priceNum-(parseFloat(savedCost)||0)).toFixed(2) : '—';
+  // حفظ السياق
+  window._pfCtx = { svc, pkgLabel, price: priceNum };
+  document.getElementById('pfModal').style.display = 'flex';
+}
+function pf_closeModal(e) {
+  if (!e || e.target===document.getElementById('pfModal'))
+    document.getElementById('pfModal').style.display='none';
+}
+function pf_calcProfit() {
+  const p = parseFloat(document.getElementById('pfMPrice').value)||0;
+  const c = parseFloat(document.getElementById('pfMCost').value)||0;
+  const profit = p - c;
+  document.getElementById('pfMProfit').textContent = p>0||c>0 ? '$'+profit.toFixed(2) : '—';
+  document.getElementById('pfMProfit').style.color = profit>=0?'#4ade80':'#f87171';
+}
+
+// ── حفظ الفاتورة ──
+async function pf_saveInvoice() {
+  const ctx    = window._pfCtx || {};
+  const price  = parseFloat(document.getElementById('pfMPrice').value)||0;
+  const cost   = parseFloat(document.getElementById('pfMCost').value)||0;
+  const profit = price - cost;
+  const name   = document.getElementById('pfMName').value.trim();
+  const phone  = document.getElementById('pfMPhone').value.trim();
+  const note   = document.getElementById('pfMNote').value.trim();
+
+  if (!phone && !name) {
+    document.getElementById('pfMPhone').focus();
+    document.getElementById('pfMPhone').style.borderColor='#f87171';
+    setTimeout(()=>document.getElementById('pfMPhone').style.borderColor='',1500);
+    return;
+  }
+
+  // احفظ التكلفة للباقة
+  if (cost > 0) {
+    PF_costs[ctx.svc+'_'+ctx.pkgLabel] = cost;
+    localStorage.setItem(PF_COSTS_KEY, JSON.stringify(PF_costs));
+  }
+
+  const inv = {
+    id:           'PF'+Date.now(),
+    date:         new Date().toLocaleDateString('ar-SY') + ' ' + new Date().toLocaleTimeString('ar-SY',{hour:'2-digit',minute:'2-digit'}),
+    ts:           Date.now(),
+    service:      PF_SERVICES[ctx.svc]?.label || ctx.svc,
+    pkg:          ctx.pkgLabel,
+    price:        price.toFixed(2),
+    cost:         cost.toFixed(2),
+    profit:       profit.toFixed(2),
+    customerName: name,
+    customerPhone:phone,
+    note:         note,
+    status:       'pending',
+    source:       'manual'
+  };
+
+  PF_invoices.push(inv);
+  localStorage.setItem(PF_LOCAL_KEY, JSON.stringify(PF_invoices));
+  document.getElementById('pfModal').style.display='none';
+  pf_renderDashboard();
+  pf_renderList();
+  pf_hidePkgs();
+
+  // رفع للسحابة
+  pf_pushToCloud(PF_invoices);
+
+  // اعرض الفاتورة مباشرة
+  setTimeout(()=>pf_viewInvoice(inv.id), 200);
+}
+
+// ── عرض فاتورة ──
+function pf_viewInvoice(id) {
+  const inv = PF_invoices.find(i=>i.id===id);
+  if (!inv) return;
+  PF_currentInv = inv;
+  document.getElementById('pvDate').textContent    = inv.date||'—';
+  document.getElementById('pvNum').textContent     = '#'+inv.id;
+  document.getElementById('pvService').textContent = inv.service||'—';
+  document.getElementById('pvPkg').textContent     = inv.pkg||'—';
+  document.getElementById('pvName').textContent    = inv.customerName||'—';
+  document.getElementById('pvPhone').textContent   = inv.customerPhone||'—';
+  document.getElementById('pvPrice').textContent   = inv.price?'$'+inv.price:'—';
+  document.getElementById('pvCost').textContent    = inv.cost?'$'+inv.cost:'—';
+  document.getElementById('pvProfit').textContent  = inv.profit?'$'+inv.profit:'—';
+  document.getElementById('pvNote').textContent    = inv.note||'—';
+  document.getElementById('pvNoteRow').style.display = inv.note?'flex':'none';
+  const stMap={pending:'⏳ معلق',done:'✅ منجز',cancelled:'❌ ملغي'};
+  const stCls={pending:'pf-status-pending',done:'pf-status-done',cancelled:'pf-status-cancelled'};
+  const stEl = document.getElementById('pvStatus');
+  stEl.textContent = stMap[inv.status]||'⏳ معلق';
+  stEl.className   = 'pf-status-badge '+(stCls[inv.status]||'pf-status-pending');
+  document.getElementById('pfViewModal').style.display='flex';
+}
+function pf_closeViewModal(e) {
+  if (!e||e.target===document.getElementById('pfViewModal'))
+    document.getElementById('pfViewModal').style.display='none';
+}
+
+// ── تغيير الحالة ──
+async function pf_setStatus(status) {
+  if (!PF_currentInv) return;
+  PF_currentInv.status = status;
+  const idx = PF_invoices.findIndex(i=>i.id===PF_currentInv.id);
+  if (idx>=0) PF_invoices[idx]=PF_currentInv;
+  localStorage.setItem(PF_LOCAL_KEY, JSON.stringify(PF_invoices));
+  pf_viewInvoice(PF_currentInv.id);
+  pf_renderDashboard();
+  pf_renderList();
+  pf_pushToCloud(PF_invoices);
+}
+
+// ── نسخ الفاتورة ──
+function pf_copyInvoice() {
+  if (!PF_currentInv) return;
+  const i = PF_currentInv;
+  const txt = `🧾 فاتورة مركز الحلو للشحن\nرقم: ${i.id}\nالتاريخ: ${i.date}\n──────────────\nالخدمة: ${i.service}\nالباقة: ${i.pkg}\n${i.customerName?'الزبون: '+i.customerName+'\n':''}${i.customerPhone?'الرقم/ID: '+i.customerPhone+'\n':''}──────────────\nسعر البيع: $${i.price}\nالتكلفة: $${i.cost}\n💰 الربح: $${i.profit}\n${i.note?'ملاحظة: '+i.note:''}`;
+  navigator.clipboard?.writeText(txt).then(()=>{
+    const btn = event.target;
+    btn.textContent='✅ تم النسخ';
+    setTimeout(()=>btn.textContent='📋 نسخ',1500);
+  });
+}
+
+// ── مشاركة الفاتورة ──
+function pf_shareInvoice() {
+  if (!PF_currentInv) return;
+  const i = PF_currentInv;
+  const txt = `🧾 فاتورة مركز الحلو للشحن\n${i.service} — ${i.pkg}\n${i.customerName?i.customerName+' ':''} ${i.customerPhone||''}\nسعر البيع: $${i.price} | الربح: $${i.profit}`;
+  if (navigator.share) navigator.share({text:txt}).catch(()=>{});
+  else navigator.clipboard?.writeText(txt);
+}
+
+// ── إنشاء فاتورة تلقائية من طلب الزبون ──
+function pf_createFromOrder(orderData) {
+  if (!orderData) return;
+  const ctx   = orderData;
+  const price = parseFloat((ctx.price||'0').replace(/[^0-9.]/g,''))||0;
+  const costKey = Object.keys(PF_costs).find(k=>k.includes(ctx.pkg||''));
+  const cost  = costKey ? parseFloat(PF_costs[costKey])||0 : 0;
+  const inv = {
+    id:           'PF'+Date.now(),
+    date:         new Date().toLocaleDateString('ar-SY')+' '+new Date().toLocaleTimeString('ar-SY',{hour:'2-digit',minute:'2-digit'}),
+    ts:           Date.now(),
+    service:      ctx.service||'—',
+    pkg:          ctx.pkg||'—',
+    price:        price.toFixed(2),
+    cost:         cost.toFixed(2),
+    profit:       (price-cost).toFixed(2),
+    customerName: '',
+    customerPhone:ctx.contact||'',
+    note:         ctx.notes||'',
+    status:       'pending',
+    source:       'auto'
+  };
+  PF_invoices.push(inv);
+  localStorage.setItem(PF_LOCAL_KEY, JSON.stringify(PF_invoices));
+  pf_pushToCloud(PF_invoices).catch(()=>{});
+  pf_renderDashboard();
+  pf_renderList();
+}
+
+// ── تهيئة عند فتح الصفحة ──
+(function pf_init(){
+  const local = localStorage.getItem(PF_LOCAL_KEY);
+  if (local) { try { PF_invoices = JSON.parse(local); } catch(e){} }
+})();
 
 function initTicker() {
   // ابدأ الشريط فوراً بالأسعار الحالية — لا ننتظر الذهب
