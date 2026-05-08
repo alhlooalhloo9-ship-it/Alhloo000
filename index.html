@@ -1224,9 +1224,20 @@
   .conv-clear-btn:hover { background: rgba(255,255,255,0.25); }
 
   /* Admin panel */
-  .admin-panel { display:none; margin-top:10px; }
-  .admin-panel.show { display:block; }
-  .admin-panel-inner { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:12px; max-height:70vh; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .admin-panel {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 99998;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(6px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+  .admin-panel.show { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: env(safe-area-inset-top, 20px); }
+  .admin-panel-inner { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:12px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto; -webkit-overflow-scrolling:touch; }
   .admin-panel-title { font-size:11px; color:var(--gold2); font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:6px; }
   .admin-rate-row { display:flex; align-items:center; gap:8px; margin-bottom:7px; }
   .admin-rate-row:last-child { margin-bottom:0; }
@@ -2992,58 +3003,55 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
 /* ══════════════════════════════════════
    INVOICE SYSTEM (pf-) — Admin Only
 ══════════════════════════════════════ */
+#adminTabInvoices { color: white !important; }
 .pf-dashboard { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
-.pf-kpi { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:10px 6px; text-align:center; }
-.pf-kpi-val { font-size:18px; font-weight:900; color:#f5a623; font-family:'Tajawal',sans-serif; }
-.pf-kpi-lbl { font-size:9px; color:rgba(255,255,255,0.35); margin-top:2px; }
+.pf-kpi { background:rgba(245,166,35,0.12); border:1px solid rgba(245,166,35,0.25); border-radius:12px; padding:10px 6px; text-align:center; }
+.pf-kpi-val { font-size:17px; font-weight:900; color:#f5a623; font-family:'Tajawal',sans-serif; }
+.pf-kpi-lbl { font-size:9px; color:rgba(255,255,255,0.7); margin-top:2px; }
 .pf-service-btns { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:4px; }
-.pf-svc-btn { background:rgba(124,58,237,0.15); border:1px solid rgba(124,58,237,0.3); border-radius:10px; color:white; font-family:'Cairo',sans-serif; font-size:10px; font-weight:700; padding:8px 4px; cursor:pointer; transition:all .2s; }
-.pf-svc-btn:active { background:rgba(124,58,237,0.4); transform:scale(.97); }
-.pf-sec-title { font-size:11px; font-weight:800; color:rgba(255,255,255,0.6); }
+.pf-svc-btn { background:rgba(124,58,237,0.25); border:1.5px solid rgba(124,58,237,0.5); border-radius:10px; color:white !important; font-family:'Cairo',sans-serif; font-size:10px; font-weight:700; padding:9px 4px; cursor:pointer; transition:all .2s; }
+.pf-svc-btn:active { background:rgba(124,58,237,0.5); transform:scale(.97); }
+.pf-sec-title { font-size:11px; font-weight:800; color:white !important; }
 .pf-pkg-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:5px; max-height:200px; overflow-y:auto; -webkit-overflow-scrolling:touch; }
-.pf-pkg-btn { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:9px; color:white; font-family:'Cairo',sans-serif; font-size:10px; font-weight:700; padding:7px 5px; cursor:pointer; text-align:center; transition:all .2s; line-height:1.4; }
-.pf-pkg-btn:active { background:rgba(245,166,35,0.2); border-color:#f5a623; transform:scale(.97); }
+.pf-pkg-btn { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:9px; color:white !important; font-family:'Cairo',sans-serif; font-size:10px; font-weight:700; padding:7px 5px; cursor:pointer; text-align:center; transition:all .2s; line-height:1.4; }
+.pf-pkg-btn:active { background:rgba(245,166,35,0.3); border-color:#f5a623; transform:scale(.97); }
 .pf-pkg-price { display:block; font-size:9px; color:#f5a623; font-weight:900; margin-top:2px; }
-/* فاتورة في السجل */
-.pf-inv-row { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:9px 11px; margin-bottom:6px; cursor:pointer; transition:all .2s; display:flex; align-items:center; gap:8px; }
-.pf-inv-row:active { background:rgba(255,255,255,0.09); }
+.pf-inv-row { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:9px 11px; margin-bottom:6px; cursor:pointer; transition:all .2s; display:flex; align-items:center; gap:8px; }
+.pf-inv-row:active { background:rgba(255,255,255,0.15); }
 .pf-inv-info { flex:1; min-width:0; }
-.pf-inv-pkg { font-size:11px; font-weight:800; color:white; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.pf-inv-meta { font-size:9px; color:rgba(255,255,255,0.35); margin-top:2px; }
+.pf-inv-pkg { font-size:11px; font-weight:800; color:white !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pf-inv-meta { font-size:9px; color:rgba(255,255,255,0.5); margin-top:2px; }
 .pf-inv-profit { font-size:13px; font-weight:900; color:#4ade80; flex-shrink:0; }
-/* حالة الفاتورة */
 .pf-status-badge { display:inline-block; border-radius:20px; padding:3px 10px; font-size:10px; font-weight:800; }
-.pf-status-pending  { background:rgba(251,191,36,0.15); color:#fbbf24; border:1px solid rgba(251,191,36,0.3); }
-.pf-status-done     { background:rgba(74,222,128,0.15); color:#4ade80; border:1px solid rgba(74,222,128,0.3); }
-.pf-status-cancelled{ background:rgba(248,113,113,0.15); color:#f87171; border:1px solid rgba(248,113,113,0.3); }
-/* Modal */
-.pf-modal-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); border-radius:28px 28px 0 0; z-index:20; display:flex; align-items:center; justify-content:center; padding:16px; overflow-y:auto; }
-.pf-modal-box { background:linear-gradient(170deg,#1a1a2e,#0f0f1e); border:1px solid rgba(255,255,255,0.12); border-radius:20px; padding:18px; width:100%; max-width:340px; }
+.pf-status-pending  { background:rgba(251,191,36,0.2); color:#fbbf24; border:1px solid rgba(251,191,36,0.4); }
+.pf-status-done     { background:rgba(74,222,128,0.2); color:#4ade80; border:1px solid rgba(74,222,128,0.4); }
+.pf-status-cancelled{ background:rgba(248,113,113,0.2); color:#f87171; border:1px solid rgba(248,113,113,0.4); }
+.pf-modal-overlay { position:fixed !important; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(6px); z-index:999997; display:flex; align-items:center; justify-content:center; padding:16px; overflow-y:auto; }
+.pf-modal-box { background:linear-gradient(170deg,#1a1a2e,#0f0f1e); border:1px solid rgba(255,255,255,0.15); border-radius:20px; padding:18px; width:100%; max-width:340px; }
 .pf-modal-title { font-size:15px; font-weight:900; color:white; text-align:center; margin-bottom:14px; }
 .pf-field-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
-.pf-field-lbl { font-size:10px; color:rgba(255,255,255,0.45); width:70px; flex-shrink:0; text-align:right; }
+.pf-field-lbl { font-size:10px; color:rgba(255,255,255,0.6); width:70px; flex-shrink:0; text-align:right; }
 .pf-field-val { font-size:11px; font-weight:700; color:white; flex:1; }
-.pf-input { flex:1; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:8px; color:white; font-family:'Cairo',sans-serif; font-size:11px; font-weight:700; padding:6px 10px; outline:none; direction:rtl; }
-.pf-input:focus { border-color:rgba(124,58,237,0.6); }
+.pf-input { flex:1; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:white !important; font-family:'Cairo',sans-serif; font-size:11px; font-weight:700; padding:7px 10px; outline:none; direction:rtl; }
+.pf-input:focus { border-color:rgba(124,58,237,0.8); background:rgba(255,255,255,0.13); }
 .pf-profit-row .pf-profit-val { font-size:15px; font-weight:900; color:#4ade80; }
-.pf-btn-cancel { flex:1; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:10px; color:rgba(255,255,255,0.6); font-family:'Cairo',sans-serif; font-size:12px; font-weight:700; padding:10px; cursor:pointer; }
+.pf-btn-cancel { flex:1; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:10px; color:rgba(255,255,255,0.7); font-family:'Cairo',sans-serif; font-size:12px; font-weight:700; padding:10px; cursor:pointer; }
 .pf-btn-save { flex:2; background:linear-gradient(135deg,#7c3aed,#4f46e5); border:none; border-radius:10px; color:white; font-family:'Cairo',sans-serif; font-size:12px; font-weight:800; padding:10px; cursor:pointer; }
-/* الوصل/الفاتورة */
-.pf-receipt { background:linear-gradient(160deg,#111827,#0f172a); border:1px solid rgba(245,166,35,0.2); border-radius:14px; padding:16px; }
+.pf-receipt { background:linear-gradient(160deg,#111827,#0f172a); border:1.5px solid rgba(245,166,35,0.3); border-radius:14px; padding:16px; }
 .pf-receipt-header { text-align:center; margin-bottom:10px; }
 .pf-receipt-title { font-size:14px; font-weight:900; color:#f5a623; }
-.pf-receipt-sub { font-size:9px; color:rgba(255,255,255,0.3); margin-top:2px; }
-.pf-receipt-num { text-align:center; font-size:11px; font-weight:700; color:rgba(255,255,255,0.3); margin-bottom:10px; letter-spacing:1px; }
-.pf-receipt-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:11px; }
-.pf-receipt-row span:first-child { color:rgba(255,255,255,0.4); }
+.pf-receipt-sub { font-size:9px; color:rgba(255,255,255,0.4); margin-top:2px; }
+.pf-receipt-num { text-align:center; font-size:11px; font-weight:700; color:rgba(255,255,255,0.35); margin-bottom:10px; letter-spacing:1px; }
+.pf-receipt-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.06); font-size:11px; }
+.pf-receipt-row span:first-child { color:rgba(255,255,255,0.45); }
 .pf-receipt-row span:last-child { color:white; font-weight:700; }
 .pf-receipt-price span:last-child { color:#f5a623; font-size:13px; }
-.pf-receipt-profit { border-top:1.5px solid rgba(74,222,128,0.3); margin-top:4px; }
-.pf-receipt-profit span:last-child { color:#4ade80; font-size:15px; font-weight:900; }
+.pf-receipt-profit { border-top:1.5px solid rgba(74,222,128,0.3) !important; margin-top:4px; }
+.pf-receipt-profit span:last-child { color:#4ade80 !important; font-size:15px; font-weight:900; }
 .pf-receipt-status-row { text-align:center; margin-top:10px; }
-.pf-act-btn { flex:1; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); border-radius:9px; color:white; font-family:'Cairo',sans-serif; font-size:11px; font-weight:700; padding:8px 4px; cursor:pointer; }
-.pf-act-green { background:rgba(74,222,128,0.12); border-color:rgba(74,222,128,0.3); color:#4ade80; }
-.pf-act-red { background:rgba(248,113,113,0.12); border-color:rgba(248,113,113,0.3); color:#f87171; }
+.pf-act-btn { flex:1; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:9px; color:white; font-family:'Cairo',sans-serif; font-size:11px; font-weight:700; padding:8px 4px; cursor:pointer; }
+.pf-act-green { background:rgba(74,222,128,0.15) !important; border-color:rgba(74,222,128,0.4) !important; color:#4ade80 !important; }
+.pf-act-red { background:rgba(248,113,113,0.15) !important; border-color:rgba(248,113,113,0.4) !important; color:#f87171 !important; }
 #priceSplash {
   position: fixed;
   inset: 0;
@@ -3726,7 +3734,10 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
 
     </div>
 
-    <!-- Admin Panel (hidden, unlock via secret tap) -->
+
+  </div>
+</div>
+<!-- Admin Panel (hidden, unlock via secret tap) -->
     <div class="admin-panel" id="adminPanel">
       <div class="admin-panel-inner">
         <div class="admin-panel-title">🔐 لوحة الأدمن</div>
@@ -3737,7 +3748,7 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
           <button class="admin-tab-btn" onclick="switchAdminTab('offers',this)">🎁 العروض</button>
           <button class="admin-tab-btn" onclick="switchAdminTab('inbox',this)" id="inboxTabBtn">💬 رسائل <span id="inboxUnreadBadge" style="display:none;background:#ef4444;color:white;border-radius:8px;padding:1px 5px;font-size:9px;margin-right:2px;"></span></button>
           <button class="admin-tab-btn" onclick="openAnalyticsWithPw(this)">📊 إحصائيات</button>
-          <button class="admin-tab-btn" onclick="pf_openTab(this)">💰 فواتير</button>
+          <button class="admin-tab-btn" onclick="pf_openOverlay()">💰 فواتير</button>
         </div>
 
         <!-- TAB: RATES -->
@@ -4086,133 +4097,6 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
           </div>
 
         <!-- TAB: INVOICES -->
-        <div class="admin-tab-content" id="adminTabInvoices">
-
-          <!-- Dashboard -->
-          <div class="pf-dashboard">
-            <div class="pf-kpi">
-              <div class="pf-kpi-val" id="pfKpiToday">$0</div>
-              <div class="pf-kpi-lbl">ربح اليوم</div>
-            </div>
-            <div class="pf-kpi">
-              <div class="pf-kpi-val" id="pfKpiMonth">$0</div>
-              <div class="pf-kpi-lbl">ربح الشهر</div>
-            </div>
-            <div class="pf-kpi">
-              <div class="pf-kpi-val" id="pfKpiCount">0</div>
-              <div class="pf-kpi-lbl">عدد الفواتير</div>
-            </div>
-          </div>
-
-          <!-- خيار السحابة -->
-          <div style="font-size:9px;color:rgba(255,255,255,0.25);text-align:center;margin-bottom:8px;" id="pfCloudStatus">☁️ جاري الاتصال بالسحابة...</div>
-
-          <!-- أزرار الخدمات -->
-          <div style="font-size:11px;font-weight:800;color:rgba(255,255,255,0.5);margin-bottom:6px;">📦 اختر الخدمة لإنشاء فاتورة:</div>
-          <div class="pf-service-btns">
-            <button class="pf-svc-btn" onclick="pf_showPkgs('syriatel')">🔴 سيرياتيل</button>
-            <button class="pf-svc-btn" onclick="pf_showPkgs('mtn')">🟡 MTN</button>
-            <button class="pf-svc-btn" onclick="pf_showPkgs('freefire')">🔥 فري فاير</button>
-            <button class="pf-svc-btn" onclick="pf_showPkgs('pubg')">🪖 ببجي</button>
-            <button class="pf-svc-btn" onclick="pf_showPkgs('joker')">🃏 جواكر</button>
-          </div>
-
-          <!-- قائمة الباقات -->
-          <div id="pfPkgList" style="display:none;margin-top:8px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-              <span class="pf-sec-title" id="pfPkgTitle">الباقات</span>
-              <button onclick="pf_hidePkgs()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:18px;cursor:pointer;padding:0;">✕</button>
-            </div>
-            <div id="pfPkgGrid" class="pf-pkg-grid"></div>
-          </div>
-
-          <!-- سجل الفواتير -->
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;margin-bottom:6px;">
-            <span class="pf-sec-title">🧾 سجل الفواتير</span>
-            <button onclick="pf_loadAndRender()" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:rgba(255,255,255,0.5);font-size:10px;font-family:'Cairo',sans-serif;padding:4px 10px;cursor:pointer;">🔄 تحديث</button>
-          </div>
-          <div id="pfInvoiceList" style="max-height:260px;overflow-y:auto;-webkit-overflow-scrolling:touch;"></div>
-
-        </div><!-- end adminTabInvoices -->
-
-        <!-- ══ MODAL: إنشاء فاتورة ══ -->
-        <div id="pfModal" class="pf-modal-overlay" style="display:none;" onclick="pf_closeModal(event)">
-          <div class="pf-modal-box">
-            <div class="pf-modal-title">🧾 إنشاء فاتورة</div>
-
-            <div class="pf-field-row">
-              <span class="pf-field-lbl">الخدمة</span>
-              <span class="pf-field-val" id="pfMService">—</span>
-            </div>
-            <div class="pf-field-row">
-              <span class="pf-field-lbl">الباقة</span>
-              <span class="pf-field-val" id="pfMPkg">—</span>
-            </div>
-            <div class="pf-field-row">
-              <span class="pf-field-lbl">سعر البيع $</span>
-              <input class="pf-input" type="text" inputmode="decimal" id="pfMPrice" placeholder="0.00" oninput="pf_calcProfit()">
-            </div>
-            <div class="pf-field-row">
-              <span class="pf-field-lbl">التكلفة $</span>
-              <input class="pf-input" type="text" inputmode="decimal" id="pfMCost" placeholder="0.00" oninput="pf_calcProfit()">
-            </div>
-            <div class="pf-field-row pf-profit-row">
-              <span class="pf-field-lbl">الربح $</span>
-              <span class="pf-field-val pf-profit-val" id="pfMProfit">—</span>
-            </div>
-            <div style="height:1px;background:rgba(255,255,255,0.08);margin:10px 0;"></div>
-            <div class="pf-field-row">
-              <span class="pf-field-lbl">اسم الزبون</span>
-              <input class="pf-input" type="text" id="pfMName" placeholder="اختياري">
-            </div>
-            <div class="pf-field-row">
-              <span class="pf-field-lbl">رقم / ID</span>
-              <input class="pf-input" type="text" inputmode="numeric" id="pfMPhone" placeholder="رقم الهاتف أو ID اللعبة">
-            </div>
-            <div class="pf-field-row">
-              <span class="pf-field-lbl">ملاحظة</span>
-              <input class="pf-input" type="text" id="pfMNote" placeholder="اختياري">
-            </div>
-
-            <div style="display:flex;gap:8px;margin-top:14px;">
-              <button class="pf-btn-cancel" onclick="pf_closeModal()">إلغاء</button>
-              <button class="pf-btn-save" onclick="pf_saveInvoice()">✅ حفظ الفاتورة</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- ══ MODAL: عرض الفاتورة ══ -->
-        <div id="pfViewModal" class="pf-modal-overlay" style="display:none;" onclick="pf_closeViewModal(event)">
-          <div class="pf-modal-box" id="pfViewBox">
-            <div class="pf-receipt" id="pfReceiptEl">
-              <div class="pf-receipt-header">
-                <div style="font-size:22px;">🧾</div>
-                <div class="pf-receipt-title">مركز الحلو للشحن</div>
-                <div class="pf-receipt-sub" id="pvDate">—</div>
-              </div>
-              <div class="pf-receipt-num" id="pvNum">#000000</div>
-              <div class="pf-receipt-row"><span>الخدمة</span><span id="pvService">—</span></div>
-              <div class="pf-receipt-row"><span>الباقة</span><span id="pvPkg">—</span></div>
-              <div class="pf-receipt-row"><span>الزبون</span><span id="pvName">—</span></div>
-              <div class="pf-receipt-row"><span>الرقم / ID</span><span id="pvPhone">—</span></div>
-              <div class="pf-receipt-row pf-receipt-price"><span>سعر البيع</span><span id="pvPrice">—</span></div>
-              <div class="pf-receipt-row"><span>التكلفة</span><span id="pvCost">—</span></div>
-              <div class="pf-receipt-row pf-receipt-profit"><span>💰 الربح</span><span id="pvProfit">—</span></div>
-              <div class="pf-receipt-row" id="pvNoteRow"><span>ملاحظة</span><span id="pvNote">—</span></div>
-              <div class="pf-receipt-status-row">
-                <span id="pvStatus" class="pf-status-badge">—</span>
-              </div>
-            </div>
-            <!-- أزرار -->
-            <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;">
-              <button class="pf-act-btn" onclick="pf_copyInvoice()">📋 نسخ</button>
-              <button class="pf-act-btn" onclick="pf_shareInvoice()">📤 مشاركة</button>
-              <button class="pf-act-btn pf-act-green" onclick="pf_setStatus('done')">✅ منجز</button>
-              <button class="pf-act-btn pf-act-red" onclick="pf_setStatus('cancelled')">❌ ملغي</button>
-            </div>
-            <button class="pf-btn-cancel" style="width:100%;margin-top:8px;" onclick="pf_closeViewModal()">إغلاق</button>
-          </div>
-        </div>
 
         <!-- زر الإقفال -->
         <div style="display:flex;justify-content:flex-end;margin-top:10px;">
@@ -4221,29 +4105,30 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
 
       </div><!-- end admin-panel-inner -->
     </div><!-- end admin-panel -->
+</div><!-- admin-panel position:fixed -->
 
-    <!-- Password Modal -->
-    <div id="pwModal" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(6px);border-radius:28px 28px 0 0;z-index:10;align-items:center;justify-content:center;flex-direction:column;gap:14px;">
-      <div style="font-size:36px;">🔐</div>
-      <div style="font-size:14px;font-weight:800;color:white;">كلمة مرور الأدمن</div>
-      <input id="pwInput" type="password" placeholder="أدخل كلمة المرور"
-        style="background:rgba(255,255,255,0.12);border:2px solid rgba(255,255,255,0.2);border-radius:12px;color:white;font-family:'Cairo',sans-serif;font-size:16px;font-weight:700;padding:12px 18px;outline:none;width:220px;text-align:center;direction:ltr;"
-        onkeydown="if(event.key==='Enter') checkPw()">
-      <div id="pwError" style="font-size:11px;color:#f87171;display:none;">❌ كلمة المرور غير صحيحة</div>
-      <div style="display:flex;gap:10px;">
-        <button onclick="checkPw()" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);border:none;color:white;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;padding:10px 24px;border-radius:20px;cursor:pointer;">دخول</button>
-        <button onclick="closePwModal()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;font-family:'Cairo',sans-serif;font-size:13px;padding:10px 18px;border-radius:20px;cursor:pointer;">إلغاء</button>
-      </div>
+
+<!-- Password Modal — خارج كل شيء position:fixed -->
+<div id="pwModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);z-index:999999;align-items:center;justify-content:center;flex-direction:column;gap:14px;">
+  <div style="background:linear-gradient(160deg,#1a1a2e,#0f0f1e);border:1px solid rgba(255,255,255,0.12);border-radius:24px;padding:30px 24px;display:flex;flex-direction:column;align-items:center;gap:14px;min-width:280px;">
+    <div style="font-size:40px;">🔐</div>
+    <div style="font-size:15px;font-weight:800;color:white;font-family:'Tajawal',sans-serif;">كلمة مرور الأدمن</div>
+    <input id="pwInput" type="password" placeholder="أدخل كلمة المرور"
+      style="background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.2);border-radius:12px;color:white;font-family:'Cairo',sans-serif;font-size:18px;font-weight:700;padding:12px 18px;outline:none;width:220px;text-align:center;direction:ltr;"
+      onkeydown="if(event.key==='Enter') checkPw()">
+    <div id="pwError" style="font-size:11px;color:#f87171;display:none;">❌ كلمة المرور غير صحيحة</div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="checkPw()" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);border:none;color:white;font-family:'Cairo',sans-serif;font-size:13px;font-weight:800;padding:12px 28px;border-radius:20px;cursor:pointer;">دخول ✓</button>
+      <button onclick="closePwModal()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;font-family:'Cairo',sans-serif;font-size:13px;padding:12px 18px;border-radius:20px;cursor:pointer;">إلغاء</button>
     </div>
   </div>
 </div>
-</div><!-- end calc-overlay -->
 
 <!-- HOME PAGE -->
 <div id="home" class="page active">
   <div class="header">
     <div class="header-logo">
-      <div class="icon">💎</div>
+      <div class="icon" onclick="adminTap()" style="cursor:pointer;">💎</div>
       <div>
         <h1>مركز الحلو للشحن</h1>
         <div class="slogan">رصيدك بإيدك • خدمة سريعة وموثوقة</div>
@@ -5027,21 +4912,31 @@ function clearField(field){
 function adminTap(){
   adminTapCount++;
   clearTimeout(adminTapTimer);
+
+  // تأثير بصري على الشعار إذا وُجد
+  const logoIcon = document.querySelector('.header-logo .icon');
+  if (logoIcon) {
+    logoIcon.style.boxShadow = `0 4px 20px rgba(245,166,35,${Math.min(adminTapCount*0.25,1)})`;
+    logoIcon.style.transform = `scale(${1 + adminTapCount*0.05})`;
+  }
+  // تأثير على زر الأدمن في الحاسبة إذا كانت مفتوحة
   const btn = document.getElementById('adminIconBtn');
-  btn.style.borderColor = `rgba(245,166,35,${Math.min(adminTapCount/4,1)})`;
-  btn.style.color = `rgba(245,166,35,${Math.min(0.4+adminTapCount*0.15,1)})`;
-  btn.style.transform = `rotate(${adminTapCount*90}deg)`;
+  if (btn) {
+    btn.style.borderColor = `rgba(245,166,35,${Math.min(adminTapCount/4,1)})`;
+    btn.style.color = `rgba(245,166,35,${Math.min(0.4+adminTapCount*0.15,1)})`;
+    btn.style.transform = `rotate(${adminTapCount*90}deg)`;
+  }
+
   adminTapTimer = setTimeout(()=>{
     adminTapCount=0;
-    btn.style.borderColor='rgba(255,255,255,0.12)';
-    btn.style.color='rgba(255,255,255,0.35)';
-    btn.style.transform='rotate(0deg)';
+    if (logoIcon) { logoIcon.style.boxShadow=''; logoIcon.style.transform=''; }
+    if (btn) { btn.style.borderColor='rgba(255,255,255,0.12)'; btn.style.color='rgba(255,255,255,0.35)'; btn.style.transform='rotate(0deg)'; }
   }, 2500);
+
   if(adminTapCount >= 4){
     adminTapCount=0;
-    btn.style.borderColor='rgba(255,255,255,0.12)';
-    btn.style.color='rgba(255,255,255,0.35)';
-    btn.style.transform='rotate(0deg)';
+    if (logoIcon) { logoIcon.style.boxShadow=''; logoIcon.style.transform=''; }
+    if (btn) { btn.style.borderColor='rgba(255,255,255,0.12)'; btn.style.color='rgba(255,255,255,0.35)'; btn.style.transform='rotate(0deg)'; }
     if(adminUnlocked){
       restoreBinCredsToUI();
       document.getElementById('adminPanel').classList.add('show');
@@ -5151,9 +5046,10 @@ function switchAdminTab(tab, btn) {
   document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('adminTab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
-  // تحميل الرسائل عند فتح تاب الصندوق
-  if (tab === 'inbox') loadFeedbackForAdmin();
+  const tabEl = document.getElementById('adminTab' + tab.charAt(0).toUpperCase() + tab.slice(1));
+  if (tabEl) tabEl.classList.add('active');
+  if (tab === 'inbox')    loadFeedbackForAdmin();
+  if (tab === 'invoices') pf_loadAndRender();
 }
 
 function goOfferStep(step) {
@@ -8464,14 +8360,19 @@ const PF_SERVICES = {
   joker:    { label:'جواكر 🃏',     pkgs: ()=>JOKER_PKGS }
 };
 
-// ── فتح التاب ──
-function pf_openTab(btn) {
-  document.querySelectorAll('.admin-tab-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.admin-tab-content').forEach(c=>c.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('adminTabInvoices').classList.add('active');
+// ── فتح/إغلاق واجهة الفواتير المستقلة ──
+function pf_openOverlay() {
+  const el = document.getElementById('pfOverlay');
+  if (el) { el.style.display = 'block'; el.scrollTop = 0; }
+  pf_hidePkgs();
   pf_loadAndRender();
 }
+function pf_closeOverlay() {
+  const el = document.getElementById('pfOverlay');
+  if (el) el.style.display = 'none';
+  pf_hidePkgs();
+}
+function pf_openTab(btn) { pf_openOverlay(); }
 
 // ══ السحابة ══
 async function pf_getOrCreateBin() {
@@ -8534,36 +8435,40 @@ async function pf_loadAndRender() {
 }
 
 function pf_renderDashboard() {
-  const today = new Date().toLocaleDateString('ar-SY');
-  const thisMonth = new Date().toLocaleDateString('ar-SY',{month:'2-digit',year:'numeric'});
-  let todayProfit=0, monthProfit=0;
+  const todayStr  = new Date().toLocaleDateString('ar-SY');
+  const monthStr  = new Date().toLocaleDateString('ar-SY',{month:'2-digit',year:'numeric'}).slice(-7);
+  let todayP=0, monthP=0;
   PF_invoices.filter(i=>i.status==='done').forEach(i=>{
     const p = parseFloat(i.profit)||0;
-    if (i.date && i.date.startsWith(today)) todayProfit += p;
-    if (i.date && i.date.includes(thisMonth.slice(-4))) monthProfit += p;
+    if (i.date && i.date.startsWith(todayStr)) todayP += p;
+    if (i.date && i.date.includes(new Date().getFullYear()+'/'+String(new Date().getMonth()+1).padStart(2,'0'))) monthP += p;
   });
-  document.getElementById('pfKpiToday').textContent  = '$'+todayProfit.toFixed(2);
-  document.getElementById('pfKpiMonth').textContent  = '$'+monthProfit.toFixed(2);
-  document.getElementById('pfKpiCount').textContent  = PF_invoices.length;
+  const setEl = (id,val) => { const e=document.getElementById(id); if(e) e.textContent=val; };
+  setEl('pfKpiToday',  '$'+todayP.toFixed(2));
+  setEl('pfKpiMonth',  '$'+monthP.toFixed(2));
+  setEl('pfKpiCount',  PF_invoices.length);
 }
 
 function pf_renderList() {
   const el = document.getElementById('pfInvoiceList');
+  if (!el) return;
   if (!PF_invoices.length) {
-    el.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.25);font-size:11px;padding:16px;">لا توجد فواتير بعد</div>';
+    el.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.3);font-size:12px;padding:24px;">لا توجد فواتير بعد</div>';
     return;
   }
-  el.innerHTML = [...PF_invoices].reverse().slice(0,50).map(inv => {
-    const stMap = {pending:'⏳ معلق',done:'✅ منجز',cancelled:'❌ ملغي'};
-    const stCls = {pending:'pf-status-pending',done:'pf-status-done',cancelled:'pf-status-cancelled'};
+  const stMap = {pending:'⏳ معلق', done:'✅ منجز', cancelled:'❌ ملغي'};
+  const stClr = {pending:'#fbbf24', done:'#4ade80', cancelled:'#f87171'};
+  const stBg  = {pending:'rgba(251,191,36,0.15)', done:'rgba(74,222,128,0.12)', cancelled:'rgba(248,113,113,0.12)'};
+  el.innerHTML = [...PF_invoices].reverse().slice(0,60).map(inv => {
     const profit = parseFloat(inv.profit)||0;
-    return `<div class="pf-inv-row" onclick="pf_viewInvoice('${inv.id}')">
-      <div class="pf-inv-info">
-        <div class="pf-inv-pkg">${inv.service} — ${inv.pkg}</div>
-        <div class="pf-inv-meta">${inv.date||''} ${inv.customerPhone ? '· '+inv.customerPhone : ''}</div>
-        <div style="margin-top:3px;"><span class="pf-status-badge ${stCls[inv.status]||'pf-status-pending'}">${stMap[inv.status]||'⏳ معلق'}</span></div>
+    const st = inv.status||'pending';
+    return `<div onclick="pf_viewInvoice('${inv.id}')" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 12px;margin-bottom:7px;display:flex;align-items:center;gap:8px;cursor:pointer;">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:800;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${inv.service||''} — ${inv.pkg||''}</div>
+        <div style="font-size:9px;color:rgba(255,255,255,0.4);margin-top:2px;">${inv.date||''} ${inv.customerPhone?'· '+inv.customerPhone:''}</div>
+        <div style="margin-top:4px;"><span style="display:inline-block;border-radius:20px;padding:2px 8px;font-size:9px;font-weight:800;color:${stClr[st]};background:${stBg[st]};border:1px solid ${stClr[st]}33;">${stMap[st]}</span></div>
       </div>
-      <div class="pf-inv-profit">${profit>0?'$'+profit.toFixed(2):'—'}</div>
+      <div style="font-size:14px;font-weight:900;color:#4ade80;flex-shrink:0;">${profit>0?'$'+profit.toFixed(2):'—'}</div>
     </div>`;
   }).join('');
 }
@@ -8604,15 +8509,18 @@ function pf_openModal(svc, pkgLabel, price) {
   document.getElementById('pfModal').style.display = 'flex';
 }
 function pf_closeModal(e) {
-  if (!e || e.target===document.getElementById('pfModal'))
-    document.getElementById('pfModal').style.display='none';
+  if (!e || e.target === document.getElementById('pfModal'))
+    document.getElementById('pfModal').style.display = 'none';
 }
 function pf_calcProfit() {
   const p = parseFloat(document.getElementById('pfMPrice').value)||0;
   const c = parseFloat(document.getElementById('pfMCost').value)||0;
   const profit = p - c;
-  document.getElementById('pfMProfit').textContent = p>0||c>0 ? '$'+profit.toFixed(2) : '—';
-  document.getElementById('pfMProfit').style.color = profit>=0?'#4ade80':'#f87171';
+  const el = document.getElementById('pfMProfit');
+  if (el) {
+    el.textContent = (p>0||c>0) ? '$'+profit.toFixed(2) : '—';
+    el.style.color = profit>=0 ? '#4ade80' : '#f87171';
+  }
 }
 
 // ── حفظ الفاتورة ──
@@ -8660,12 +8568,8 @@ async function pf_saveInvoice() {
   pf_renderDashboard();
   pf_renderList();
   pf_hidePkgs();
-
-  // رفع للسحابة
   pf_pushToCloud(PF_invoices);
-
-  // اعرض الفاتورة مباشرة
-  setTimeout(()=>pf_viewInvoice(inv.id), 200);
+  setTimeout(()=>pf_viewInvoice(inv.id), 150);
 }
 
 // ── عرض فاتورة ──
@@ -8692,8 +8596,8 @@ function pf_viewInvoice(id) {
   document.getElementById('pfViewModal').style.display='flex';
 }
 function pf_closeViewModal(e) {
-  if (!e||e.target===document.getElementById('pfViewModal'))
-    document.getElementById('pfViewModal').style.display='none';
+  if (!e || e.target === document.getElementById('pfViewModal'))
+    document.getElementById('pfViewModal').style.display = 'none';
 }
 
 // ── تغيير الحالة ──
@@ -8882,5 +8786,131 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+<!-- ══════════════════════════════════════════
+     نظام الفواتير — صفحة مستقلة
+══════════════════════════════════════════ -->
+<div id="pfOverlay" style="display:none;position:fixed;inset:0;z-index:999990;background:#0d0d1a;overflow-y:auto;-webkit-overflow-scrolling:touch;font-family:'Cairo',sans-serif;direction:rtl;">
+  <!-- Header ثابت -->
+  <div style="background:linear-gradient(135deg,#150a2e,#0d0d1a);padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.08);position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;">
+    <button onclick="pf_closeOverlay()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);border-radius:50%;width:34px;height:34px;color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>
+    <span style="font-size:16px;font-weight:900;color:white;flex:1;">💰 إدارة الفواتير</span>
+    <button onclick="pf_loadAndRender()" style="background:rgba(124,58,237,0.2);border:1px solid rgba(124,58,237,0.45);border-radius:20px;color:#a78bfa;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:5px 12px;cursor:pointer;white-space:nowrap;">🔄 تحديث</button>
+  </div>
+
+  <div style="padding:14px 12px;max-width:500px;margin:0 auto;">
+    <!-- KPIs -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">
+      <div style="background:rgba(245,166,35,0.12);border:1.5px solid rgba(245,166,35,0.3);border-radius:12px;padding:10px 6px;text-align:center;">
+        <div id="pfKpiToday" style="font-size:17px;font-weight:900;color:#f5a623;font-family:'Tajawal',sans-serif;">$0</div>
+        <div style="font-size:9px;color:rgba(255,255,255,0.5);margin-top:2px;">ربح اليوم</div>
+      </div>
+      <div style="background:rgba(74,222,128,0.1);border:1.5px solid rgba(74,222,128,0.25);border-radius:12px;padding:10px 6px;text-align:center;">
+        <div id="pfKpiMonth" style="font-size:17px;font-weight:900;color:#4ade80;font-family:'Tajawal',sans-serif;">$0</div>
+        <div style="font-size:9px;color:rgba(255,255,255,0.5);margin-top:2px;">ربح الشهر</div>
+      </div>
+      <div style="background:rgba(139,92,246,0.1);border:1.5px solid rgba(139,92,246,0.25);border-radius:12px;padding:10px 6px;text-align:center;">
+        <div id="pfKpiCount" style="font-size:17px;font-weight:900;color:#a78bfa;font-family:'Tajawal',sans-serif;">0</div>
+        <div style="font-size:9px;color:rgba(255,255,255,0.5);margin-top:2px;">الفواتير</div>
+      </div>
+    </div>
+
+    <div id="pfCloudStatus" style="font-size:9px;color:rgba(255,255,255,0.3);text-align:center;margin-bottom:12px;">☁️ جاري التزامن...</div>
+
+    <!-- الخدمات -->
+    <div style="font-size:11px;font-weight:800;color:rgba(255,255,255,0.65);margin-bottom:8px;">📦 اختر الخدمة لإنشاء فاتورة يدوية:</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px;">
+      <button onclick="pf_showPkgs('syriatel')" style="background:rgba(239,68,68,0.15);border:1.5px solid rgba(239,68,68,0.4);border-radius:10px;color:white;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:10px 4px;cursor:pointer;">🔴 سيرياتيل</button>
+      <button onclick="pf_showPkgs('mtn')"      style="background:rgba(234,179,8,0.15);border:1.5px solid rgba(234,179,8,0.4);border-radius:10px;color:white;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:10px 4px;cursor:pointer;">🟡 MTN</button>
+      <button onclick="pf_showPkgs('freefire')" style="background:rgba(249,115,22,0.15);border:1.5px solid rgba(249,115,22,0.4);border-radius:10px;color:white;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:10px 4px;cursor:pointer;">🔥 فري فاير</button>
+      <button onclick="pf_showPkgs('pubg')"     style="background:rgba(168,85,247,0.15);border:1.5px solid rgba(168,85,247,0.4);border-radius:10px;color:white;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:10px 4px;cursor:pointer;">🪖 ببجي</button>
+      <button onclick="pf_showPkgs('joker')"    style="background:rgba(6,182,212,0.15);border:1.5px solid rgba(6,182,212,0.4);border-radius:10px;color:white;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:10px 4px;cursor:pointer;">🃏 جواكر</button>
+    </div>
+
+    <!-- قائمة الباقات (مخفية بالبداية) -->
+    <div id="pfPkgList" style="display:none;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:10px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <span id="pfPkgTitle" style="font-size:12px;font-weight:800;color:white;">الباقات</span>
+        <button onclick="pf_hidePkgs()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:22px;line-height:1;cursor:pointer;padding:0 4px;">✕</button>
+      </div>
+      <div id="pfPkgGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;max-height:240px;overflow-y:auto;"></div>
+    </div>
+
+    <!-- سجل الفواتير -->
+    <div style="font-size:12px;font-weight:800;color:rgba(255,255,255,0.7);margin-bottom:8px;">🧾 سجل الفواتير</div>
+    <div id="pfInvoiceList" style="padding-bottom:30px;"></div>
+  </div>
+</div>
+
+<!-- Modal: إنشاء فاتورة -->
+<div id="pfModal" style="display:none;position:fixed;inset:0;z-index:999995;background:rgba(0,0,0,0.92);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:16px;box-sizing:border-box;overflow-y:auto;" onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:linear-gradient(170deg,#1a1a2e,#0f0f1e);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:20px;width:100%;max-width:340px;font-family:'Cairo',sans-serif;direction:rtl;box-sizing:border-box;">
+    <div style="font-size:15px;font-weight:900;color:white;text-align:center;margin-bottom:16px;">🧾 إنشاء فاتورة</div>
+
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;"><span style="font-size:10px;color:rgba(255,255,255,0.5);width:68px;text-align:right;flex-shrink:0;">الخدمة</span><span id="pfMService" style="font-size:11px;font-weight:700;color:white;">—</span></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;"><span style="font-size:10px;color:rgba(255,255,255,0.5);width:68px;text-align:right;flex-shrink:0;">الباقة</span><span id="pfMPkg" style="font-size:11px;font-weight:700;color:white;">—</span></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;">
+      <span style="font-size:10px;color:rgba(255,255,255,0.5);width:68px;text-align:right;flex-shrink:0;">سعر البيع $</span>
+      <input id="pfMPrice" type="text" inputmode="decimal" placeholder="0.00" oninput="pf_calcProfit()" style="flex:1;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:white;font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;padding:8px 10px;outline:none;direction:ltr;text-align:center;box-sizing:border-box;">
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;">
+      <span style="font-size:10px;color:rgba(255,255,255,0.5);width:68px;text-align:right;flex-shrink:0;">التكلفة $</span>
+      <input id="pfMCost" type="text" inputmode="decimal" placeholder="0.00" oninput="pf_calcProfit()" style="flex:1;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:white;font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;padding:8px 10px;outline:none;direction:ltr;text-align:center;box-sizing:border-box;">
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;background:rgba(74,222,128,0.08);border-radius:9px;padding:9px 10px;">
+      <span style="font-size:10px;color:rgba(255,255,255,0.5);width:68px;text-align:right;flex-shrink:0;">💰 الربح $</span>
+      <span id="pfMProfit" style="font-size:18px;font-weight:900;color:#4ade80;flex:1;text-align:center;">—</span>
+    </div>
+    <div style="height:1px;background:rgba(255,255,255,0.08);margin:10px 0;"></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;">
+      <span style="font-size:10px;color:rgba(255,255,255,0.5);width:68px;text-align:right;flex-shrink:0;">اسم الزبون</span>
+      <input id="pfMName" type="text" placeholder="اختياري" style="flex:1;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:white;font-family:'Cairo',sans-serif;font-size:12px;padding:8px 10px;outline:none;box-sizing:border-box;">
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;">
+      <span style="font-size:10px;color:rgba(255,255,255,0.5);width:68px;text-align:right;flex-shrink:0;">رقم / ID</span>
+      <input id="pfMPhone" type="text" inputmode="numeric" placeholder="رقم أو ID اللعبة" style="flex:1;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:white;font-family:'Cairo',sans-serif;font-size:12px;padding:8px 10px;outline:none;box-sizing:border-box;">
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+      <span style="font-size:10px;color:rgba(255,255,255,0.5);width:68px;text-align:right;flex-shrink:0;">ملاحظة</span>
+      <input id="pfMNote" type="text" placeholder="اختياري" style="flex:1;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:white;font-family:'Cairo',sans-serif;font-size:12px;padding:8px 10px;outline:none;box-sizing:border-box;">
+    </div>
+
+    <div style="display:flex;gap:8px;">
+      <button onclick="document.getElementById('pfModal').style.display='none'" style="flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:rgba(255,255,255,0.7);font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;padding:11px;cursor:pointer;">إلغاء</button>
+      <button onclick="pf_saveInvoice()" style="flex:2;background:linear-gradient(135deg,#7c3aed,#4f46e5);border:none;border-radius:10px;color:white;font-family:'Cairo',sans-serif;font-size:13px;font-weight:800;padding:11px;cursor:pointer;">✅ حفظ الفاتورة</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: عرض فاتورة -->
+<div id="pfViewModal" style="display:none;position:fixed;inset:0;z-index:999995;background:rgba(0,0,0,0.92);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:16px;box-sizing:border-box;overflow-y:auto;" onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:linear-gradient(170deg,#1a1a2e,#0f0f1e);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:18px;width:100%;max-width:340px;font-family:'Cairo',sans-serif;direction:rtl;box-sizing:border-box;">
+    <div id="pfReceiptEl" style="background:linear-gradient(160deg,#111827,#0f172a);border:1.5px solid rgba(245,166,35,0.25);border-radius:14px;padding:16px;margin-bottom:14px;">
+      <div style="text-align:center;margin-bottom:12px;">
+        <div style="font-size:24px;">🧾</div>
+        <div style="font-size:15px;font-weight:900;color:#f5a623;">مركز الحلو للشحن</div>
+        <div id="pvDate" style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;">—</div>
+      </div>
+      <div id="pvNum" style="text-align:center;font-size:10px;color:rgba(255,255,255,0.25);letter-spacing:2px;margin-bottom:12px;">#000000</div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:11px;"><span style="color:rgba(255,255,255,0.45);">الخدمة</span><span id="pvService" style="color:white;font-weight:700;">—</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:11px;"><span style="color:rgba(255,255,255,0.45);">الباقة</span><span id="pvPkg" style="color:white;font-weight:700;">—</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:11px;"><span style="color:rgba(255,255,255,0.45);">الزبون</span><span id="pvName" style="color:white;font-weight:700;">—</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:11px;"><span style="color:rgba(255,255,255,0.45);">الرقم / ID</span><span id="pvPhone" style="color:white;font-weight:700;">—</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:11px;"><span style="color:rgba(255,255,255,0.45);">سعر البيع</span><span id="pvPrice" style="color:#f5a623;font-weight:700;font-size:13px;">—</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:11px;"><span style="color:rgba(255,255,255,0.45);">التكلفة</span><span id="pvCost" style="color:white;font-weight:700;">—</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1.5px solid rgba(74,222,128,0.3);margin-top:6px;"><span style="font-size:12px;color:rgba(255,255,255,0.7);font-weight:700;">💰 الربح</span><span id="pvProfit" style="color:#4ade80;font-weight:900;font-size:18px;">—</span></div>
+      <div id="pvNoteRow" style="display:none;justify-content:space-between;padding:6px 0;font-size:11px;"><span style="color:rgba(255,255,255,0.45);">ملاحظة</span><span id="pvNote" style="color:white;font-weight:700;">—</span></div>
+      <div style="text-align:center;margin-top:12px;"><span id="pvStatus" style="display:inline-block;border-radius:20px;padding:4px 14px;font-size:11px;font-weight:800;background:rgba(251,191,36,0.2);color:#fbbf24;border:1px solid rgba(251,191,36,0.4);">—</span></div>
+    </div>
+    <!-- أزرار -->
+    <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+      <button onclick="pf_copyInvoice()" style="flex:1;min-width:70px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:9px;color:white;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:9px 4px;cursor:pointer;">📋 نسخ</button>
+      <button onclick="pf_shareInvoice()" style="flex:1;min-width:70px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:9px;color:white;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:9px 4px;cursor:pointer;">📤 مشاركة</button>
+      <button onclick="pf_setStatus('done')" style="flex:1;min-width:70px;background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.4);border-radius:9px;color:#4ade80;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:9px 4px;cursor:pointer;">✅ منجز</button>
+      <button onclick="pf_setStatus('cancelled')" style="flex:1;min-width:70px;background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.4);border-radius:9px;color:#f87171;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:9px 4px;cursor:pointer;">❌ ملغي</button>
+    </div>
+    <button onclick="document.getElementById('pfViewModal').style.display='none'" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:rgba(255,255,255,0.6);font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;padding:10px;cursor:pointer;">إغلاق</button>
+  </div>
+</div>
+
 </body>
 </html>
