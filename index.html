@@ -8671,6 +8671,11 @@ function pf_viewInvoice(id) {
   stEl.textContent = stMap[inv.status]||'⏳ معلق';
   stEl.className   = 'pf-status-badge '+(stCls[inv.status]||'pf-status-pending');
   document.getElementById('pfViewModal').style.display='flex';
+  // تطبيق اللون المحفوظ
+  const savedColor = localStorage.getItem('halou_pf_receipt_color');
+  if (savedColor && savedColor !== '#ffffff') {
+    setTimeout(() => pf_setReceiptColor(savedColor), 50);
+  }
 }
 function pf_closeViewModal(e) {
   if (!e || e.target === document.getElementById('pfViewModal'))
@@ -8740,10 +8745,55 @@ function pf_createFromOrder(orderData) {
   pf_renderList();
 }
 
+// ── حذف فاتورة ──
+async function pf_deleteInvoice() {
+  if (!PF_currentInv) return;
+  const inv = PF_currentInv;
+  // تأكيد الحذف
+  const confirmed = confirm(`⚠️ هل تريد حذف هذه الفاتورة؟\n\n${inv.service} — ${inv.pkg}\n${inv.date}\n\nلا يمكن التراجع عن الحذف.`);
+  if (!confirmed) return;
+  // احذف من المصفوفة
+  PF_invoices = PF_invoices.filter(i => i.id !== inv.id);
+  // احفظ محلياً
+  localStorage.setItem(PF_LOCAL_KEY, JSON.stringify(PF_invoices));
+  // أغلق المودال
+  document.getElementById('pfViewModal').style.display = 'none';
+  PF_currentInv = null;
+  // حدّث العرض
+  pf_renderDashboard();
+  pf_renderList();
+  // ارفع للسحابة
+  pf_pushToCloud(PF_invoices).catch(()=>{});
+}
+let PF_receiptColor = '#ffffff';
+function pf_setReceiptColor(color) {
+  PF_receiptColor = color;
+  localStorage.setItem('halou_pf_receipt_color', color);
+  const el = document.getElementById('pfReceiptEl');
+  if (!el) return;
+  // تغيير لون كل النصوص داخل الفاتورة
+  el.querySelectorAll('span, div').forEach(node => {
+    // تجاوز العناصر التي لها ألوان ثابتة (الربح والسعر والحالة)
+    const skip = ['pvProfit','pvPrice','pvStatus'];
+    if (!skip.includes(node.id)) {
+      node.style.color = color;
+      node.style.webkitTextFillColor = color;
+    }
+  });
+  // تحديث لون عنوان المركز
+  const title = el.querySelector('[style*="f5a623"]');
+  // highlight اللون المختار
+  document.querySelectorAll('#pfViewModal [onclick^="pf_setReceiptColor"]').forEach(btn => {
+    btn.style.transform = btn.getAttribute('onclick').includes(color) ? 'scale(1.25)' : 'scale(1)';
+    btn.style.boxShadow = btn.getAttribute('onclick').includes(color) ? `0 0 8px ${color}` : 'none';
+  });
+}
+
 // ── تهيئة عند فتح الصفحة ──
 (function pf_init(){
   const local = localStorage.getItem(PF_LOCAL_KEY);
   if (local) { try { PF_invoices = JSON.parse(local); } catch(e){} }
+  PF_receiptColor = localStorage.getItem('halou_pf_receipt_color') || '#ffffff';
 })();
 
 function initTicker() {
@@ -8989,6 +9039,29 @@ if ('serviceWorker' in navigator) {
       <button onclick="pf_setStatus('done')" style="flex:1;min-width:70px;background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.4);border-radius:9px;color:#4ade80;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:9px 4px;cursor:pointer;">✅ منجز</button>
       <button onclick="pf_setStatus('cancelled')" style="flex:1;min-width:70px;background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.4);border-radius:9px;color:#f87171;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:9px 4px;cursor:pointer;">❌ ملغي</button>
     </div>
+    <!-- زر الحذف منفرد -->
+    <button onclick="pf_deleteInvoice()" style="width:100%;background:rgba(239,68,68,0.1);border:1.5px solid rgba(239,68,68,0.35);border-radius:10px;color:#ef4444;font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;padding:10px;cursor:pointer;margin-bottom:8px;">🗑 حذف هذه الفاتورة</button>
+
+    <!-- لون نص الفاتورة -->
+    <div style="margin-bottom:10px;">
+      <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:6px;text-align:center;">🎨 لون نص الفاتورة</div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+        <button onclick="pf_setReceiptColor('#ffffff')" title="أبيض"  style="width:30px;height:30px;border-radius:50%;background:#ffffff;border:2px solid rgba(255,255,255,0.3);cursor:pointer;"></button>
+        <button onclick="pf_setReceiptColor('#4ade80')" title="أخضر"  style="width:30px;height:30px;border-radius:50%;background:#4ade80;border:2px solid rgba(74,222,128,0.4);cursor:pointer;"></button>
+        <button onclick="pf_setReceiptColor('#60a5fa')" title="أزرق"  style="width:30px;height:30px;border-radius:50%;background:#60a5fa;border:2px solid rgba(96,165,250,0.4);cursor:pointer;"></button>
+        <button onclick="pf_setReceiptColor('#f87171')" title="أحمر"  style="width:30px;height:30px;border-radius:50%;background:#f87171;border:2px solid rgba(248,113,113,0.4);cursor:pointer;"></button>
+        <button onclick="pf_setReceiptColor('#f5a623')" title="ذهبي"  style="width:30px;height:30px;border-radius:50%;background:#f5a623;border:2px solid rgba(245,166,35,0.4);cursor:pointer;"></button>
+        <button onclick="pf_setReceiptColor('#a78bfa')" title="بنفسجي" style="width:30px;height:30px;border-radius:50%;background:#a78bfa;border:2px solid rgba(167,139,250,0.4);cursor:pointer;"></button>
+        <button onclick="pf_setReceiptColor('#fb923c')" title="برتقالي" style="width:30px;height:30px;border-radius:50%;background:#fb923c;border:2px solid rgba(251,146,60,0.4);cursor:pointer;"></button>
+        <button onclick="pf_setReceiptColor('#34d399')" title="تركوازي" style="width:30px;height:30px;border-radius:50%;background:#34d399;border:2px solid rgba(52,211,153,0.4);cursor:pointer;"></button>
+        <!-- منتقي لون مخصص -->
+        <label title="لون مخصص" style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#f00,#0f0,#00f);border:2px solid rgba(255,255,255,0.2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;">
+          🖊
+          <input type="color" onchange="pf_setReceiptColor(this.value)" style="position:absolute;opacity:0;width:0;height:0;">
+        </label>
+      </div>
+    </div>
+
     <button onclick="document.getElementById('pfViewModal').style.display='none'" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:rgba(255,255,255,0.6);font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;padding:10px;cursor:pointer;">إغلاق</button>
   </div>
 </div>
