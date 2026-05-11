@@ -3000,6 +3000,17 @@ body.light-mode .nv-output-section { background: var(--card); border-color: rgba
 body.light-mode .nv-main-input { color: var(--txt); }
 body.light-mode .nv-syp-card { background: var(--card) !important; }
 
+/* ══ إصلاح لون النص في نافذة الفاتورة ══ */
+#pfModal input {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  background-color: rgba(255,255,255,0.1) !important;
+}
+#pfModal input::placeholder {
+  color: rgba(255,255,255,0.35) !important;
+  -webkit-text-fill-color: rgba(255,255,255,0.35) !important;
+}
+
 /* ══════════════════════════════════════
    INVOICE SYSTEM (pf-) — Admin Only
 ══════════════════════════════════════ */
@@ -4511,29 +4522,43 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
 <script>
 // ===== DATA =====
 const SYRIATEL_PKGS=[
-  {amount:'1.92',unit:'ليرة',price:'$ 0.05'},{amount:'2.88',unit:'ليرة',price:'$ 0.07'},
-  {amount:'3.85',unit:'ليرة',price:'$ 0.09'},{amount:'4.81',unit:'ليرة',price:'$ 0.10'},
-  {amount:'5.77',unit:'ليرة',price:'$ 0.15'},{amount:'9.62',unit:'ليرة',price:'$ 0.19'},
-  {amount:'20.19',unit:'ليرة',price:'$ 0.20'},{amount:'21.50',unit:'ليرة',price:'$ 0.26'},
-  {amount:'24.04',unit:'ليرة',price:'$ 0.27'},{amount:'25.96',unit:'ليرة',price:'$ 0.30'},
-  {amount:'30.77',unit:'ليرة',price:'$ 0.34'},{amount:'40.38',unit:'ليرة',price:'$ 0.45'},
-  {amount:'45.19',unit:'ليرة',price:'$ 0.51'},{amount:'48.08',unit:'ليرة',price:'$ 0.54'},
-  {amount:'52.88',unit:'ليرة',price:'$ 0.59'},{amount:'62.50',unit:'ليرة',price:'$ 0.70'},
-  {amount:'68.27',unit:'ليرة',price:'$ 0.77'},{amount:'72.12',unit:'ليرة',price:'$ 0.81'},
-  {amount:'77.88',unit:'ليرة',price:'$ 0.87'},{amount:'81.73',unit:'ليرة',price:'$ 0.92'},
-  {amount:'86.54',unit:'ليرة',price:'$ 0.97'},{amount:'96.15',unit:'ليرة',price:'$ 1.09'},
-  {amount:'100.96',unit:'ليرة',price:'$ 1.13'},{amount:'105.77',unit:'ليرة',price:'$ 1.19'},
-  {amount:'115.38',unit:'ليرة',price:'$ 1.30'},{amount:'125.00',unit:'ليرة',price:'$ 1.40'},
-  {amount:'130.77',unit:'ليرة',price:'$ 1.46'},{amount:'144.23',unit:'ليرة',price:'$ 1.62'},
-  {amount:'160.58',unit:'ليرة',price:'$ 1.81'},{amount:'163.46',unit:'ليرة',price:'$ 1.84'},
-  {amount:'173.08',unit:'ليرة',price:'$ 1.95'},{amount:'183.65',unit:'ليرة',price:'$ 2.07'},
-  {amount:'192.31',unit:'ليرة',price:'$ 2.16'},{amount:'211.54',unit:'ليرة',price:'$ 2.37'},
-  {amount:'240.38',unit:'ليرة',price:'$ 2.70'},{amount:'288.46',unit:'ليرة',price:'$ 3.25'},
-  {amount:'317.31',unit:'ليرة',price:'$ 3.56'},{amount:'370.19',unit:'ليرة',price:'$ 4.15'},
-  {amount:'432.69',unit:'ليرة',price:'$ 4.86'},{amount:'480.77',unit:'ليرة',price:'$ 5.40'},
-  {amount:'576.92',unit:'ليرة',price:'$ 6.48'},{amount:'625.00',unit:'ليرة',price:'$ 7.02'},
-  {amount:'721.15',unit:'ليرة',price:'$ 8.10'},{amount:'769.23',unit:'ليرة',price:'$ 8.64'},
-  {amount:'951.92',unit:'ليرة',price:'$ 10.69'},
+  {amount:'20.19',  unit:'ليرة', price:'$ 0.20'},
+  {amount:'23.07',  unit:'ليرة', price:'$ 0.23'},
+  {amount:'24.03',  unit:'ليرة', price:'$ 0.25'},
+  {amount:'25.96',  unit:'ليرة', price:'$ 0.30'},
+  {amount:'30.76',  unit:'ليرة', price:'$ 0.35'},
+  {amount:'40.38',  unit:'ليرة', price:'$ 0.45'},
+  {amount:'45.19',  unit:'ليرة', price:'$ 0.46'},
+  {amount:'48.07',  unit:'ليرة', price:'$ 0.50'},
+  {amount:'52.88',  unit:'ليرة', price:'$ 0.55'},
+  {amount:'62.50',  unit:'ليرة', price:'$ 0.65'},
+  {amount:'68.26',  unit:'ليرة', price:'$ 0.70'},
+  {amount:'72.11',  unit:'ليرة', price:'$ 0.75'},
+  {amount:'77.88',  unit:'ليرة', price:'$ 0.80'},
+  {amount:'81.73',  unit:'ليرة', price:'$ 0.85'},
+  {amount:'86.53',  unit:'ليرة', price:'$ 0.90'},
+  {amount:'96.15',  unit:'ليرة', price:'$ 1.00'},
+  {amount:'100.96', unit:'ليرة', price:'$ 1.10'},
+  {amount:'105.76', unit:'ليرة', price:'$ 1.12'},
+  {amount:'115.38', unit:'ليرة', price:'$ 1.20'},
+  {amount:'130.76', unit:'ليرة', price:'$ 1.35'},
+  {amount:'144.23', unit:'ليرة', price:'$ 1.50'},
+  {amount:'160.57', unit:'ليرة', price:'$ 1.65'},
+  {amount:'163.46', unit:'ليرة', price:'$ 1.70'},
+  {amount:'173.07', unit:'ليرة', price:'$ 1.75'},
+  {amount:'183.65', unit:'ليرة', price:'$ 1.90'},
+  {amount:'192.30', unit:'ليرة', price:'$ 2.00'},
+  {amount:'211.53', unit:'ليرة', price:'$ 2.20'},
+  {amount:'240.38', unit:'ليرة', price:'$ 2.45'},
+  {amount:'288.46', unit:'ليرة', price:'$ 2.95'},
+  {amount:'317.30', unit:'ليرة', price:'$ 3.25'},
+  {amount:'370.19', unit:'ليرة', price:'$ 3.75'},
+  {amount:'432.69', unit:'ليرة', price:'$ 4.40'},
+  {amount:'480.76', unit:'ليرة', price:'$ 4.90'},
+  {amount:'576.92', unit:'ليرة', price:'$ 5.85'},
+  {amount:'721.15', unit:'ليرة', price:'$ 7.30'},
+  {amount:'769.23', unit:'ليرة', price:'$ 7.80'},
+  {amount:'951.92', unit:'ليرة', price:'$ 9.65'},
 ];
 const MTN_PKGS=[
   {amount:'50',unit:'ليرة',price:'$ 0.56'},{amount:'85',unit:'ليرة',price:'$ 0.95'},
@@ -5843,7 +5868,7 @@ async function fetchTCMBRate() {
   try {
     const res = await fetch(
       'https://open.er-api.com/v6/latest/USD',
-      { cache: 'no-store', signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined }
+      { cache: 'no-store', signal: (()=>{ const c=new AbortController(); setTimeout(()=>c.abort(),8000); return c.signal; })() }
     );
     if (res.ok) {
       const data = await res.json();
@@ -5859,7 +5884,7 @@ async function fetchTCMBRate() {
   try {
     const res = await fetch(
       'https://api.frankfurter.app/latest?from=USD&to=TRY',
-      { cache: 'no-store', signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined }
+      { cache: 'no-store', signal: (()=>{ const c=new AbortController(); setTimeout(()=>c.abort(),8000); return c.signal; })() }
     );
     if (res.ok) {
       const data = await res.json();
@@ -7524,7 +7549,7 @@ async function fetchTelegramHTML() {
       const proxyUrl = proxyFn(tgUrl);
       const res = await fetch(proxyUrl, {
         cache: 'no-store',
-        signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined
+        signal: (()=>{ const c=new AbortController(); setTimeout(()=>c.abort(),8000); return c.signal; })()
       });
       if (!res.ok) { lastErr = 'HTTP ' + res.status; continue; }
       const html = await res.text();
@@ -7656,14 +7681,17 @@ async function fetchViaProxy(targetUrl) {
   let lastErr = '';
   for (const fn of proxies) {
     try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 10000);
       const res = await fetch(fn(targetUrl + '?t=' + Date.now()), {
         cache: 'no-store',
-        signal: AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined
+        signal: ctrl.signal
       });
+      clearTimeout(timer);
       if (!res.ok) { lastErr = 'HTTP ' + res.status; continue; }
       const text = await res.text();
       if (text.length < 500) { lastErr = 'رد قصير'; continue; }
-      return text; // ✅ نجح
+      return text;
     } catch(e) { lastErr = e.message || 'خطأ'; }
   }
   throw new Error('فشلت جميع الـ Proxies: ' + lastErr);
@@ -8200,7 +8228,7 @@ let tickerGoldPrice = null;      // سعر غرام الذهب 24K بالدول�
 let tickerLastFetch  = 0;
 
 async function fetchGoldPrice() {
-  const sig = (ms) => AbortSignal.timeout ? AbortSignal.timeout(ms) : undefined;
+  const sig = (ms) => { const c = new AbortController(); setTimeout(()=>c.abort(), ms); return c.signal; };
 
   // ── Source 1: open.er-api.com/XAU (نفس الـ API الذي يجلب سعر التركي) ──
   try {
@@ -8374,6 +8402,25 @@ function pf_closeOverlay() {
 }
 function pf_openTab(btn) { pf_openOverlay(); }
 
+// ── فاتورة يدوية كاملة (بدون باقة محددة) ──
+function pf_openManual() {
+  // إعادة تعيين الحقول
+  document.getElementById('pfMPrice').value   = '';
+  document.getElementById('pfMCost').value    = '';
+  document.getElementById('pfMProfit').textContent = '—';
+  document.getElementById('pfMName').value    = '';
+  document.getElementById('pfMPhone').value   = '';
+  document.getElementById('pfMNote').value    = '';
+  window._pfCtx = { svc: 'manual', pkgLabel: '', price: 0 };
+  // اجعل حقلي الخدمة والباقة قابلَي التعديل
+  const svcEl = document.getElementById('pfMService');
+  const pkgEl = document.getElementById('pfMPkg');
+  const inputStyle = 'background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:6px;color:#ffffff;-webkit-text-fill-color:#ffffff;font-family:\'Cairo\',sans-serif;font-size:11px;padding:5px 8px;outline:none;width:140px;';
+  svcEl.innerHTML = `<input type="text" id="pfMServiceInput" placeholder="الخدمة (مثال: سيرياتيل)" style="${inputStyle}">`;
+  pkgEl.innerHTML = `<input type="text" id="pfMPkgInput"     placeholder="الباقة أو الملاحظة"    style="${inputStyle}">`;
+  document.getElementById('pfModal').style.display = 'flex';
+}
+
 // ══ السحابة ══
 async function pf_getOrCreateBin() {
   if (PF_BIN_ID) return PF_BIN_ID;
@@ -8421,15 +8468,39 @@ async function pf_fetchFromCloud() {
 
 // ── تحميل وعرض ──
 async function pf_loadAndRender() {
-  document.getElementById('pfCloudStatus').textContent = '☁️ جاري التزامن مع السحابة...';
-  const cloud = await pf_fetchFromCloud();
-  if (cloud) {
-    PF_invoices = cloud;
-    localStorage.setItem(PF_LOCAL_KEY, JSON.stringify(cloud));
+  const statusEl = document.getElementById('pfCloudStatus');
+  if (statusEl) statusEl.textContent = '☁️ جاري التزامن...';
+
+  // ── اقرأ المحلي أولاً دائماً ──
+  const localInvs = JSON.parse(localStorage.getItem(PF_LOCAL_KEY) || '[]');
+
+  // ── جلب السحابة ──
+  const cloudInvs = await pf_fetchFromCloud();
+
+  if (cloudInvs && cloudInvs.length > 0) {
+    // دمج ذكي: لا تكرار بالـ ID، الأحدث يغلب
+    const merged = {};
+    localInvs.forEach(i => { if(i.id) merged[i.id] = i; });
+    cloudInvs.forEach(i => {
+      if (i.id && (!merged[i.id] || (i.ts||0) >= (merged[i.id].ts||0)))
+        merged[i.id] = i;
+    });
+    PF_invoices = Object.values(merged).sort((a,b)=>(a.ts||0)-(b.ts||0));
+    if (statusEl) statusEl.textContent = '☁️ متزامن ✅';
+    // إذا المحلي عنده بيانات إضافية، ارفعها للسحابة
+    if (localInvs.length > cloudInvs.length)
+      pf_pushToCloud(PF_invoices).catch(()=>{});
   } else {
-    PF_invoices = JSON.parse(localStorage.getItem(PF_LOCAL_KEY) || '[]');
-    document.getElementById('pfCloudStatus').textContent = '⚠️ بيانات محلية (لا اتصال)';
+    // السحابة فارغة أو فشلت — استخدم المحلي ولا تمسحه
+    PF_invoices = localInvs;
+    if (statusEl) statusEl.textContent = cloudInvs === null
+      ? '⚠️ بيانات محلية (لا اتصال)' : '☁️ السحابة فارغة';
+    // ارفع المحلي للسحابة إذا كان فيه بيانات
+    if (localInvs.length > 0 && cloudInvs !== null)
+      pf_pushToCloud(PF_invoices).catch(()=>{});
   }
+
+  localStorage.setItem(PF_LOCAL_KEY, JSON.stringify(PF_invoices));
   pf_renderDashboard();
   pf_renderList();
 }
@@ -8533,33 +8604,39 @@ async function pf_saveInvoice() {
   const phone  = document.getElementById('pfMPhone').value.trim();
   const note   = document.getElementById('pfMNote').value.trim();
 
-  if (!phone && !name) {
+  // قراءة الخدمة والباقة (ثابتة أو من input يدوي)
+  const svcInput = document.getElementById('pfMServiceInput');
+  const pkgInput = document.getElementById('pfMPkgInput');
+  const service  = svcInput ? svcInput.value.trim() || 'يدوي' : (ctx.svc ? (PF_SERVICES[ctx.svc]?.label || ctx.svc) : '—');
+  const pkg      = pkgInput ? pkgInput.value.trim() || '—'     : (ctx.pkgLabel || '—');
+
+  if (!phone && !name && !pkg) {
     document.getElementById('pfMPhone').focus();
     document.getElementById('pfMPhone').style.borderColor='#f87171';
     setTimeout(()=>document.getElementById('pfMPhone').style.borderColor='',1500);
     return;
   }
 
-  // احفظ التكلفة للباقة
-  if (cost > 0) {
+  // احفظ التكلفة للباقة للمرة القادمة
+  if (cost > 0 && ctx.svc && ctx.pkgLabel) {
     PF_costs[ctx.svc+'_'+ctx.pkgLabel] = cost;
     localStorage.setItem(PF_COSTS_KEY, JSON.stringify(PF_costs));
   }
 
   const inv = {
     id:           'PF'+Date.now(),
-    date:         new Date().toLocaleDateString('ar-SY') + ' ' + new Date().toLocaleTimeString('ar-SY',{hour:'2-digit',minute:'2-digit'}),
+    date:         new Date().toLocaleDateString('ar-SY')+' '+new Date().toLocaleTimeString('ar-SY',{hour:'2-digit',minute:'2-digit'}),
     ts:           Date.now(),
-    service:      PF_SERVICES[ctx.svc]?.label || ctx.svc,
-    pkg:          ctx.pkgLabel,
+    service,
+    pkg,
     price:        price.toFixed(2),
     cost:         cost.toFixed(2),
     profit:       profit.toFixed(2),
     customerName: name,
     customerPhone:phone,
-    note:         note,
+    note,
     status:       'pending',
-    source:       'manual'
+    source:       svcInput ? 'manual' : 'pkg'
   };
 
   PF_invoices.push(inv);
@@ -8818,6 +8895,10 @@ if ('serviceWorker' in navigator) {
 
     <!-- الخدمات -->
     <div style="font-size:11px;font-weight:800;color:rgba(255,255,255,0.65);margin-bottom:8px;">📦 اختر الخدمة لإنشاء فاتورة يدوية:</div>
+    <!-- فاتورة يدوية كاملة -->
+    <button onclick="pf_openManual()" style="width:100%;background:linear-gradient(135deg,rgba(245,166,35,0.15),rgba(245,166,35,0.08));border:1.5px solid rgba(245,166,35,0.4);border-radius:10px;color:#f5a623;font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;padding:11px;cursor:pointer;margin-bottom:10px;">
+      ✏️ فاتورة يدوية — أدخل كل شيء بنفسك
+    </button>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px;">
       <button onclick="pf_showPkgs('syriatel')" style="background:rgba(239,68,68,0.15);border:1.5px solid rgba(239,68,68,0.4);border-radius:10px;color:white;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:10px 4px;cursor:pointer;">🔴 سيرياتيل</button>
       <button onclick="pf_showPkgs('mtn')"      style="background:rgba(234,179,8,0.15);border:1.5px solid rgba(234,179,8,0.4);border-radius:10px;color:white;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;padding:10px 4px;cursor:pointer;">🟡 MTN</button>
