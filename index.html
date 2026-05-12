@@ -3320,13 +3320,6 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
   0%,80%,100% { transform: scale(0.6); opacity: 0.3; }
   40%          { transform: scale(1.2); opacity: 1; }
 }
-  gap: 10px;
-  font-family: 'Cairo', sans-serif;
-  font-size: 11px;
-  color: rgba(255,255,255,0.25);
-  transition: color 0.3s, opacity 0.3s;
-  opacity: 0.4;
-}
 .ps-step.active {
   color: rgba(255,255,255,0.9);
   opacity: 1;
@@ -3338,6 +3331,12 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
 
 #rateNotifBanner {
   display: none !important;
+}
+
+/* سهم لفت انتباه العروض */
+@keyframes offerBounce {
+  0%,100% { transform:translateY(0);   opacity:0.7; }
+  50%      { transform:translateY(5px); opacity:1;   }
 }
 </style>
 </head>
@@ -4186,10 +4185,15 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
     </div>
 
     <!-- العروض -->
-    <div class="sq-card offers-sq" onclick="goPage('offers')">
+    <div class="sq-card offers-sq" onclick="goPage('offers')" style="position:relative;overflow:hidden;">
       <div class="sq-icon">🎁</div>
       <div class="sq-label">العروض</div>
       <div class="sq-sub" id="offersCount">جاري التحميل...</div>
+      <!-- سهم متحرك يظهر فقط عند وجود عرض -->
+      <div id="offerArrowHint" style="display:none;position:absolute;bottom:6px;left:0;right:0;text-align:center;animation:offerBounce 1.2s ease-in-out infinite;">
+        <div style="font-size:9px;font-weight:800;color:#f5a623;letter-spacing:0.5px;">تصفح عروضنا الآن</div>
+        <div style="font-size:16px;line-height:1;color:#f5a623;">↓</div>
+      </div>
     </div>
 
   </div>
@@ -5192,6 +5196,10 @@ function updateOffersCount() {
   if (!el) return;
   const count = activeOffers.length;
   el.textContent = count > 0 ? `${count} عرض متاح 🔥` : 'لا توجد عروض';
+
+  // أظهر/أخفِ سهم لفت الانتباه
+  const arrow = document.getElementById('offerArrowHint');
+  if (arrow) arrow.style.display = count > 0 ? 'block' : 'none';
 }
 
 function formatCountdown(ms) {
@@ -5456,7 +5464,9 @@ function showOfferNotif(offer) {
   if (seenId === offer.id) return;
 
   // ملء البيانات
-  document.getElementById('onIcon').textContent    = offer.catIcon || '🎁';
+  const iconEl = document.getElementById('onIcon');
+  iconEl.textContent       = offer.catIcon || '🎁';
+  iconEl.dataset.offerid   = offer.id || '';  // حفظ الـ ID للاستخدام عند الإغلاق
   document.getElementById('onTitle').textContent   = offer.pkgName || 'عرض خاص';
   document.getElementById('onService').textContent = offer.catLabel || '';
   document.getElementById('onOldPrice').textContent = offer.oldPrice || '';
@@ -5510,9 +5520,13 @@ function startOfferTimer(expiresAt) {
 }
 
 function dismissOfferNotif() {
-  // "فيما بعد" — يغلق ولا يحفظ (سيظهر مجدداً في جلسة قادمة)
+  // إغلاق نهائي — يُحفظ كـ "شُوهد" ولا يظهر مجدداً
   document.getElementById('offerNotifOverlay').classList.remove('open');
   if (_offerNotifTimer) clearInterval(_offerNotifTimer);
+  // احفظ ID العرض حتى لا يظهر مجدداً
+  const icon = document.getElementById('onIcon');
+  const offerId = icon ? icon.dataset.offerid : null;
+  if (offerId) markOfferSeen(offerId);
 }
 
 function goToOffer() {
