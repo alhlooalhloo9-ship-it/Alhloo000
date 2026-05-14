@@ -8520,18 +8520,43 @@ async function pf_loadAndRender() {
 }
 
 function pf_renderDashboard() {
-  const todayStr  = new Date().toLocaleDateString('ar-SY');
-  const monthStr  = new Date().toLocaleDateString('ar-SY',{month:'2-digit',year:'numeric'}).slice(-7);
-  let todayP=0, monthP=0;
-  PF_invoices.filter(i=>i.status==='done').forEach(i=>{
-    const p = parseFloat(i.profit)||0;
-    if (i.date && i.date.startsWith(todayStr)) todayP += p;
-    if (i.date && i.date.includes(new Date().getFullYear()+'/'+String(new Date().getMonth()+1).padStart(2,'0'))) monthP += p;
+  const now     = new Date();
+  const todayY  = now.getFullYear();
+  const todayM  = now.getMonth();
+  const todayD  = now.getDate();
+  // بداية الأسبوع الحالي (الأحد)
+  const weekStart = new Date(now);
+  weekStart.setDate(todayD - now.getDay());
+  weekStart.setHours(0,0,0,0);
+
+  let todayP=0, weekP=0, monthP=0, yearP=0, totalP=0, count=0;
+
+  PF_invoices.filter(i => i.status === 'done').forEach(i => {
+    const p = parseFloat(i.profit) || 0;
+    if (!p) return;
+    const d = new Date(i.ts || 0);
+    totalP += p;
+    if (d.getFullYear() === todayY) {
+      yearP += p;
+      if (d.getMonth() === todayM) {
+        monthP += p;
+        if (d >= weekStart) {
+          weekP += p;
+          if (d.getDate() === todayD) todayP += p;
+        }
+      }
+    }
   });
+
+  count = PF_invoices.length;
+
   const setEl = (id,val) => { const e=document.getElementById(id); if(e) e.textContent=val; };
-  setEl('pfKpiToday',  '$'+todayP.toFixed(2));
-  setEl('pfKpiMonth',  '$'+monthP.toFixed(2));
-  setEl('pfKpiCount',  PF_invoices.length);
+  setEl('pfKpiToday', '$'+todayP.toFixed(2));
+  setEl('pfKpiWeek',  '$'+weekP.toFixed(2));
+  setEl('pfKpiMonth', '$'+monthP.toFixed(2));
+  setEl('pfKpiYear',  '$'+yearP.toFixed(2));
+  setEl('pfKpiTotal', '$'+totalP.toFixed(2));
+  setEl('pfKpiCount', count);
 }
 
 function pf_renderList() {
@@ -8939,19 +8964,35 @@ if ('serviceWorker' in navigator) {
   </div>
 
   <div style="padding:14px 12px;max-width:500px;margin:0 auto;">
-    <!-- KPIs -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">
-      <div style="background:rgba(245,166,35,0.12);border:1.5px solid rgba(245,166,35,0.3);border-radius:12px;padding:10px 6px;text-align:center;">
-        <div id="pfKpiToday" style="font-size:17px;font-weight:900;color:#f5a623;font-family:'Tajawal',sans-serif;">$0</div>
-        <div style="font-size:9px;color:rgba(255,255,255,0.5);margin-top:2px;">ربح اليوم</div>
+    <!-- ملخص الأرباح -->
+    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:12px;margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:800;color:rgba(255,255,255,0.5);margin-bottom:10px;text-align:center;">💰 ملخص الأرباح</div>
+      <!-- صف 1: اليوم والأسبوع -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px;">
+        <div style="background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.25);border-radius:10px;padding:9px 6px;text-align:center;">
+          <div id="pfKpiToday" style="font-size:16px;font-weight:900;color:#f5a623;font-family:'Tajawal',sans-serif;">$0</div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.45);margin-top:2px;">📅 اليوم</div>
+        </div>
+        <div style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);border-radius:10px;padding:9px 6px;text-align:center;">
+          <div id="pfKpiWeek" style="font-size:16px;font-weight:900;color:#60a5fa;font-family:'Tajawal',sans-serif;">$0</div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.45);margin-top:2px;">📆 هذا الأسبوع</div>
+        </div>
       </div>
-      <div style="background:rgba(74,222,128,0.1);border:1.5px solid rgba(74,222,128,0.25);border-radius:12px;padding:10px 6px;text-align:center;">
-        <div id="pfKpiMonth" style="font-size:17px;font-weight:900;color:#4ade80;font-family:'Tajawal',sans-serif;">$0</div>
-        <div style="font-size:9px;color:rgba(255,255,255,0.5);margin-top:2px;">ربح الشهر</div>
+      <!-- صف 2: الشهر والسنة -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px;">
+        <div style="background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.25);border-radius:10px;padding:9px 6px;text-align:center;">
+          <div id="pfKpiMonth" style="font-size:16px;font-weight:900;color:#4ade80;font-family:'Tajawal',sans-serif;">$0</div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.45);margin-top:2px;">🗓 هذا الشهر</div>
+        </div>
+        <div style="background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.25);border-radius:10px;padding:9px 6px;text-align:center;">
+          <div id="pfKpiYear" style="font-size:16px;font-weight:900;color:#a78bfa;font-family:'Tajawal',sans-serif;">$0</div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.45);margin-top:2px;">📊 هذا العام</div>
+        </div>
       </div>
-      <div style="background:rgba(139,92,246,0.1);border:1.5px solid rgba(139,92,246,0.25);border-radius:12px;padding:10px 6px;text-align:center;">
-        <div id="pfKpiCount" style="font-size:17px;font-weight:900;color:#a78bfa;font-family:'Tajawal',sans-serif;">0</div>
-        <div style="font-size:9px;color:rgba(255,255,255,0.5);margin-top:2px;">الفواتير</div>
+      <!-- المجموع الكلي -->
+      <div style="background:linear-gradient(135deg,rgba(245,166,35,0.15),rgba(74,222,128,0.1));border:1.5px solid rgba(245,166,35,0.3);border-radius:10px;padding:10px 6px;text-align:center;">
+        <div id="pfKpiTotal" style="font-size:20px;font-weight:900;font-family:'Tajawal',sans-serif;background:linear-gradient(135deg,#f5a623,#4ade80);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">$0</div>
+        <div style="font-size:9px;color:rgba(255,255,255,0.5);margin-top:2px;">💎 المجموع الكلي · <span id="pfKpiCount" style="color:rgba(255,255,255,0.7);">0</span> فاتورة</div>
       </div>
     </div>
 
