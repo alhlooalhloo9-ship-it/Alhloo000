@@ -4669,6 +4669,7 @@ function toggleMode() {
 
 
 let rates={oldSyp:11700.3, newSyp:117.3, tryRate:44.2};
+const MARGIN = 1.02; // هامش الربح 2% لتغطية فرق سعر الصراف
 let activeField=null;
 let adminTapCount=0;
 let adminTapTimer=null;
@@ -4812,11 +4813,11 @@ function updateNewCalcUI() {
     const months=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
     const dateStr = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
     const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-    ruText.textContent = `تم تحديث سعر الصرف بتاريخ ${dateStr} — ${timeStr} | $1 = ${rates.newSyp} ج.س | ${rates.oldSyp} ق.س | ${rates.tryRate} ₺`;
+    ruText.textContent = `تم تحديث سعر الصرف بتاريخ ${dateStr} — ${timeStr} | $1 = ${Math.round(rates.newSyp * MARGIN * 10)/10} ج.س | ${Math.round(rates.oldSyp * MARGIN)} ق.س | ${rates.tryRate} ₺`;
   }
   // update home calc card
   const calcCard = document.querySelector('.calc-sq-rate');
-  if (calcCard) calcCard.innerHTML = `$1 = ${rates.newSyp} ج.س<br>$1 = ${rates.tryRate} ₺`;
+  if (calcCard) calcCard.innerHTML = `$1 = ${Math.round(rates.newSyp * MARGIN * 10)/10} ج.س<br>$1 = ${rates.tryRate} ₺`;
 }
 
 // ── دالة مركزية لإعادة رسم الباقات بالسعر الجديد ──
@@ -4838,12 +4839,15 @@ function applyRatesToUI(dateStr, timeStr, source) {
                  document.querySelector('.ru-text');
   if (ruText) {
     const srcLabel = source === 'sptoday' ? ' 🌐' : source === 'telegram' ? ' 📡' : '';
-    const trySypPart = rates.trySyp ? ` | ₺1 = ${rates.trySyp} ج.س` : '';
+    const mNew = Math.round(rates.newSyp * MARGIN * 10) / 10;
+    const mOld = Math.round(rates.oldSyp * MARGIN);
+    const mTrySyp = rates.trySyp ? Math.round(rates.trySyp * MARGIN * 100) / 100 : null;
+    const trySypPart = mTrySyp ? ` | ₺1 = ${mTrySyp} ج.س` : '';
     const datePart = dateStr ? `${dateStr}${timeStr ? ' — ' + timeStr : ''}${srcLabel} | ` : '';
-    ruText.textContent = `${datePart}$1 = ${rates.newSyp} ج.س | ${rates.oldSyp} ق.س | $1 = ${rates.tryRate} ₺${trySypPart}`;
+    ruText.textContent = `${datePart}$1 = ${mNew} ج.س | ${mOld} ق.س | $1 = ${rates.tryRate} ₺${trySypPart}`;
   }
   const calcCard = document.querySelector('.calc-sq-rate');
-  if (calcCard) calcCard.innerHTML = `$1 = ${rates.newSyp} ج.س<br>$1 = ${rates.tryRate} ₺`;
+  if (calcCard) calcCard.innerHTML = `$1 = ${Math.round(rates.newSyp * MARGIN * 10)/10} ج.س<br>$1 = ${rates.tryRate} ₺`;
   updateNewCalcUI();
   rerenderAllPkgs();
   if (adminUnlocked && dateStr && document.getElementById('adminLastSaved')) {
@@ -5793,7 +5797,7 @@ async function startupLoadPrices() {
   // ① جلب الليرة السورية (timeout 5 ثواني)
   await withTimeout(loadRatesFromCloud(), 5000).catch(() => {});
   _splashProgress(45);
-  _splashStep(1, 'done', `$1 = ${rates.newSyp} ج.س`);
+  _splashStep(1, 'done', `$1 = ${Math.round(rates.newSyp * MARGIN * 10)/10} ج.س`);
 
   // ② جلب الليرة التركية (timeout 5 ثواني)
   const tryRate = await withTimeout(fetchTCMBRate(), 5000).catch(() => null);
@@ -6058,7 +6062,7 @@ function extractNum(amount) {
 
 function renderPkgs(pkgs, cid, cb) {
   const serviceId = Object.keys(PKG_MAP).find(k => PKG_MAP[k].cid === cid) || '';
-  const useRate = rates.newSyp || 117.3;  // سعر الصرف الحالي
+  const useRate = (rates.newSyp || 117.3) * MARGIN;  // سعر الصرف + هامش 2%
 
   document.getElementById(cid).innerHTML = pkgs.map((p, i) => {
     // حساب السعر بالليرة السورية
@@ -8909,12 +8913,16 @@ function convertFrom5(source) {
 
   const gp = tickerGoldPrice || 154; // سعر غرام الذهب 24K بالدولار
 
+  // ── تطبيق هامش الربح 2% على أسعار الليرة السورية ──
+  const mNewSyp = rates.newSyp * MARGIN;
+  const mOldSyp = rates.oldSyp * MARGIN;
+
   // ── تحويل إلى دولار ──
   let usd;
   if      (source === 'usd')  usd = raw;
   else if (source === 'try')  usd = raw / rates.tryRate;
-  else if (source === 'new')  usd = raw / rates.newSyp;
-  else if (source === 'old')  usd = raw / rates.oldSyp;
+  else if (source === 'new')  usd = raw / mNewSyp;
+  else if (source === 'old')  usd = raw / mOldSyp;
   else if (source === 'gold') usd = raw * gp;
 
   // ── دولار → باقي الحقول ──
@@ -8925,8 +8933,8 @@ function convertFrom5(source) {
 
   set5('usd',  fmt5(usd,              2));
   set5('try',  fmt5(usd * rates.tryRate, 1));
-  set5('new',  fmt5(usd * rates.newSyp,  0));
-  set5('old',  fmt5(usd * rates.oldSyp,  0));
+  set5('new',  fmt5(usd * mNewSyp,  0));
+  set5('old',  fmt5(usd * mOldSyp,  0));
   set5('gold', fmt5(usd / gp,            3));
 }
 
