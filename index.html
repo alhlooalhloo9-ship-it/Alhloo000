@@ -1437,6 +1437,88 @@
     line-height: 1.4;
   }
 
+  /* ══ زر السوق ══ */
+  .market-btn {
+    flex-shrink: 0;
+    background: linear-gradient(135deg,rgba(0,198,255,0.15),rgba(0,114,255,0.15));
+    border: 1px solid rgba(0,198,255,0.4);
+    border-radius: 10px;
+    color: #00c6ff;
+    font-family: 'Cairo', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 7px 11px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s;
+  }
+  .market-btn:active { background: rgba(0,198,255,0.25); }
+
+  /* ══ MARKET BOTTOM SHEET ══ */
+  .mkt-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(6px);
+    z-index: 8000; align-items: flex-end;
+  }
+  .mkt-overlay.open { display: flex; }
+  .mkt-sheet {
+    width: 100%; max-height: 88vh; overflow-y: auto;
+    background: #060b14;
+    border-radius: 22px 22px 0 0;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    animation: slideUpMkt 0.32s cubic-bezier(0.34,1.2,0.64,1);
+    padding-bottom: 24px;
+  }
+  @keyframes slideUpMkt { from{transform:translateY(100%)} to{transform:translateY(0)} }
+  .mkt-header {
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 16px 16px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    position: sticky; top:0; background:#060b14; z-index:1;
+  }
+  .mkt-title { font-size:16px; font-weight:900; color:white; }
+  .mkt-live {
+    display:flex; align-items:center; gap:5px; font-size:10px; color:#00ff88;
+    background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.2);
+    border-radius:20px; padding:3px 9px;
+  }
+  .mkt-live-dot { width:6px; height:6px; background:#00ff88; border-radius:50%; animation:pulseMkt 1.5s infinite; }
+  @keyframes pulseMkt{0%,100%{opacity:1}50%{opacity:0.2}}
+  .mkt-close {
+    background:rgba(255,255,255,0.07); border:none; border-radius:50%;
+    width:30px; height:30px; color:rgba(255,255,255,0.5);
+    font-size:16px; cursor:pointer; line-height:30px; text-align:center;
+  }
+  .mkt-cards { padding:12px; display:flex; flex-direction:column; gap:10px; }
+  .mkt-card {
+    background:linear-gradient(135deg,#0d1f35,#0a1628);
+    border:1px solid rgba(255,255,255,0.07);
+    border-radius:18px; overflow:hidden; position:relative;
+  }
+  .mkt-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+  .mkt-card.usd::before { background:linear-gradient(90deg,#00c6ff,#0072ff); }
+  .mkt-card.try-c::before { background:linear-gradient(90deg,#f7971e,#ffd200); }
+  .mkt-card-top { display:flex; align-items:center; gap:10px; padding:12px 14px 8px; }
+  .mkt-flag { font-size:26px; }
+  .mkt-info .mkt-name { font-size:13px; font-weight:800; color:white; }
+  .mkt-info .mkt-pair { font-size:10px; color:rgba(255,255,255,0.3); margin-top:2px; }
+  .mkt-prices { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:rgba(255,255,255,0.04); }
+  .mkt-cell { padding:11px 14px; background:#080f1e; }
+  .mkt-lbl { font-size:10px; font-weight:800; letter-spacing:1px; margin-bottom:5px; display:flex; align-items:center; gap:5px; }
+  .mkt-lbl.buy{color:#00c896} .mkt-lbl.sell{color:#ff6b6b}
+  .mkt-dot{width:6px;height:6px;border-radius:50%} .mkt-dot.g{background:#00c896} .mkt-dot.r{background:#ff6b6b}
+  .mkt-price { font-size:19px; font-weight:900; }
+  .mkt-price.buy{color:#00e5a8} .mkt-price.sell{color:#ff8080}
+  .mkt-unit { font-size:9px; color:rgba(255,255,255,0.3); margin-top:2px; }
+  .mkt-footer {
+    margin:0 12px; background:rgba(0,198,255,0.04);
+    border:1px solid rgba(0,198,255,0.1); border-radius:10px;
+    padding:8px 14px; display:flex; justify-content:space-between; align-items:center;
+  }
+  .mkt-footer-lbl{font-size:10px;color:rgba(255,255,255,0.35)}
+  .mkt-footer-time{font-size:11px;font-weight:800;color:#00c6ff}
+
   /* ===== WHAT'S NEW MODAL ===== */
   .whats-new-overlay {
     position: fixed; inset: 0;
@@ -3665,6 +3747,68 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
         <div class="ru-title">آخر تحديث لأسعار الصرف</div>
     <div class="ru-text" id="ruText">جاري تحميل الأسعار...</div>
       </div>
+      <button class="market-btn" onclick="openMarketSheet()">📊 السوق</button>
+    </div>
+
+    <!-- نافذة السوق المنبثقة -->
+    <div class="mkt-overlay" id="mktOverlay" onclick="if(event.target===this)closeMarketSheet()">
+      <div class="mkt-sheet">
+        <div class="mkt-header">
+          <div class="mkt-title">💱 أسعار الصرف</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="mkt-live"><div class="mkt-live-dot"></div> مباشر</div>
+            <button class="mkt-close" onclick="closeMarketSheet()">✕</button>
+          </div>
+        </div>
+        <div class="mkt-cards">
+          <div class="mkt-card usd">
+            <div class="mkt-card-top">
+              <div class="mkt-flag">🇺🇸</div>
+              <div class="mkt-info">
+                <div class="mkt-name">الدولار الأمريكي</div>
+                <div class="mkt-pair">USD / SYP جديد</div>
+              </div>
+            </div>
+            <div class="mkt-prices">
+              <div class="mkt-cell">
+                <div class="mkt-lbl buy"><div class="mkt-dot g"></div> شراء</div>
+                <div class="mkt-price buy" id="mktUsdBuy">—</div>
+                <div class="mkt-unit">ليرة سورية</div>
+              </div>
+              <div class="mkt-cell">
+                <div class="mkt-lbl sell"><div class="mkt-dot r"></div> بيع</div>
+                <div class="mkt-price sell" id="mktUsdSell">—</div>
+                <div class="mkt-unit">ليرة سورية</div>
+              </div>
+            </div>
+          </div>
+          <div class="mkt-card try-c">
+            <div class="mkt-card-top">
+              <div class="mkt-flag">🇹🇷</div>
+              <div class="mkt-info">
+                <div class="mkt-name">الليرة التركية</div>
+                <div class="mkt-pair">TRY / SYP جديد</div>
+              </div>
+            </div>
+            <div class="mkt-prices">
+              <div class="mkt-cell">
+                <div class="mkt-lbl buy"><div class="mkt-dot g"></div> شراء</div>
+                <div class="mkt-price buy" id="mktTryBuy">—</div>
+                <div class="mkt-unit">ليرة سورية</div>
+              </div>
+              <div class="mkt-cell">
+                <div class="mkt-lbl sell"><div class="mkt-dot r"></div> بيع</div>
+                <div class="mkt-price sell" id="mktTrySell">—</div>
+                <div class="mkt-unit">ليرة سورية</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mkt-footer">
+          <div class="mkt-footer-lbl">🕐 آخر تحديث</div>
+          <div class="mkt-footer-time" id="mktTime">—</div>
+        </div>
+      </div>
     </div>
 
     <!-- 5 مستطيلات أفقية -->
@@ -4668,8 +4812,8 @@ function toggleMode() {
 }
 
 
-let rates={oldSyp:11700.3, newSyp:117.3, tryRate:44.2};
-const MARGIN = 1.02; // هامش الربح 2% لتغطية فرق سعر الصراف
+let rates={oldSyp:11700.3, newSyp:117.3, tryRate:44.2, buySyp:11500, buyNewSyp:115};
+const MARGIN = 1.02; // هامش الربح 2%
 let activeField=null;
 let adminTapCount=0;
 let adminTapTimer=null;
@@ -5762,61 +5906,22 @@ function dismissSplash(skipped) {
 }
 
 async function startupLoadPrices() {
-  _splashStep(1, 'active');
-  _splashStep(2, 'active');
-  _splashStep(3, 'active');
-  _splashProgress(8);
+  // ── فتح التطبيق فوراً بدون انتظار ──
+  dismissSplash(true);
+  if (!_tickerTimer) setTimeout(initTicker, 100);
 
-  // مؤقت "بطيء": 5 ثواني
-  _splashSlowTimer = setTimeout(() => {
-    const msg = document.getElementById('psSlowMsg');
-    const btn = document.getElementById('psSkipBtn');
-    if (msg) msg.classList.add('show');
-    if (btn) btn.classList.add('show');
-  }, 5000);
-
-  // ── ضمان بدء الشريط بعد 4 ثواني مهما حدث ──
-  const tickerGuarantee = setTimeout(() => {
-    if (!_tickerTimer) initTicker();
-  }, 4000);
-
-  // ── إغلاق إجباري بعد 8 ثواني في كل الأحوال ──
-  const hardClose = setTimeout(() => {
-    dismissSplash(true);
-    if (!_tickerTimer) initTicker();
-  }, 8000);
-
-  // ── helper: promise مع timeout محدد ──
-  function withTimeout(promise, ms) {
-    return Promise.race([
-      promise,
-      new Promise(resolve => setTimeout(() => resolve(null), ms))
+  // ── تحميل الأسعار من JSONBin في الخلفية بصمت ──
+  try {
+    await Promise.race([
+      loadRatesFromCloud(),
+      new Promise(r => setTimeout(r, 4000)) // max 4 ثواني
     ]);
-  }
+    applyRatesToUI(rates._dateStr || null, rates._timeStr || null);
+  } catch(e) {}
 
-  // ① جلب الليرة السورية (timeout 5 ثواني)
-  await withTimeout(loadRatesFromCloud(), 5000).catch(() => {});
-  _splashProgress(45);
-  _splashStep(1, 'done', `$1 = ${Math.round(rates.newSyp * MARGIN * 10)/10} ج.س`);
-
-  // ② جلب الليرة التركية (timeout 5 ثواني)
-  const tryRate = await withTimeout(fetchTCMBRate(), 5000).catch(() => null);
-  if (tryRate) rates.tryRate = Math.round(tryRate * 100) / 100;
-  _splashProgress(85);
-  _splashStep(2, 'done', `$1 = ${rates.tryRate} ₺`);
-
-  // ③ الذهب لا ننتظره — يُجلب في الخلفية بعد فتح التطبيق
-  _splashProgress(100);
-  _splashStep(3, 'active', '⏳');
-
-  clearTimeout(tickerGuarantee);
-  clearTimeout(hardClose);
-  applyRatesToUI(null, null);
-  dismissSplash(false);
-
-  // ابدأ الشريط فوراً بعد إغلاق الـ splash
-  setTimeout(initTicker, 300);
-  setTimeout(() => autoFetchForAllUsers().catch(() => {}), 800);
+  // ── تحديث من المصادر الخارجية في الخلفية ──
+  setTimeout(() => autoFetchForAllUsers().catch(() => {}), 500);
+  setTimeout(() => fetchGoldPrice().catch(() => {}), 1500);
 }
 
 // ===== STARTUP =====
@@ -5965,10 +6070,14 @@ async function autoFetchForAllUsers() {
     }
 
     const prevRate = rates.newSyp;
-    rates.newSyp  = newNewSyp;
-    rates.oldSyp  = newOldSyp;
-    rates.tryRate = newTryRate;
-    rates.trySyp  = newTrySyp;
+    rates.newSyp    = newNewSyp;
+    rates.oldSyp    = newOldSyp;
+    rates.tryRate   = newTryRate;
+    rates.trySyp    = newTrySyp;
+    rates.buySyp    = usdData.buy;
+    rates.buyNewSyp = Math.round((usdData.buy / 100) * 10) / 10;
+    rates._dateStr  = dateStr;
+    rates._timeStr  = timeStr;
 
     const now = new Date();
     const days=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
@@ -8876,6 +8985,31 @@ function updateTickerIfReady() {
 // ═══════════════════════════════════════════════════════
 const FIELDS_5 = ['usd','try','new','old','gold'];
 let activeRow5 = null;
+
+// ══ MARKET SHEET ══
+function openMarketSheet() {
+  updateMarketSheet();
+  document.getElementById("mktOverlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function closeMarketSheet() {
+  document.getElementById("mktOverlay").classList.remove("open");
+  document.body.style.overflow = "";
+}
+function updateMarketSheet() {
+  const fmt = n => Math.round(n).toLocaleString("ar-SA");
+  const usdBuy  = rates.buyNewSyp || Math.round(rates.newSyp * 0.98 * 10) / 10;
+  const usdSell = Math.round(rates.newSyp * MARGIN * 10) / 10;
+  const tryBuy  = rates.trySyp ? Math.round(rates.trySyp * 0.98 * 100) / 100 : Math.round(usdBuy / rates.tryRate * 100) / 100;
+  const trySell = rates.trySyp ? Math.round(rates.trySyp * MARGIN * 100) / 100 : Math.round(usdSell / rates.tryRate * 100) / 100;
+  const el = id => document.getElementById(id);
+  if (el("mktUsdBuy"))  el("mktUsdBuy").textContent  = fmt(usdBuy);
+  if (el("mktUsdSell")) el("mktUsdSell").textContent = fmt(usdSell);
+  if (el("mktTryBuy"))  el("mktTryBuy").textContent  = fmt(tryBuy);
+  if (el("mktTrySell")) el("mktTrySell").textContent = fmt(trySell);
+  const t = el("mktTime");
+  if (t && rates._dateStr) t.textContent = rates._dateStr + (rates._timeStr ? " — " + rates._timeStr : "");
+}
 
 function setActive5(field) {
   activeRow5 = field;
