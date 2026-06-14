@@ -1,0 +1,58 @@
+name: تحديث أسعار الصرف
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: جلب ورفع الأسعار
+        env:
+          BIN_ID: ${{ secrets.BIN_ID }}
+          API_KEY: ${{ secrets.API_KEY }}
+        run: |
+          python3 << 'PYTHON'
+          import urllib.request, json, re, os, time
+          BIN_ID  = os.environ["BIN_ID"]
+          API_KEY = os.environ["API_KEY"]
+          JSONBIN = f"https://api.jsonbin.io/v3/b/{BIN_ID}"
+          def fetch(url):
+              req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+              with urllib.request.urlopen(req, timeout=15) as r:
+                  return r.read().decode("utf-8", errors="ignore")
+          def extract(html):
+              for p in [r'1\s+USD[^|]*\|\s*([\d,]+)\s*ل\.س[^|]*\|\s*([\d,]+)\s*ل\.س', r'is\s*([\d,]+)\s*SYP\s*for buying and\s*([\d,]+)\s*SYP\s*for selling']:
+                  m = re.search(p, html, re.IGNORECASE)
+                  if m:
+                      b,s = int(m.group(1).replace(',','')), int(m.group(2).replace(',',''))
+                      if s > 100: return b, s
+              return None, None
+          html = fetch("https://sp-today.com/currency/us-dollar")
+          buy, sell = extract(html)
+          if not sell or sell < 5000: raise Exception("فشل جلب السعر")
+          usd_try = None
+          try:
+              d = json.loads(fetch("https://open.er-api.com/v6/latest/USD"))
+              usd_try = d.get("rates",{}).get("TRY")
+              if not (usd_try and 10 < usd_try < 200): usd_try = None
+          except: pass
+          if not usd_try:
+              try:
+                  d = json.loads(fetch("https://api.frankfurter.app/latest?from=USD&to=TRY"))
+                  usd_try = d.get("rates",{}).get("TRY")
+              except: pass
+          if not usd_try: usd_try = 38.5
+          now = time.gmtime(time.time() + 3*3600)
+          days = ["الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت","الأحد"]
+          months = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"]
+          req = urllib.request.Request(f"{JSONBIN}/latest", headers={"X-Master-Key": API_KEY})
+          with urllib.request.urlopen(req, timeout=15) as r:
+              current = json.loads(r.read())["record"]
+          current.update({"newSyp": round((sell/100)*10)/10, "oldSyp": sell, "tryRate": round(usd_try*100)/100, "trySyp": round((sell/usd_try/100)*100)/100, "buySyp": buy, "buyNewSyp": round((buy/100)*10)/10, "dateStr": f"{days[now.tm_wday]} {now.tm_mday} {months[now.tm_mon-1]} {now.tm_year}", "timeStr": f"{now.tm_hour:02d}:{now.tm_min:02d}", "source": "github-actions", "updatedAt": int(time.time()*1000)})
+          body = json.dumps(current).encode()
+          req = urllib.request.Request(JSONBIN, data=body, method="PUT", headers={"Content-Type": "application/json", "X-Master-Key": API_KEY})
+          with urllib.request.urlopen(req, timeout=15) as r: print("✅ تم!")
+          PYTHON
