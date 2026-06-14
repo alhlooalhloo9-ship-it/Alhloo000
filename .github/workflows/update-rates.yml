@@ -12,42 +12,56 @@ jobs:
           BIN_ID: ${{ secrets.BIN_ID }}
           API_KEY: ${{ secrets.API_KEY }}
         run: |
-          python3 -c "
-          import urllib.request, json, re, os, time, random
-          BIN_ID=os.environ['BIN_ID']; API_KEY=os.environ['API_KEY']
+          pip install requests --quiet
+          python3 << 'PYTHON'
+          import requests, json, re, os, time
+
+          BIN_ID=os.environ['BIN_ID']
+          API_KEY=os.environ['API_KEY']
           JSONBIN=f'https://api.jsonbin.io/v3/b/{BIN_ID}'
-          agents=['Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0 Safari/537.36','Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15']
-          def fetch(u,ref=None):
-            h={'User-Agent':random.choice(agents),'Accept':'text/html,application/xhtml+xml','Accept-Language':'ar,en;q=0.9','Cache-Control':'no-cache'}
-            if ref: h['Referer']=ref
-            r=urllib.request.Request(u,headers=h)
-            with urllib.request.urlopen(r,timeout=20) as x: return x.read().decode('utf-8','ignore')
-          sell,buy=None,None
-          for proxy in ['https://corsproxy.io/?','https://api.allorigins.win/raw?url=']:
-            try:
-              url=proxy+urllib.request.quote('https://sp-today.com/currency/us-dollar',safe='')
-              html=fetch(url,'https://sp-today.com')
-              m=re.search(r'is\s*([\d,]+)\s*SYP\s*for buying and\s*([\d,]+)\s*SYP\s*for selling',html,re.I)
-              if not m: m=re.search(r'1\s+USD[^|]*\|\s*([\d,]+)[^|]*\|\s*([\d,]+)',html,re.I)
-              if m:
-                buy=int(m.group(1).replace(',','')); sell=int(m.group(2).replace(',',''))
-                if sell>5000: print(f'sell={sell} buy={buy}'); break
-            except Exception as e: print(f'proxy {proxy} failed: {e}')
-          if not sell: raise Exception('فشل جلب السعر من كل المصادر')
+
+          session = requests.Session()
+          session.headers.update({
+            'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language':'ar,en-US;q=0.5',
+            'Referer':'https://www.google.com/'
+          })
+
+          session.get('https://sp-today.com/', timeout=15)
+          r = session.get('https://sp-today.com/currency/us-dollar', timeout=15)
+          html = r.text
+
+          sell,buy = None,None
+          for p in [r'is\s*([\d,]+)\s*SYP\s*for buying and\s*([\d,]+)\s*SYP\s*for selling',
+                    r'1\s+USD[^|]*\|\s*([\d,]+)[^|]*\|\s*([\d,]+)']:
+            m = re.search(p, html, re.I)
+            if m:
+              buy=int(m.group(1).replace(',','')); sell=int(m.group(2).replace(',',''))
+              if sell>5000: break
+
+          if not sell: raise Exception(f'فشل - status={r.status_code}')
+          print(f'sell={sell} buy={buy}')
+
           try:
-            d=json.loads(fetch('https://open.er-api.com/v6/latest/USD'))
-            tr=d['rates']['TRY']
+            tr = requests.get('https://open.er-api.com/v6/latest/USD',timeout=10).json()['rates']['TRY']
           except:
-            try:
-              d=json.loads(fetch('https://api.frankfurter.app/latest?from=USD&to=TRY'))
-              tr=d['rates']['TRY']
-            except: tr=38.5
+            tr = 38.5
+
           now=time.gmtime(time.time()+3*3600)
           days=['الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت','الأحد']
           months=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر']
-          req=urllib.request.Request(f'{JSONBIN}/latest',headers={'X-Master-Key':API_KEY})
-          with urllib.request.urlopen(req,timeout=15) as r: cur=json.loads(r.read())['record']
-          cur.update({'newSyp':round((sell/100)*10)/10,'oldSyp':sell,'tryRate':round(tr*100)/100,'trySyp':round((sell/tr/100)*100)/100,'buySyp':buy,'buyNewSyp':round((buy/100)*10)/10,'dateStr':f\"{days[now.tm_wday]} {now.tm_mday} {months[now.tm_mon-1]} {now.tm_year}\",'timeStr':f'{now.tm_hour:02d}:{now.tm_min:02d}','source':'github-actions','updatedAt':int(time.time()*1000)})
-          req=urllib.request.Request(JSONBIN,data=json.dumps(cur).encode(),method='PUT',headers={'Content-Type':'application/json','X-Master-Key':API_KEY})
-          with urllib.request.urlopen(req,timeout=15) as r: print('✅ تم!')
-          "
+
+          h={'X-Master-Key':API_KEY}
+          cur = requests.get(f'{JSONBIN}/latest',headers=h,timeout=15).json()['record']
+          cur.update({
+            'newSyp':round((sell/100)*10)/10,'oldSyp':sell,
+            'tryRate':round(tr*100)/100,'trySyp':round((sell/tr/100)*100)/100,
+            'buySyp':buy,'buyNewSyp':round((buy/100)*10)/10,
+            'dateStr':f"{days[now.tm_wday]} {now.tm_mday} {months[now.tm_mon-1]} {now.tm_year}",
+            'timeStr':f'{now.tm_hour:02d}:{now.tm_min:02d}',
+            'source':'github-actions','updatedAt':int(time.time()*1000)
+          })
+          r2 = requests.put(JSONBIN,json=cur,headers={**h,'Content-Type':'application/json'},timeout=15)
+          print('✅ تم!' if r2.ok else f'خطأ JSONBin: {r2.status_code}')
+          PYTHON
