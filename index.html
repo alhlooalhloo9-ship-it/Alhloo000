@@ -5885,22 +5885,21 @@ function dismissSplash(skipped) {
 }
 
 async function startupLoadPrices() {
-  // ── فتح التطبيق فوراً بدون انتظار ──
-  dismissSplash(true);
-  if (!_tickerTimer) setTimeout(initTicker, 100);
-
-  // ── تحميل الأسعار من JSONBin في الخلفية بصمت ──
+  // ── أولاً: جلب prices.json (على نفس السيرفر = سريع جداً < 300ms) ──
   try {
     await Promise.race([
       loadRatesFromCloud(),
-      new Promise(r => setTimeout(r, 4000)) // max 4 ثواني
+      new Promise(r => setTimeout(r, 3000)) // max 3 ثواني fallback
     ]);
-    applyRatesToUI(rates._dateStr || null, rates._timeStr || null);
   } catch(e) {}
 
-  // ── تحديث من المصادر الخارجية في الخلفية ──
-  setTimeout(() => autoFetchForAllUsers().catch(() => {}), 500);
-  setTimeout(() => fetchGoldPrice().catch(() => {}), 1500);
+  // ── ثانياً: فتح التطبيق بعد جلب الأسعار مباشرة ──
+  dismissSplash(false);
+  if (!_tickerTimer) setTimeout(initTicker, 100);
+
+  // ── ثالثاً: تحديث إضافي في الخلفية بصمت ──
+  setTimeout(() => autoFetchForAllUsers().catch(() => {}), 1000);
+  setTimeout(() => fetchGoldPrice().catch(() => {}), 2000);
 }
 
 // ===== STARTUP =====
