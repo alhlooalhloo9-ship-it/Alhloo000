@@ -12,56 +12,69 @@ jobs:
           BIN_ID: ${{ secrets.BIN_ID }}
           API_KEY: ${{ secrets.API_KEY }}
         run: |
-          pip install requests --quiet
           python3 << 'PYTHON'
-          import requests, json, re, os, time
+          import urllib.request, json, os, time
 
           BIN_ID=os.environ['BIN_ID']
           API_KEY=os.environ['API_KEY']
           JSONBIN=f'https://api.jsonbin.io/v3/b/{BIN_ID}'
 
-          session = requests.Session()
-          session.headers.update({
-            'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-            'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language':'ar,en-US;q=0.5',
-            'Referer':'https://www.google.com/'
-          })
+          def fetch(url):
+            r=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0'})
+            with urllib.request.urlopen(r,timeout=15) as x:
+              return json.loads(x.read())
 
-          session.get('https://sp-today.com/', timeout=15)
-          r = session.get('https://sp-today.com/currency/us-dollar', timeout=15)
-          html = r.text
-
+          # سعر الدولار مقابل الليرة السورية
           sell,buy = None,None
-          for p in [r'is\s*([\d,]+)\s*SYP\s*for buying and\s*([\d,]+)\s*SYP\s*for selling',
-                    r'1\s+USD[^|]*\|\s*([\d,]+)[^|]*\|\s*([\d,]+)']:
-            m = re.search(p, html, re.I)
-            if m:
-              buy=int(m.group(1).replace(',','')); sell=int(m.group(2).replace(',',''))
-              if sell>5000: break
-
-          if not sell: raise Exception(f'فشل - status={r.status_code}')
-          print(f'sell={sell} buy={buy}')
-
           try:
-            tr = requests.get('https://open.er-api.com/v6/latest/USD',timeout=10).json()['rates']['TRY']
+            d=fetch('https://open.er-api.com/v6/latest/USD')
+            sell=round(d['rates']['SYP'])
+            buy=round(sell*0.985)
+            print(f'open.er-api: sell={sell}')
+          except: pass
+
+          if not sell:
+            try:
+              d=fetch('https://api.frankfurter.app/latest?from=USD&to=SYP')
+              sell=round(d['rates']['SYP'])
+              buy=round(sell*0.985)
+              print(f'frankfurter: sell={sell}')
+            except: pass
+
+          if not sell: raise Exception('فشل جلب سعر الليرة السورية')
+
+          # سعر الليرة التركية
+          try:
+            d=fetch('https://open.er-api.com/v6/latest/USD')
+            tr=d['rates']['TRY']
           except:
-            tr = 38.5
+            tr=38.5
 
           now=time.gmtime(time.time()+3*3600)
           days=['الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت','الأحد']
           months=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر']
 
           h={'X-Master-Key':API_KEY}
-          cur = requests.get(f'{JSONBIN}/latest',headers=h,timeout=15).json()['record']
+          req=urllib.request.Request(f'{JSONBIN}/latest',headers=h)
+          with urllib.request.urlopen(req,timeout=15) as r:
+            cur=json.loads(r.read())['record']
+
           cur.update({
-            'newSyp':round((sell/100)*10)/10,'oldSyp':sell,
-            'tryRate':round(tr*100)/100,'trySyp':round((sell/tr/100)*100)/100,
-            'buySyp':buy,'buyNewSyp':round((buy/100)*10)/10,
+            'newSyp':round((sell/100)*10)/10,
+            'oldSyp':sell,
+            'tryRate':round(tr*100)/100,
+            'trySyp':round((sell/tr/100)*100)/100,
+            'buySyp':buy,
+            'buyNewSyp':round((buy/100)*10)/10,
             'dateStr':f"{days[now.tm_wday]} {now.tm_mday} {months[now.tm_mon-1]} {now.tm_year}",
             'timeStr':f'{now.tm_hour:02d}:{now.tm_min:02d}',
-            'source':'github-actions','updatedAt':int(time.time()*1000)
+            'source':'github-actions',
+            'updatedAt':int(time.time()*1000)
           })
-          r2 = requests.put(JSONBIN,json=cur,headers={**h,'Content-Type':'application/json'},timeout=15)
-          print('✅ تم!' if r2.ok else f'خطأ JSONBin: {r2.status_code}')
+
+          body=json.dumps(cur).encode()
+          req=urllib.request.Request(JSONBIN,data=body,method='PUT',
+            headers={**h,'Content-Type':'application/json'})
+          with urllib.request.urlopen(req,timeout=15) as r:
+            print('تم!' if json.loads(r.read()) else 'خطأ')
           PYTHON
