@@ -1,67 +1,58 @@
-name: تحديث أسعار الصرف
+name: Auto Update Prices
+
 on:
   schedule:
     - cron: '0 * * * *'
   workflow_dispatch:
+
 jobs:
-  update:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: جلب ورفع الأسعار
-        env:
-          BIN_ID: ${{ secrets.BIN_ID }}
-          API_KEY: ${{ secrets.API_KEY }}
-        run: |
-          python3 << 'EOF'
-          import urllib.request, json, os, time
-          BIN_ID = os.environ["BIN_ID"]
-          API_KEY = os.environ["API_KEY"]
-          JSONBIN = "https://api.jsonbin.io/v3/b/" + BIN_ID
-          def get(url):
-            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(req, timeout=15) as r:
-              return json.loads(r.read())
-          sell = None
-          try:
-            d = get("https://open.er-api.com/v6/latest/USD")
-            sell = round(d["rates"]["SYP"])
-            buy = round(sell * 0.985)
-            print("sell=" + str(sell))
-          except Exception as e:
-            print("er-api failed: " + str(e))
-          if not sell:
-            try:
-              d = get("https://api.frankfurter.app/latest?from=USD&to=SYP")
-              sell = round(d["rates"]["SYP"])
-              buy = round(sell * 0.985)
-              print("frankfurter sell=" + str(sell))
-            except Exception as e:
-              print("frankfurter failed: " + str(e))
-          if not sell:
-            raise Exception("all sources failed")
-          try:
-            tr = get("https://open.er-api.com/v6/latest/USD")["rates"]["TRY"]
-          except:
-            tr = 38.5
-          now = time.gmtime(time.time() + 3 * 3600)
-          days = ["الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت","الأحد"]
-          months = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"]
-          h = {"X-Master-Key": API_KEY}
-          req = urllib.request.Request(JSONBIN + "/latest", headers=h)
-          with urllib.request.urlopen(req, timeout=15) as r:
-            cur = json.loads(r.read())["record"]
-          cur["newSyp"] = round((sell / 100) * 10) / 10
-          cur["oldSyp"] = sell
-          cur["tryRate"] = round(tr * 100) / 100
-          cur["trySyp"] = round((sell / tr / 100) * 100) / 100
-          cur["buySyp"] = buy
-          cur["buyNewSyp"] = round((buy / 100) * 10) / 10
-          cur["dateStr"] = days[now.tm_wday] + " " + str(now.tm_mday) + " " + months[now.tm_mon - 1] + " " + str(now.tm_year)
-          cur["timeStr"] = str(now.tm_hour).zfill(2) + ":" + str(now.tm_min).zfill(2)
-          cur["source"] = "github-actions"
-          cur["updatedAt"] = int(time.time() * 1000)
-          body = json.dumps(cur).encode()
-          req = urllib.request.Request(JSONBIN, data=body, method="PUT", headers={"Content-Type": "application/json", "X-Master-Key": API_KEY})
-          with urllib.request.urlopen(req, timeout=15) as r:
-            print("done: " + str(r.status))
-          EOF
+    - name: Check
+      uses: actions/checkout@v3
+
+    - name: Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Tools
+      run: |
+        pip install requests beautifulsoup4
+
+    - name: Script
+      run: |
+        echo 'import json, requests' > get.py
+        echo 'from bs4 import BeautifulSoup' >> get.py
+        echo 'from datetime import datetime' >> get.py
+        echo 'url = "https://sarf-today.com/"' >> get.py
+        echo 'head = {"User-Agent": "Mozilla/5.0"}' >> get.py
+        echo 'b_usd, s_usd, b_try, s_try = "14800", "15000", "430", "445"' >> get.py
+        echo 'try:' >> get.py
+        echo '    res = requests.get(url, headers=head, timeout=15)' >> get.py
+        echo '    if res.status_code == 200:' >> get.py
+        echo '        soup = BeautifulSoup(res.text, "html.parser")' >> get.py
+        echo '        b_usd = soup.find("span", {"id": "usd_buy"}).text.strip()' >> get.py
+        echo '        s_usd = soup.find("span", {"id": "usd_sell"}).text.strip()' >> get.py
+        echo '        b_try = soup.find("span", {"id": "try_buy"}).text.strip()' >> get.py
+        echo '        s_try = soup.find("span", {"id": "try_sell"}).text.strip()' >> get.py
+        echo 'except: pass' >> get.py
+        echo 'g_try = "33.50"' >> get.py
+        echo 'try:' >> get.py
+        echo '    api = requests.get("https://open.er-api.com/v6/latest/USD", timeout=10).json()' >> get.py
+        echo '    g_try = str(round(api["rates"]["TRY"], 2))' >> get.py
+        echo 'except: pass' >> get.py
+        echo 'out = {"last_update": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "currency": {"USD_TO_SYP": {"buy": b_usd, "sell": s_usd}, "TRY_TO_SYP": {"buy": b_try, "sell": s_try}, "USD_TO_TRY": {"global_rate": g_try}}}' >> get.py
+        echo 'with open("prices.json", "w", encoding="utf-8") as f: json.dump(out, f, ensure_ascii=False, indent=4)' >> get.py
+
+    - name: Run
+      run: python get.py
+
+    - name: Push
+      run: |
+        git config --global user.name "GitHub Action"
+        git config --global user.email "action@github.com"
+        git add prices.json
+        git commit -m "🔄 Update Prices" && git push || echo "No changes"
