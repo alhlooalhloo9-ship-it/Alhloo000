@@ -4856,15 +4856,13 @@ function showSyncStatus(msg, color='rgba(255,255,255,0.5)'){
 
 // ===== LOAD RATES FROM CLOUD =====
 async function loadRatesFromCloud(){
-  if(!BIN_ID){ loadLocalRates(); return; }
   const statusEl = document.getElementById('calcStatus');
   try {
-    const url = `${JSONBIN_BASE}/${BIN_ID}/latest?t=${Date.now()}`;
-    const res = await fetch(url, { headers: { 'X-Master-Key': API_KEY } });
+    // ── قراءة الأسعار من prices.json المحلي (يُحدَّث كل ساعة بواسطة GitHub Actions) ──
+    const res = await fetch(`./prices.json?t=${Date.now()}`);
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const r = data.record;
-    if(!r || (!r.newSyp && !r.tryRate)) throw new Error('empty record');
+    const r = await res.json();
+    if(!r || (!r.newSyp && !r.tryRate)) throw new Error('empty');
 
     const cloudNew  = parseFloat(r.newSyp)  || 117.3;
     const cloudOld  = parseFloat(r.oldSyp)  || 11700.3;
@@ -4883,11 +4881,11 @@ async function loadRatesFromCloud(){
       rates.tryRate = parseFloat(localData.tryRate) || cloudTry;
       applyRatesToUI(localData.dateStr, localData.timeStr, 'telegram');
     } else {
-      // السحابة أحدث — استخدمها
+      // prices.json أحدث — استخدمه
       rates.newSyp  = cloudNew;
       rates.oldSyp  = cloudOld;
       rates.tryRate = cloudTry;
-      applyRatesToUI(r.dateStr, r.timeStr);
+      applyRatesToUI(r.dateStr||'', r.timeStr||'');
       localStorage.setItem('halou_rates', JSON.stringify({
         newSyp: cloudNew, oldSyp: cloudOld, tryRate: cloudTry,
         dateStr: r.dateStr||'', timeStr: r.timeStr||'',
@@ -5019,28 +5017,9 @@ async function saveAdminRates(){
   applyRatesToUI(dateStr, timeStr);
   document.getElementById('adminLastSaved').textContent = `${dateStr} — ${timeStr}`;
 
-  if(!BIN_ID || !API_KEY){
-    showSyncStatus('⚠️ لم يتم ربط JSONBin — تم الحفظ محلياً فقط','#fb923c');
-    return;
-  }
-
-  // Upload to JSONBin
-  showSyncStatus('⏳ جاري النشر للجميع...','#a78bfa');
-  try {
-    const res = await fetch(`${JSONBIN_BASE}/${BIN_ID}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Master-Key': API_KEY
-      },
-      body: JSON.stringify(payload)
-    });
-    if(!res.ok) throw new Error('upload failed');
-    showSyncStatus('✅ تم النشر! كل المستخدمين سيرون الأسعار الجديدة','#4ade80');
-    setTimeout(()=>{ const el=document.getElementById('syncStatus'); if(el) el.style.display='none'; }, 4000);
-  } catch(e){
-    showSyncStatus('❌ فشل الاتصال — تم الحفظ محلياً فقط','#f87171');
-  }
+  // الأسعار تُحدَّث تلقائياً عبر GitHub Actions من prices.json
+  showSyncStatus('✅ تم الحفظ — الأسعار تُحدَّث تلقائياً كل ساعة','#4ade80');
+  setTimeout(()=>{ const el=document.getElementById('syncStatus'); if(el) el.style.display='none'; }, 4000);
 }
 
 // ===== AUTO-REFRESH every 60s for all users =====
