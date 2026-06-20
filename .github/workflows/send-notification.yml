@@ -1,0 +1,74 @@
+name: إرسال إشعار للزبائن
+
+on:
+  repository_dispatch:
+    types: [send_notification]
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: تثبيت Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: تثبيت firebase-admin
+        run: npm install firebase-admin
+
+      - name: إرسال الإشعار لكل الزبائن
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          NOTIF_TITLE: ${{ github.event.client_payload.title }}
+          NOTIF_BODY: ${{ github.event.client_payload.body }}
+        run: |
+          cat > send.js << 'EOF'
+          const admin = require('firebase-admin');
+          const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+
+          admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount)
+          });
+          const db = admin.firestore();
+
+          async function main() {
+            const title = process.env.NOTIF_TITLE || 'مركز الحلو';
+            const body  = process.env.NOTIF_BODY  || '';
+
+            const snap = await db.collection('fcm_tokens').get();
+            const tokens = snap.docs.map(d => d.id);
+            console.log(`📱 عدد الأجهزة المسجلة: ${tokens.length}`);
+
+            if (tokens.length === 0) {
+              console.log('⚠️ لا يوجد زبائن مسجلين للإشعارات بعد');
+              return;
+            }
+
+            const message = {
+              notification: { title, body },
+              tokens
+            };
+
+            const res = await admin.messaging().sendEachForMulticast(message);
+            console.log(`✅ نجح الإرسال إلى: ${res.successCount} جهاز`);
+            console.log(`❌ فشل الإرسال إلى: ${res.failureCount} جهاز`);
+
+            // حذف التوكنات المنتهية (الزبون حذف التطبيق أو ألغى الإذن)
+            const deadTokens = [];
+            res.responses.forEach((r, i) => {
+              if (!r.success) {
+                const code = (r.error && r.error.code) || '';
+                if (code.includes('registration-token-not-registered') || code.includes('invalid-argument')) {
+                  deadTokens.push(tokens[i]);
+                }
+              }
+            });
+            for (const t of deadTokens) {
+              await db.collection('fcm_tokens').doc(t).delete();
+            }
+            if (deadTokens.length) console.log(`🗑️ تم حذف ${deadTokens.length} جهاز غير نشط`);
+          }
+
+          main().catch(e => { console.error('❌ خطأ:', e); process.exit(1); });
+          EOF
+          node send.js
