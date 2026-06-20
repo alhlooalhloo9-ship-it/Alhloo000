@@ -824,7 +824,37 @@
   /* PACKAGES */
   .packages-container { padding:8px 14px 20px; position:relative; z-index:10; }
   .packages-grid { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
-  .pkg-card { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:9px 10px; cursor:pointer; transition:all 0.2s; display:flex; flex-direction:column; align-items:center; gap:3px; position:relative; }
+  .pkg-card {
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:14px;
+    padding:8px 6px 9px;
+    cursor:pointer;
+    transition:transform 0.18s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.18s, background 0.18s;
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+    position:relative;
+    box-shadow:0 3px 8px rgba(0,0,0,0.18);
+  }
+  .pkg-card:active { transform:scale(0.93) translateY(1px); box-shadow:0 1px 3px rgba(0,0,0,0.25); }
+  .pkg-amount {
+    font-size:12px; font-weight:900; color:#60a5fa; text-align:center;
+    line-height:1.2;
+  }
+  .pkg-unit { font-size:8px; color:rgba(255,255,255,0.35); margin-top:-1px; }
+  .pkg-price-divider {
+    width:60%; height:1px; background:rgba(255,255,255,0.08);
+    margin:3px 0 2px;
+  }
+  .pkg-price {
+    font-size:10.5px; font-weight:700; color:#4ade80;
+    display:flex; align-items:center; gap:2px;
+  }
+  .pkg-price::before { content:'$'; font-size:9px; opacity:0.6; }
+  .pkg-price-syp {
+    font-size:9.5px; font-weight:800; color:#f5a623; margin-top:1px; display:none;
+    display:flex; align-items:center; gap:2px;
+  }
+  .pkg-price-syp::before { content:'≈'; font-size:8px; opacity:0.7; }
   .pkg-card:hover,.pkg-card:active { background:rgba(255,255,255,0.12); transform:scale(1.03); }
   .pkg-amount { font-size:13px; font-weight:900; color:#60a5fa; text-align:center; }
   .pkg-price { font-size:12px; font-weight:700; color:#4ade80; }
@@ -2622,8 +2652,8 @@ body:not(.light-mode) .welcome-overlay {
 @keyframes toastOut { from{opacity:1} to{opacity:0} }
 
 /* Smooth page transitions */
-.page.active { animation: pageIn 0.2s ease !important; }
-@keyframes pageIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+@keyframes pageIn { from{opacity:0;transform:translateY(18px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+.page.active { animation: pageIn 0.38s cubic-bezier(0.16,1,0.3,1) !important; }
 
 /* ══════════════════════════════════════
    ANALYTICS DASHBOARD CSS
@@ -3420,7 +3450,428 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
   0%,100% { transform:translateY(0);   opacity:0.7; }
   50%      { transform:translateY(5px); opacity:1;   }
 }
+
+  /* ══════════════════════════════════════════════
+     🎨 تحديث التصميم — نمط الأصفر المقسّم (Style D)
+     يطبق فقط على الألوان والشكل، لا يغيّر أي وظيفة
+  ══════════════════════════════════════════════ */
+
+  /* شريط الأسعار العلوي → بطاقة صفراء بارزة */
+  .rate-update-bar {
+    background: linear-gradient(135deg, #FFC93C, #FFB627) !important;
+    border: none !important;
+    border-radius: 16px !important;
+    padding: 12px 14px !important;
+    box-shadow: 0 6px 18px rgba(255,201,60,0.25);
+  }
+  .rate-update-bar .ru-title { color: #1a1a1f !important; font-weight: 900 !important; }
+  .rate-update-bar .ru-text  { color: rgba(26,26,31,0.65) !important; font-weight: 600; }
+  .rate-update-bar .ru-icon  { filter: none; }
+  body.light-mode .rate-update-bar .ru-title,
+  body.light-mode .rate-update-bar .ru-text { color: #1a1a1f !important; }
+
+  /* زر السوق → داكن بارز فوق الأصفر */
+  .market-btn {
+    background: #1a1a1f !important;
+    border: none !important;
+    color: #FFC93C !important;
+    border-radius: 12px !important;
+    font-weight: 900 !important;
+    padding: 9px 14px !important;
+  }
+  .market-btn:active { background: #000 !important; }
+
+  /* نافذة السوق → لمسة صفراء على البطاقات */
+  .mkt-card.usd::before, .mkt-card.try-c::before {
+    background: linear-gradient(90deg,#FFC93C,#FFB627) !important;
+  }
+  .mkt-price.buy  { color: #FFC93C !important; }
+  .mkt-dot.g      { background: #FFC93C !important; }
+  .mkt-lbl.buy    { color: #FFC93C !important; }
+  .mkt-close      { background: rgba(255,201,60,0.12) !important; }
+
+  /* الحاسبة → الصف النشط يصبح بإطار أصفر */
+  .conv-row.active-row {
+    border-color: #FFC93C !important;
+    box-shadow: 0 0 0 2px rgba(255,201,60,0.2) !important;
+    background: rgba(255,201,60,0.06) !important;
+  }
+  .calc-sq-rate { color: #FFC93C !important; }
+
+  /* بطاقات الباقات → شريط أصفر علوي + إبراز عند التحديد */
+  .pkg-card {
+    border-radius: 14px !important;
+    position: relative;
+    overflow: hidden;
+  }
+  .pkg-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg,#FFC93C,#FFB627);
+    opacity: 0.85;
+  }
+  .pkg-card:hover, .pkg-card:active {
+    border-color: rgba(255,201,60,0.5) !important;
+    background: rgba(255,201,60,0.08) !important;
+  }
+  .pkg-card.selected, .pkg-card.active {
+    background: rgba(255,201,60,0.15) !important;
+    border-color: #FFC93C !important;
+  }
+
+  /* ══════════════════════════════════════════════
+     🎨 الأيقونات العائمة — الصفحة الرئيسية
+  ══════════════════════════════════════════════ */
+  @keyframes floatIconHome {
+    0%,100% { transform: translateY(0) rotate(0deg); }
+    50%     { transform: translateY(-7px) rotate(2deg); }
+  }
+  .sq-card {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  .sq-card:active { transform: scale(0.92) !important; }
+  .sq-icon {
+    width: 64px; height: 64px;
+    border-radius: 20px;
+    display: flex !important; align-items: center; justify-content: center;
+    margin: 0 auto 10px;
+    font-size: 28px !important;
+    filter: none !important;
+    animation: floatIconHome 3.4s ease-in-out infinite;
+    transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .sq-card.syrian .sq-icon   { background: linear-gradient(150deg,#38bdf8,#0284c7); box-shadow: 0 10px 22px -6px rgba(2,132,199,0.5);   animation-delay: 0s;   }
+  .sq-card.games-sq .sq-icon { background: linear-gradient(150deg,#a78bfa,#7c3aed); box-shadow: 0 10px 22px -6px rgba(124,58,237,0.5); animation-delay: 0.35s;}
+  .sq-card.calc-sq .sq-icon  { background: linear-gradient(150deg,#fbbf24,#d97706); box-shadow: 0 10px 22px -6px rgba(217,119,6,0.5);  animation-delay: 0.7s; }
+  .sq-card.offers-sq .sq-icon{ background: linear-gradient(150deg,#fb7185,#e11d48); box-shadow: 0 10px 22px -6px rgba(225,29,72,0.5); animation-delay: 1.05s;}
+  .sq-label { text-shadow: none !important; }
+  .sq-badge {
+    background: linear-gradient(135deg,#fb7185,#e11d48) !important;
+    box-shadow: 0 4px 10px rgba(225,29,72,0.4);
+  }
+
+  /* ══════════════════════════════════════════════
+     🎨 بطاقات الشركة — رصيد سوري / الألعاب
+  ══════════════════════════════════════════════ */
+  .company-card {
+    background: transparent !important;
+    border: none !important;
+  }
+  .company-card:active { transform: scale(0.92) !important; }
+  .company-card img {
+    border-radius: 18px !important;
+    animation: floatIconHome 3.4s ease-in-out infinite;
+    box-shadow: 0 10px 20px -6px rgba(0,0,0,0.4);
+  }
+  .company-card.syriatel img { animation-delay: 0s; }
+  .company-card.mtn img      { animation-delay: 0.35s; }
+
+  /* ══════════════════════════════════════════════
+     🎨 تصميم الباقات الجديد — Timeline + شعار ثابت
+  ══════════════════════════════════════════════ */
+  .packages-grid { display:block !important; }
+  .tl-wrap { display:flex; padding:6px 10px 10px 4px; }
+  .tl-fixed-col {
+    width:84px; flex-shrink:0;
+    display:flex; flex-direction:column; align-items:center;
+    padding-top:6px;
+    position:-webkit-sticky; position:sticky;
+    top:10px; align-self:flex-start;
+    z-index:50;
+  }
+  .tl-logo-ring {
+    width:68px; height:68px; border-radius:50%;
+    background:radial-gradient(circle,rgba(255,255,255,0.06),rgba(0,0,0,0.1));
+    border:2px solid rgba(255,255,255,0.15);
+    display:flex; align-items:center; justify-content:center;
+    font-size:26px;
+    position:relative;
+    animation: floatIconHome 3.4s ease-in-out infinite;
+  }
+  .tl-logo-ring::before {
+    content:''; position:absolute; inset:-8px; border-radius:50%;
+    border:1.5px dashed rgba(255,255,255,0.15);
+    animation: spinSlow 18s linear infinite;
+  }
+  @keyframes spinSlow { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+  .tl-logo-name  { margin-top:9px; font-size:11px; font-weight:800; text-align:center; }
+  .tl-logo-count { font-size:9px; color:rgba(255,255,255,0.4); margin-top:2px; }
+  .tl-connect-line { width:2px; flex:1; min-height:40px; margin-top:12px; }
+
+  .tl-scroll-col { flex:1; padding-right:14px; }
+  .tl-item {
+    position:relative; margin-bottom:12px;
+    opacity:0; transform:translateX(18px);
+    transition:opacity 0.5s cubic-bezier(0.16,1,0.3,1), transform 0.5s cubic-bezier(0.16,1,0.3,1);
+  }
+  .tl-item.show { opacity:1; transform:translateX(0); }
+  .tl-node {
+    position:absolute; right:-20px; top:16px; width:9px; height:9px; border-radius:50%;
+    box-shadow:0 0 0 3px rgba(255,255,255,0.08);
+  }
+  .tl-card {
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:14px; padding:10px 12px;
+    display:flex; align-items:center; gap:8px;
+    cursor:pointer;
+    transition:transform 0.18s cubic-bezier(0.34,1.56,0.64,1), background 0.18s;
+  }
+  .tl-card:active { transform:scale(0.96); background:rgba(255,255,255,0.09); }
+  .tl-num {
+    width:24px; height:24px; border-radius:50%;
+    font-size:10px; font-weight:900;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .tl-mid { flex:1; }
+  .tl-amt { font-size:13px; font-weight:900; color:#fff; }
+  .tl-price { text-align:left; flex-shrink:0; }
+  .tl-usd { font-size:11px; font-weight:800; color:#4ade80; }
+  .tl-syp { font-size:9.5px; font-weight:700; color:#fbbf24; margin-top:1px; }
+  .tl-copy-btns { display:flex; flex-direction:column; gap:3px; flex-shrink:0; }
+  .tl-copy-btn {
+    width:22px; height:22px; border-radius:7px; border:none;
+    background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.6);
+    font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .tl-copy-btn:active { background:rgba(255,255,255,0.18); }
+
+  /* ── تكيّف الألوان مع الوضع الفاتح ── */
+  body.light-mode .tl-amt        { color:#1a1a2e !important; }
+  body.light-mode .tl-logo-count { color:rgba(0,0,0,0.45) !important; }
+  body.light-mode .tl-card       { background:rgba(0,0,0,0.04) !important; border-color:rgba(0,0,0,0.08) !important; }
+  body.light-mode .tl-card:active{ background:rgba(0,0,0,0.08) !important; }
+  body.light-mode .tl-copy-btn   { background:rgba(0,0,0,0.06) !important; color:rgba(0,0,0,0.55) !important; }
+  body.light-mode .tl-copy-btn:active { background:rgba(0,0,0,0.12) !important; }
+  body.light-mode .tl-logo-ring  { background:radial-gradient(circle,rgba(0,0,0,0.04),rgba(0,0,0,0.08)) !important; border-color:rgba(0,0,0,0.12) !important; }
+  body.light-mode .tl-logo-ring::before { border-color:rgba(0,0,0,0.12) !important; }
+  body.light-mode .tl-node       { box-shadow:0 0 0 3px rgba(0,0,0,0.06) !important; }
+
+  /* ══════════════════════════════════════════════
+     🥇 تصميم الشبكة الذهبية — الصفحة الرئيسية
+  ══════════════════════════════════════════════ */
+  /* خلفية شبكية سداسية */
+  body::before {
+    content:'';
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='32'%3E%3Cpath d='M14 0 L28 8 L28 24 L14 32 L0 24 L0 8 Z' fill='none' stroke='rgba(255,255,255,0.04)' stroke-width='0.8'/%3E%3C/svg%3E");
+    background-size:28px 32px;
+  }
+  body.light-mode::before { display:none; }
+
+  /* تخطي الـ squares-grid وتطبيق التصميم الجديد */
+  .squares-grid {
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    gap:20px 16px !important;
+    padding:8px 18px 20px !important;
+    background:transparent !important;
+    position:relative; z-index:2;
+  }
+  .sq-card {
+    background:transparent !important;
+    border:none !important;
+    box-shadow:none !important;
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:center !important;
+    gap:0 !important;
+    padding:0 !important;
+    cursor:pointer;
+    animation:riseGold 0.5s cubic-bezier(0.16,1,0.3,1) backwards;
+    transition:transform 0.18s cubic-bezier(0.34,1.56,0.64,1) !important;
+  }
+  .sq-card:active { transform:scale(0.92) !important; }
+  .sq-card:nth-child(1){animation-delay:0.05s}
+  .sq-card:nth-child(2){animation-delay:0.12s}
+  .sq-card:nth-child(3){animation-delay:0.19s}
+  .sq-card:nth-child(4){animation-delay:0.26s}
+  @keyframes riseGold {
+    from{opacity:0;transform:translateY(22px) scale(0.88)}
+    to{opacity:1;transform:translateY(0) scale(1)}
+  }
+  /* الدائرة الذهبية */
+  .sq-icon {
+    width:82px !important; height:82px !important;
+    border-radius:50% !important;
+    background:radial-gradient(circle at 35% 35%,#1e1e1e,#111) !important;
+    border:2.5px solid #d4af37 !important;
+    display:flex !important; align-items:center !important; justify-content:center !important;
+    font-size:32px !important;
+    box-shadow:
+      0 0 0 5px rgba(212,175,55,0.1),
+      0 8px 20px rgba(0,0,0,0.5),
+      inset 0 1px 1px rgba(212,175,55,0.12) !important;
+    animation:floatIconHome 3.4s ease-in-out infinite !important;
+    position:relative !important;
+    margin:0 auto !important;
+    filter:none !important;
+  }
+  .sq-card:nth-child(2) .sq-icon{animation-delay:0.35s}
+  .sq-card:nth-child(3) .sq-icon{animation-delay:0.70s}
+  .sq-card:nth-child(4) .sq-icon{animation-delay:1.05s}
+  /* الشريحة الذهبية */
+  .sq-label {
+    margin-top:-10px !important;
+    background:linear-gradient(90deg,#a07020,#d4af37,#f5e27a,#d4af37,#a07020) !important;
+    background-size:200% auto !important;
+    animation:goldShineHome 3s linear infinite !important;
+    border-radius:9px !important;
+    padding:5px 16px !important;
+    font-size:11.5px !important; font-weight:900 !important;
+    color:#1a1a1a !important;
+    box-shadow:0 3px 10px rgba(212,175,55,0.35) !important;
+    min-width:88px; text-align:center !important;
+    position:relative; z-index:2;
+  }
+  @keyframes goldShineHome{to{background-position:200% center}}
+  /* النص الفرعي تحت الشريحة */
+  .sq-sub, .calc-sq-rate {
+    font-size:9px !important;
+    color:rgba(212,175,55,0.6) !important;
+    text-align:center !important;
+    margin-top:4px !important;
+    background:none !important;
+  }
+  /* شارة HOT */
+  .sq-badge {
+    background:linear-gradient(135deg,#dc2626,#ef4444) !important;
+    font-size:8px !important; font-weight:900 !important;
+    color:white !important;
+    padding:3px 8px !important; border-radius:8px !important;
+    position:absolute !important; top:-4px !important; left:50% !important;
+    transform:translateX(-50%) !important;
+    z-index:3 !important;
+    box-shadow:0 2px 8px rgba(220,38,38,0.4) !important;
+  }
+  /* أيقونات الألعاب الصغيرة */
+  .games-mini-icons {
+    margin-top:4px !important;
+    font-size:14px !important;
+    display:flex !important; gap:3px !important; justify-content:center !important;
+  }
+  /* تكيّف مع الوضع الفاتح */
+  body.light-mode .sq-icon {
+    background:radial-gradient(circle at 35% 35%,#fff8ee,#fdf3e0) !important;
+    box-shadow:
+      0 0 0 5px rgba(212,175,55,0.12),
+      0 8px 20px rgba(0,0,0,0.15),
+      inset 0 1px 1px rgba(212,175,55,0.2) !important;
+  }
+  body.light-mode .sq-sub,
+  body.light-mode .calc-sq-rate { color:rgba(139,90,20,0.7) !important; }
+  /* عنوان القسم */
+  .section-title {
+    color:rgba(212,175,55,0.7) !important;
+    letter-spacing:2px !important;
+    font-size:11px !important;
+  }
+
+  /* ══════════════════════════════════════════════
+     🥇 نفس التصميم الذهبي — صفحات رصيد سوري والألعاب
+  ══════════════════════════════════════════════ */
+  .company-cards { gap:18px 14px !important; }
+  .company-card {
+    background:transparent !important;
+    border:none !important;
+    box-shadow:none !important;
+    display:flex !important; flex-direction:column !important; align-items:center !important;
+    gap:0 !important; padding:0 !important;
+    cursor:pointer;
+    animation:riseGold 0.5s cubic-bezier(0.16,1,0.3,1) backwards;
+    transition:transform 0.18s cubic-bezier(0.34,1.56,0.64,1) !important;
+  }
+  .company-card:active { transform:scale(0.92) !important; }
+  .company-card:nth-child(1){animation-delay:0.05s}
+  .company-card:nth-child(2){animation-delay:0.15s}
+  .company-card:nth-child(3){animation-delay:0.25s}
+  .company-card img,
+  .company-card > div:first-child {
+    width:82px !important; height:82px !important;
+    border-radius:50% !important;
+    background:radial-gradient(circle at 35% 35%,#1e1e1e,#111) !important;
+    border:2.5px solid #d4af37 !important;
+    display:flex !important; align-items:center !important; justify-content:center !important;
+    font-size:32px !important;
+    box-shadow:
+      0 0 0 5px rgba(212,175,55,0.1),
+      0 8px 20px rgba(0,0,0,0.5),
+      inset 0 1px 1px rgba(212,175,55,0.12) !important;
+    animation:floatIconHome 3.4s ease-in-out infinite !important;
+    object-fit:contain !important;
+    padding:14px !important;
+    box-sizing:border-box !important;
+    margin:0 auto !important;
+  }
+  .company-card:nth-child(2) img,
+  .company-card:nth-child(2) > div:first-child { animation-delay:0.35s !important; }
+  .company-card:nth-child(3) img,
+  .company-card:nth-child(3) > div:first-child { animation-delay:0.70s !important; }
+  .company-name {
+    margin-top:-10px !important;
+    background:linear-gradient(90deg,#a07020,#d4af37,#f5e27a,#d4af37,#a07020) !important;
+    background-size:200% auto !important;
+    animation:goldShineHome 3s linear infinite !important;
+    border-radius:9px !important;
+    padding:5px 16px !important;
+    font-size:12px !important; font-weight:900 !important;
+    color:#1a1a1a !important;
+    box-shadow:0 3px 10px rgba(212,175,55,0.35) !important;
+    display:inline-block !important;
+    position:relative; z-index:2;
+  }
+  .company-card > div:nth-child(3) {
+    font-size:9px !important;
+    color:rgba(212,175,55,0.6) !important;
+    margin-top:4px !important;
+    background:none !important;
+  }
+  body.light-mode .company-card img,
+  body.light-mode .company-card > div:first-child {
+    background:radial-gradient(circle at 35% 35%,#fff8ee,#fdf3e0) !important;
+    box-shadow:
+      0 0 0 5px rgba(212,175,55,0.12),
+      0 8px 20px rgba(0,0,0,0.15),
+      inset 0 1px 1px rgba(212,175,55,0.2) !important;
+  }
+  body.light-mode .company-card > div:nth-child(3) { color:rgba(139,90,20,0.7) !important; }
+
+  /* ══════════════════════════════════════════════
+     🥇 إصلاح نهائي — إزالة المربعات الملوّنة القديمة
+  ══════════════════════════════════════════════ */
+  .sq-card.syrian,
+  .sq-card.games-sq,
+  .sq-card.calc-sq,
+  .sq-card.offers-sq,
+  .sq-card.more {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* خلفية الوضع الفاتح — أغمق بخفة */
+  body.light-mode {
+    background: linear-gradient(135deg, #dfe3ee 0%, #d6dae6 40%, #e6dcf0 100%) !important;
+  }
+
+  /* ══════════════════════════════════════════════
+     🥇 نقش الهوية البصرية — "مركز الحلو" مكرر شفاف
+  ══════════════════════════════════════════════ */
+  body::after {
+    content: '';
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    opacity: 0.2;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='180'%3E%3Ctext x='-10' y='60' font-family='Arial,sans-serif' font-size='24' font-weight='900' fill='%23d4af37' transform='rotate(-22 120 90)'%3Eمركز الحلو%3C/text%3E%3Ctext x='90' y='160' font-family='Arial,sans-serif' font-size='24' font-weight='900' fill='%23d4af37' transform='rotate(-22 120 90)'%3Eمركز الحلو%3C/text%3E%3C/svg%3E");
+    background-size: 240px 180px;
+    background-repeat: repeat;
+  }
+  body.light-mode::after { opacity: 0.12; }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -4248,6 +4699,27 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
             <div id="adminOffersList">
               <div style="font-size:11px;color:rgba(255,255,255,0.3);text-align:center;padding:10px;">لا توجد عروض حالياً</div>
             </div>
+          </div>
+
+          <!-- ══ إشعارات Push الحقيقية (حتى مع التطبيق مغلق) ══ -->
+          <div style="margin-top:16px;border-top:1px solid rgba(255,255,255,0.07);padding-top:12px;">
+            <div style="font-size:11px;font-weight:800;color:#fbbf24;margin-bottom:8px;">🔔 إرسال إشعار حقيقي للزبائن (يصل حتى لو التطبيق مغلق)</div>
+
+            <input class="admin-input-full" id="pushTitle" placeholder="عنوان الإشعار...">
+            <input class="admin-input-full" id="pushBody" placeholder="نص الرسالة...">
+
+            <button onclick="sendRealPush()" style="width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;color:white;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;padding:10px;border-radius:12px;cursor:pointer;margin-top:6px;">📡 إرسال للجميع الآن</button>
+            <div id="pushSendStatus" style="margin-top:6px;font-size:10px;text-align:center;color:rgba(255,255,255,0.4);display:none;"></div>
+
+            <details style="margin-top:10px;">
+              <summary style="font-size:9px;color:rgba(255,255,255,0.3);cursor:pointer;">⚙️ إعدادات الإرسال (مرة واحدة فقط)</summary>
+              <div style="margin-top:8px;">
+                <input class="admin-input-full" id="ghPatInput" type="password" placeholder="مفتاح GitHub (PAT)..." style="font-size:10px;">
+                <input class="admin-input-full" id="ghRepoInput" placeholder="اسم المستودع مثل: alhloo9-ship-it/Alhloo000" style="font-size:10px;">
+                <button onclick="saveGhSettings()" style="width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);font-family:'Cairo',sans-serif;font-size:10px;padding:7px;border-radius:10px;cursor:pointer;margin-top:4px;">💾 حفظ على هذا الجهاز فقط</button>
+                <div style="font-size:8px;color:rgba(255,255,255,0.25);margin-top:5px;line-height:1.5;">المفتاح يُحفظ فقط في متصفحك ولا يُرفع على GitHub أو أي سيرفر.</div>
+              </div>
+            </details>
           </div>
 
         <!-- TAB: INVOICES -->
@@ -5300,6 +5772,10 @@ async function addOffer() {
   updateOffersCount();
   // إظهار الإشعار للأدمن كمعاينة
   setTimeout(() => showOfferNotif(offer), 500);
+  // إرسال إشعار حقيقي تلقائي لكل الزبائن (إذا كان مفتاح GitHub محفوظاً)
+  if (localStorage.getItem('halou_gh_pat')) {
+    sendRealPush(`🎁 عرض جديد: ${offer.pkgName}`, `${offer.oldPrice} ← ${offer.newPrice} — لفترة محدودة فقط!`);
+  }
 }
 
 async function deleteOffer(id) {
@@ -5796,19 +6272,110 @@ async function saveOffersToCloud() {
   }
 }
 
+// ══ Firebase Cloud Messaging — إشعارات حقيقية ══
+const firebaseConfig = {
+  apiKey: "AIzaSyDy28MaXr8WucMu2Jh72Ll6_F9ojNuiv7A",
+  authDomain: "mrkz-alhloo.firebaseapp.com",
+  projectId: "mrkz-alhloo",
+  storageBucket: "mrkz-alhloo.appspot.com",
+  messagingSenderId: "197049690415",
+  appId: "1:197049690415:web:70fc92fcbe009948f7d9da",
+  measurementId: "G-YVRN2DJBLZ"
+};
+const FCM_VAPID_KEY = "BIKPBK6OlDRsxpZq1h4czhT6VWPBAhO6riEHee-uLLrQejBbRroyLewgVlgA13zfLDb4a4LCz46krjE2nmfj9OY";
+
+let _fbApp = null, _fbMessaging = null, _fbDb = null;
+function initFirebaseApp() {
+  if (_fbApp) return;
+  try {
+    _fbApp = firebase.initializeApp(firebaseConfig);
+    _fbDb  = firebase.firestore();
+    if (firebase.messaging.isSupported && firebase.messaging.isSupported()) {
+      _fbMessaging = firebase.messaging();
+    }
+  } catch(e) { console.warn('[FCM] init failed', e); }
+}
+
+async function registerFcmToken() {
+  try {
+    initFirebaseApp();
+    if (!_fbMessaging || !('serviceWorker' in navigator)) return false;
+    const reg = await navigator.serviceWorker.register('./firebase-messaging-sw.js', { scope: '/firebase-cloud-messaging-push-scope' });
+    const token = await _fbMessaging.getToken({ vapidKey: FCM_VAPID_KEY, serviceWorkerRegistration: reg });
+    if (token && _fbDb) {
+      await _fbDb.collection('fcm_tokens').doc(token).set({
+        token, updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      localStorage.setItem('halou_fcm_registered', '1');
+      return true;
+    }
+  } catch(e) { console.warn('[FCM] token registration failed', e); }
+  return false;
+}
+
 function enableNotifications() {
   if (!('Notification' in window)) {
     alert('متصفحك لا يدعم الإشعارات');
     return;
   }
-  Notification.requestPermission().then(perm => {
+  Notification.requestPermission().then(async perm => {
     if (perm === 'granted') {
       document.getElementById('notifBanner').style.display = 'none';
       localStorage.setItem('halou_notif_dismissed', '1');
-      // Send a welcome notification
       sendPushNotification('✅ تم تفعيل الإشعارات!', 'ستصلك إشعارات فور إضافة عروض جديدة من مركز الحلو');
+      await registerFcmToken();
     }
   });
+}
+
+// ══ إرسال إشعار حقيقي عبر GitHub Action (للأدمن فقط) ══
+function saveGhSettings() {
+  const pat  = document.getElementById('ghPatInput').value.trim();
+  const repo = document.getElementById('ghRepoInput').value.trim();
+  if (pat)  localStorage.setItem('halou_gh_pat', pat);
+  if (repo) localStorage.setItem('halou_gh_repo', repo);
+  showPushStatus('✅ تم الحفظ على هذا الجهاز فقط','#4ade80');
+}
+
+function showPushStatus(msg, color) {
+  const el = document.getElementById('pushSendStatus');
+  if (!el) return;
+  el.textContent = msg; el.style.color = color; el.style.display = 'block';
+  setTimeout(()=>{ el.style.display='none'; }, 5000);
+}
+
+async function sendRealPush(customTitle, customBody) {
+  const pat  = localStorage.getItem('halou_gh_pat');
+  const repo = localStorage.getItem('halou_gh_repo');
+  const title = customTitle || document.getElementById('pushTitle')?.value.trim();
+  const body  = customBody  || document.getElementById('pushBody')?.value.trim();
+
+  if (!pat || !repo) { showPushStatus('⚠️ أضف مفتاح GitHub واسم المستودع أولاً من الإعدادات تحت','#fb923c'); return; }
+  if (!title || !body) { showPushStatus('⚠️ اكتب عنوان ونص الرسالة','#fb923c'); return; }
+
+  showPushStatus('⏳ جاري الإرسال للجميع...','#a855f7');
+  try {
+    const res = await fetch(`https://api.github.com/repos/${repo}/dispatches`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${pat}`,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        event_type: 'send_notification',
+        client_payload: { title, body }
+      })
+    });
+    if (res.status === 204) {
+      showPushStatus('✅ تم الإرسال! سيصل للزبائن خلال ثوانٍ','#4ade80');
+      if (!customTitle) { document.getElementById('pushTitle').value=''; document.getElementById('pushBody').value=''; }
+    } else {
+      showPushStatus('❌ فشل الإرسال — تحقق من المفتاح واسم المستودع','#f87171');
+    }
+  } catch(e) {
+    showPushStatus('❌ خطأ في الاتصال','#f87171');
+  }
 }
 
 function dismissNotifBanner() {
@@ -5885,21 +6452,22 @@ function dismissSplash(skipped) {
 }
 
 async function startupLoadPrices() {
-  // ── أولاً: جلب prices.json (على نفس السيرفر = سريع جداً < 300ms) ──
+  // ── فتح التطبيق فوراً بدون انتظار ──
+  dismissSplash(true);
+  if (!_tickerTimer) setTimeout(initTicker, 100);
+
+  // ── تحميل الأسعار من JSONBin في الخلفية بصمت ──
   try {
     await Promise.race([
       loadRatesFromCloud(),
-      new Promise(r => setTimeout(r, 3000)) // max 3 ثواني fallback
+      new Promise(r => setTimeout(r, 4000)) // max 4 ثواني
     ]);
+    applyRatesToUI(rates._dateStr || null, rates._timeStr || null);
   } catch(e) {}
 
-  // ── ثانياً: فتح التطبيق بعد جلب الأسعار مباشرة ──
-  dismissSplash(false);
-  if (!_tickerTimer) setTimeout(initTicker, 100);
-
-  // ── ثالثاً: تحديث إضافي في الخلفية بصمت ──
-  setTimeout(() => autoFetchForAllUsers().catch(() => {}), 1000);
-  setTimeout(() => fetchGoldPrice().catch(() => {}), 2000);
+  // ── تحديث من المصادر الخارجية في الخلفية ──
+  setTimeout(() => autoFetchForAllUsers().catch(() => {}), 500);
+  setTimeout(() => fetchGoldPrice().catch(() => {}), 1500);
 }
 
 // ===== STARTUP =====
@@ -6147,35 +6715,74 @@ function extractNum(amount) {
   return m ? m[0] : amount;
 }
 
+const PKG_LOGO = {
+  'syriatel-pkgs': { icon:'🔴', name:'سيرياتيل',    color:'#e63946' },
+  'mtn-pkgs':      { icon:'🟡', name:'ام تي ان',     color:'#ffb703' },
+  'ff-pkgs':       { icon:'🔥', name:'فري فاير',     color:'#f72585' },
+  'pubg-pkgs':     { icon:'🪖', name:'ببجي موبايل', color:'#4cc9f0' },
+  'joker-pkgs':    { icon:'🃏', name:'جواكر',        color:'#ffd000' },
+};
+
+let _tlObserver = null;
+function initTimelineObserver(cid) {
+  if (!_tlObserver) {
+    _tlObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('show'); });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  }
+  document.querySelectorAll('#' + cid + ' .tl-item').forEach(el => _tlObserver.observe(el));
+}
+
 function renderPkgs(pkgs, cid, cb) {
   const serviceId = Object.keys(PKG_MAP).find(k => PKG_MAP[k].cid === cid) || '';
   const useRate = (rates.newSyp || 117.3) * MARGIN;  // سعر الصرف + هامش 2%
+  const logo = PKG_LOGO[cid] || { icon:'📦', name:'الباقات', color:'#9ca3af' };
 
-  document.getElementById(cid).innerHTML = pkgs.map((p, i) => {
-    // حساب السعر بالليرة السورية
+  const itemsHtml = pkgs.map((p, i) => {
     const usdMatch = p.price.match(/[\d.]+/);
     let sypHtml = '';
     if (usdMatch && useRate) {
       const usdVal = parseFloat(usdMatch[0]);
       const sypVal = Math.round(usdVal * useRate);
-      sypHtml = `<div class="pkg-price-syp" style="display:block;">≈ ${sypVal.toLocaleString()} ل.س</div>`;
+      sypHtml = `<div class="tl-syp">≈ ${sypVal.toLocaleString()} ل.س</div>`;
     }
-    // زر 1: نسخ الرقم فقط
     const numOnly = encodeURIComponent(extractNum(p.amount));
-    // زر 2: نسخ الكمية الكاملة مع النص
     const fullText = encodeURIComponent(p.amount + (p.unit ? ' ' + p.unit : ''));
+    const numLabel = String(i + 1).padStart(2, '0');
     return `
-    <div class="pkg-card" onclick="${cb}(${i})">
-      <div class="pkg-copy-btns">
-        <button class="pkg-copy-btn num-btn" onclick="copyPkgWA(event,this,'${numOnly}')" title="نسخ الرقم فقط">#</button>
-        <button class="pkg-copy-btn txt-btn" onclick="copyPkgWA(event,this,'${fullText}')" title="نسخ الكمية كاملة">📋</button>
+    <div class="tl-item">
+      <div class="tl-node" style="background:${logo.color}"></div>
+      <div class="tl-card" onclick="${cb}(${i})">
+        <div class="tl-num" style="background:${logo.color}26;color:${logo.color}">${numLabel}</div>
+        <div class="tl-mid">
+          <div class="tl-amt">${p.amount}${p.unit ? ' ' + p.unit : ''}</div>
+        </div>
+        <div class="tl-price">
+          <div class="tl-usd">${p.price}</div>
+          ${sypHtml}
+        </div>
+        <div class="tl-copy-btns" onclick="event.stopPropagation()">
+          <button class="tl-copy-btn" onclick="copyPkgWA(event,this,'${numOnly}')" title="نسخ الرقم فقط">#</button>
+          <button class="tl-copy-btn" onclick="copyPkgWA(event,this,'${fullText}')" title="نسخ الكمية كاملة">📋</button>
+        </div>
       </div>
-      <div class="pkg-amount">${p.amount}</div>
-      ${p.unit ? `<div class="pkg-unit">${p.unit}</div>` : ''}
-      <div class="pkg-price">${p.price}</div>
-      ${sypHtml}
     </div>`;
   }).join('');
+
+  document.getElementById(cid).innerHTML = `
+    <div class="tl-wrap">
+      <div class="tl-fixed-col">
+        <div class="tl-logo-ring" style="border-color:${logo.color}66; box-shadow:0 0 0 6px ${logo.color}1f, 0 10px 22px rgba(0,0,0,0.4);">
+          <div>${logo.icon}</div>
+        </div>
+        <div class="tl-logo-name" style="color:${logo.color}">${logo.name}</div>
+        <div class="tl-logo-count">${pkgs.length} باقة</div>
+        <div class="tl-connect-line" style="background:linear-gradient(to bottom, ${logo.color}66, transparent);"></div>
+      </div>
+      <div class="tl-scroll-col">${itemsHtml}</div>
+    </div>`;
+
+  initTimelineObserver(cid);
 }
 
 function buildCopyMsg(p, serviceId, sypVal, profit) {
