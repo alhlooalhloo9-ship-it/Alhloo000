@@ -1446,6 +1446,7 @@
   .rate-update-bar {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 8px;
     background: rgba(245,166,35,0.1);
     border: 1px solid rgba(245,166,35,0.25);
@@ -4192,13 +4193,18 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
     <div id="calcStatus" class="calc-status">✅ أسعار الصرف جاهزة</div>
 
     <!-- Rate update notice -->
-    <div class="rate-update-bar">
-      <div class="ru-icon">📢</div>
-      <div class="ru-content">
-        <div class="ru-title">آخر تحديث لأسعار الصرف</div>
-    <div class="ru-text" id="ruText">جاري تحميل الأسعار...</div>
+    <div class="rate-update-bar" style="flex-direction:column; align-items:stretch;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div class="ru-icon">📢</div>
+        <div class="ru-content">
+          <div class="ru-title">آخر تحديث لأسعار الصرف</div>
+          <div class="ru-text" id="ruText">جاري تحميل الأسعار...</div>
+        </div>
       </div>
-      <button class="market-btn" onclick="openMarketSheet()">📊 السوق</button>
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <button class="market-btn" id="manualRefreshBtn" onclick="manualRefreshRate()" style="flex:1; text-align:center;">🔄 حدّث السعر</button>
+        <button class="market-btn" onclick="openMarketSheet()" style="flex:1; text-align:center;">📊 السوق</button>
+      </div>
     </div>
 
     <!-- نافذة السوق المنبثقة -->
@@ -4797,7 +4803,7 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
     <div class="sq-card calc-sq" onclick="openCalc()">
       <div class="sq-icon">🧮</div>
       <div class="sq-label">حاسبة الصرف</div>
-      <div class="calc-sq-rate">$1 = 117.3 ج.س<br>$1 = 44.2 ₺</div>
+      <div class="calc-sq-rate">⏳ جاري تحميل السعر...</div>
     </div>
 
     <!-- العروض -->
@@ -6452,17 +6458,19 @@ function dismissSplash(skipped) {
 }
 
 async function startupLoadPrices() {
-  // ── فتح التطبيق فوراً بدون انتظار ──
+  // ── ① أولاً: تحميل آخر سعر محفوظ محلياً فوراً (بدون انتظار، حتى بدون إنترنت) ──
+  loadLocalRates();
+
+  // ── ② فتح التطبيق فوراً بالسعر المحفوظ — لا فلاش ولا أرقام افتراضية ──
   dismissSplash(true);
   if (!_tickerTimer) setTimeout(initTicker, 100);
 
-  // ── تحميل الأسعار من JSONBin في الخلفية بصمت ──
+  // ── ③ بصمت: تحقق إذا يوجد سعر أحدث على السيرفر، حدّث فقط إذا كان جديداً فعلاً ──
   try {
     await Promise.race([
       loadRatesFromCloud(),
-      new Promise(r => setTimeout(r, 4000)) // max 4 ثواني
+      new Promise(r => setTimeout(r, 4000)) // حد أقصى 4 ثواني، ثم يبقى على آخر سعر محفوظ
     ]);
-    applyRatesToUI(rates._dateStr || null, rates._timeStr || null);
   } catch(e) {}
 
   // ── تحديث من المصادر الخارجية في الخلفية ──
@@ -6482,13 +6490,11 @@ setTimeout(() => { if (!_tickerTimer) initTicker(); }, 5000);
     const splash = document.getElementById('priceSplash');
     if (splash) splash.remove();
     _splashDone = true;
-    // ابدأ الـ ticker فوراً بالأسعار المحفوظة محلياً
-    loadRatesFromCloud().then(() => {
-      applyRatesToUI(null, null);
-    }).catch(() => {}).finally(() => {
-      // ابدأ الشريط دائماً بغض النظر عن نتيجة التحديث
-      initTicker();
-      // ثم حدّث من المصادر الخارجية بصمت
+    // أولاً: عرض آخر سعر محفوظ فوراً (بدون فلاش، يعمل حتى بدون إنترنت)
+    loadLocalRates();
+    initTicker();
+    // ثم: تحقق بصمت من وجود سعر أحدث، حدّث فقط إذا تغيّر فعلاً
+    loadRatesFromCloud().finally(() => {
       setTimeout(() => autoFetchForAllUsers().catch(() => {}), 1500);
     });
   } else {
@@ -9572,6 +9578,29 @@ const FIELDS_5 = ['usd','try','new','old','gold'];
 let activeRow5 = null;
 
 // ══ MARKET SHEET ══
+// ══ زر "حدّث السعر" — احتياطي يدوي مستقل، لا علاقة له بالتحديث التلقائي ══
+let _manualRefreshBusy = false;
+async function manualRefreshRate() {
+  if (_manualRefreshBusy) return;
+  _manualRefreshBusy = true;
+  const btn = document.getElementById('manualRefreshBtn');
+  const originalText = btn ? btn.textContent : '';
+  if (btn) { btn.textContent = '⏳ جاري الجلب...'; btn.style.opacity = '0.6'; }
+
+  try {
+    // يستخدم نفس آلية الجلب المباشر من sp-today.com مع الهامش المتفق عليه
+    await autoFetchForAllUsers();
+    if (btn) { btn.textContent = '✅ تم التحديث'; }
+  } catch(e) {
+    if (btn) { btn.textContent = '❌ فشل الجلب'; }
+  } finally {
+    setTimeout(() => {
+      if (btn) { btn.textContent = originalText || '🔄 حدّث السعر'; btn.style.opacity = '1'; }
+      _manualRefreshBusy = false;
+    }, 2500);
+  }
+}
+
 function openMarketSheet() {
   updateMarketSheet();
   document.getElementById("mktOverlay").classList.add("open");
