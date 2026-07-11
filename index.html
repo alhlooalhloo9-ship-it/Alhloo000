@@ -4381,7 +4381,7 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
       </div>
       <div style="display:flex; gap:8px; margin-top:8px;">
         <button class="market-btn" id="manualRefreshBtn" onclick="manualRefreshRate()" style="flex:1; text-align:center;">🔄 ليرتنا</button>
-        <button class="market-btn" onclick="fetchRatesFromTelegram()" style="flex:1; text-align:center;">📡 تلغرام</button>
+        <button class="market-btn" id="calcTgBtn" onclick="fetchRatesFromTelegram(this)" style="flex:1; text-align:center;">📡 تلغرام</button>
       </div>
     </div>
 
@@ -4446,86 +4446,182 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
       </div>
     </div>
 
-    <!-- 5 مستطيلات أفقية -->
-    <div class="conv-grid-5">
+    <!-- ══ GRX: نشرة أسعار اليوم + تحويل بعملة قابلة للاختيار (تظهر داخل نافذة الحاسبة) ══ -->
+    <div class="grx-wrap">
+      <div class="grx-title">نشرة اسعار اليوم</div>
+      <div class="grx-cards" id="grxCards"></div>
 
-      <!-- دولار أمريكي -->
-      <div class="conv-row usd-row" id="field-usd" onclick="document.getElementById('inp-usd').focus()">
-        <span class="cr-icon">🇺🇸</span>
-        <div class="cr-name">
-          <div class="cr-name-text">دولار أمريكي</div>
-          <div class="cr-sym">$ USD</div>
+      <div class="grx-conv">
+        <div class="grx-conv-title">تحويل المبلغ من</div>
+        <div class="grx-conv-row">
+          <input type="text" inputmode="decimal" id="grxAmount" class="grx-amount" value="1" oninput="grxRender()">
+          <button type="button" class="grx-cur-btn" onclick="grxOpenModal()">
+            <span id="grxSelFlag">🇺🇸</span>
+            <span id="grxSelCode">USD</span>
+            <span class="grx-chev">▲<br>▼</span>
+          </button>
         </div>
-        <div class="cr-sep"></div>
-        <input class="cr-input" id="inp-usd" type="text" inputmode="decimal"
-          placeholder="اكتب هنا"
-          oninput="convertFrom5('usd')" onfocus="setActive5('usd')">
-        <button class="cr-clear" onclick="event.stopPropagation();clearAll5()">✕</button>
-      </div>
 
-      <!-- ليرة تركية -->
-      <div class="conv-row try-row" id="field-try" onclick="document.getElementById('inp-try').focus()">
-        <span class="cr-icon">🇹🇷</span>
-        <div class="cr-name">
-          <div class="cr-name-text">ليرة تركية</div>
-          <div class="cr-sym">₺ TRY</div>
+        <div class="grx-table">
+          <div class="grx-table-head">
+            <div class="grx-col-sell">مبيع</div>
+            <div class="grx-col-buy">شراء</div>
+            <div class="grx-col-cur">العملة</div>
+          </div>
+          <div id="grxRows"></div>
         </div>
-        <div class="cr-sep"></div>
-        <input class="cr-input" id="inp-try" type="text" inputmode="decimal"
-          placeholder="اكتب هنا"
-          oninput="convertFrom5('try')" onfocus="setActive5('try')">
-        <button class="cr-clear" onclick="event.stopPropagation();clearAll5()">✕</button>
       </div>
-
-      <!-- ليرة سورية جديدة -->
-      <div class="conv-row new-row" id="field-new" onclick="document.getElementById('inp-new').focus()">
-        <span class="cr-icon">🇸🇾</span>
-        <div class="cr-name">
-          <div class="cr-name-text">ليرة سورية جديدة</div>
-          <div class="cr-sym">ج.س</div>
-        </div>
-        <div class="cr-sep"></div>
-        <input class="cr-input" id="inp-new" type="text" inputmode="decimal"
-          placeholder="اكتب هنا"
-          oninput="convertFrom5('new')" onfocus="setActive5('new')">
-        <button class="cr-clear" onclick="event.stopPropagation();clearAll5()">✕</button>
-      </div>
-
-      <!-- ليرة سورية قديمة -->
-      <div class="conv-row old-row" id="field-old" onclick="document.getElementById('inp-old').focus()">
-        <span class="cr-icon">🇸🇾</span>
-        <div class="cr-name">
-          <div class="cr-name-text">ليرة سورية قديمة</div>
-          <div class="cr-sym" style="color:#fb923c">ق.س</div>
-        </div>
-        <div class="cr-sep"></div>
-        <input class="cr-input" id="inp-old" type="text" inputmode="decimal"
-          placeholder="اكتب هنا"
-          oninput="convertFrom5('old')" onfocus="setActive5('old')">
-        <button class="cr-clear" onclick="event.stopPropagation();clearAll5()">✕</button>
-      </div>
-
-      <div class="conv-row-divider">✦ ذهب ✦</div>
-
-      <!-- ذهب عيار 24 -->
-      <div class="conv-row gold-row" id="field-gold" onclick="document.getElementById('inp-gold').focus()">
-        <span class="cr-icon">🥇</span>
-        <div class="cr-name">
-          <div class="cr-name-text">ذهب عيار 24</div>
-          <div class="cr-sym">غرام</div>
-        </div>
-        <div class="cr-sep"></div>
-        <input class="cr-input" id="inp-gold" type="text" inputmode="decimal"
-          placeholder="اكتب هنا"
-          oninput="convertFrom5('gold')" onfocus="setActive5('gold')">
-        <button class="cr-clear" onclick="event.stopPropagation();clearAll5()">✕</button>
-      </div>
-
     </div>
-
 
   </div>
 </div>
+
+<!-- ══════════════ GRX: نشرة أسعار اليوم + تحويل بعملة قابلة للاختيار ══════════════ -->
+<style>
+  .grx-wrap{margin:22px 14px 0;font-family:'Cairo',sans-serif;direction:rtl;}
+  .grx-title{font-size:19px;font-weight:900;color:#fff;margin-bottom:12px;}
+  .grx-cards{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;}
+  .grx-cards::-webkit-scrollbar{height:4px;}
+  .grx-cards::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:4px;}
+  .grx-card{flex:0 0 auto;min-width:158px;background:linear-gradient(160deg,#c1263a,#8a1424);border-radius:16px;padding:14px 12px;scroll-snap-align:start;}
+  .grx-card-title{font-size:13px;font-weight:800;color:#fff;line-height:1.55;margin-bottom:16px;text-align:center;min-height:40px;}
+  .grx-card-rates{display:flex;justify-content:space-between;gap:6px;}
+  .grx-card-rates span{font-size:13px;font-weight:900;color:#fff;display:block;text-align:center;flex:1;}
+  .grx-card-rates b{display:block;font-size:9px;font-weight:700;opacity:.75;margin-bottom:3px;}
+
+  .grx-conv{margin-top:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:16px;}
+  .grx-conv-title{font-size:15px;font-weight:800;color:rgba(255,255,255,0.55);margin-bottom:10px;}
+  .grx-conv-row{display:flex;border:1.5px solid rgba(255,255,255,0.15);border-radius:12px;overflow:hidden;}
+  .grx-amount{flex:1;background:transparent;border:none;outline:none;color:#fff;font-family:'Cairo',sans-serif;font-size:18px;font-weight:800;padding:12px 14px;direction:ltr;text-align:left;min-width:0;}
+  .grx-cur-btn{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.06);border:none;border-right:1.5px solid rgba(255,255,255,0.15);padding:0 14px;color:#fff;font-family:'Cairo',sans-serif;font-size:15px;font-weight:800;cursor:pointer;white-space:nowrap;}
+  .grx-chev{font-size:9px;opacity:.6;letter-spacing:-1px;}
+
+  .grx-table{margin-top:14px;}
+  .grx-table-head,.grx-table-row{display:flex;align-items:center;padding:10px 4px;}
+  .grx-table-head{color:rgba(255,255,255,0.4);font-size:11px;font-weight:800;border-bottom:1px solid rgba(255,255,255,0.08);}
+  .grx-table-row{border-bottom:1px solid rgba(255,255,255,0.06);font-size:15px;font-weight:900;color:#fff;}
+  .grx-col-cur{flex:1.5;display:flex;align-items:center;gap:8px;}
+  .grx-col-buy,.grx-col-sell{flex:1;text-align:center;}
+
+  /* نافذة اختيار العملة (Bottom Sheet) */
+  .grx-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:999990;align-items:flex-end;justify-content:center;}
+  .grx-modal-bg.show{display:flex;}
+  .grx-modal{width:100%;max-width:420px;background:#f4f4f6;border-radius:22px 22px 0 0;padding:16px 14px 24px;box-sizing:border-box;animation:grxUp .25s ease;}
+  @keyframes grxUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .grx-modal-handle{width:38px;height:4px;background:rgba(0,0,0,0.15);border-radius:4px;margin:0 auto 12px;}
+  .grx-opt{display:flex;align-items:center;gap:12px;padding:14px 10px;border-radius:12px;cursor:pointer;font-family:'Cairo',sans-serif;}
+  .grx-opt:active{background:rgba(0,0,0,0.06);}
+  .grx-opt-flag{font-size:22px;}
+  .grx-opt-name{font-size:16px;font-weight:800;color:#1a1a1a;}
+  .grx-opt.selected{background:rgba(196,38,58,0.09);}
+</style>
+
+<!-- نافذة اختيار عملة -->
+<div class="grx-modal-bg" id="grxModalBg" onclick="if(event.target===this) grxCloseModal()">
+  <div class="grx-modal">
+    <div class="grx-modal-handle"></div>
+    <div id="grxOptList"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const GRX_CUR = {
+    usd:{name:'الدولار', flag:'🇺🇸', code:'USD'},
+    try:{name:'الليرة التركية', flag:'🇹🇷', code:'TRY'},
+    syp:{name:'الليرة السورية', flag:'🇸🇾', code:'SYP'}
+  };
+  let grxBase = 'usd';
+
+  function grxUnitSyp(){
+    const r = (typeof rates !== 'undefined' && rates) ? rates : {newSyp:117.3, tryRate:44.2};
+    const m = (typeof MARGIN !== 'undefined') ? MARGIN : 1.02;
+    const usdSell = r.newSyp * m;
+    const usdBuy  = r.buyNewSyp || (r.newSyp * 0.98);
+    const trySell = usdSell / r.tryRate;
+    const tryBuy  = usdBuy  / r.tryRate;
+    return { usd:{buy:usdBuy, sell:usdSell}, try:{buy:tryBuy, sell:trySell}, syp:{buy:1, sell:1} };
+  }
+
+  // يحسب سعر تحويل وحدة واحدة من "from" إلى "to" حسب جانب البيع/الشراء
+  function grxRate(from, to, side){
+    if(from===to) return 1;
+    const u = grxUnitSyp();
+    if(to==='syp')   return u[from][side];
+    if(from==='syp') return 1 / u[to][side==='buy' ? 'sell' : 'buy'];
+    return u[from][side] / u[to][side==='buy' ? 'sell' : 'buy'];
+  }
+
+  function grxFmt(n){
+    if(!isFinite(n)) return '—';
+    return n>=100 ? Math.round(n).toLocaleString('en-US') : (Math.round(n*100)/100).toLocaleString('en-US');
+  }
+
+  window.grxOpenModal = function(){
+    const list = document.getElementById('grxOptList');
+    list.innerHTML = Object.keys(GRX_CUR).map(function(k){
+      const c = GRX_CUR[k];
+      return '<div class="grx-opt '+(k===grxBase?'selected':'')+'" onclick="grxSelect(\''+k+'\')">'
+           + '<span class="grx-opt-flag">'+c.flag+'</span>'
+           + '<span class="grx-opt-name">'+c.name+'</span>'
+           + '</div>';
+    }).join('');
+    document.getElementById('grxModalBg').classList.add('show');
+  };
+  window.grxCloseModal = function(){
+    document.getElementById('grxModalBg').classList.remove('show');
+  };
+  window.grxSelect = function(key){
+    grxBase = key;
+    document.getElementById('grxSelFlag').textContent = GRX_CUR[key].flag;
+    document.getElementById('grxSelCode').textContent = GRX_CUR[key].code;
+    grxCloseModal();
+    grxRender();
+  };
+
+  function grxRenderCards(){
+    const pairs = [
+      {from:'usd', to:'try', label:'الدولار مقابل الليرة التركية'},
+      {from:'usd', to:'syp', label:'الدولار مقابل الليرة السورية'},
+      {from:'try', to:'syp', label:'الليرة التركية مقابل الليرة السورية'}
+    ];
+    document.getElementById('grxCards').innerHTML = pairs.map(function(p){
+      const buy = grxRate(p.from,p.to,'buy');
+      const sell = grxRate(p.from,p.to,'sell');
+      return '<div class="grx-card">'
+           + '<div class="grx-card-title">'+p.label+'</div>'
+           + '<div class="grx-card-rates">'
+           + '<span><b>شراء</b>'+grxFmt(buy)+'</span>'
+           + '<span><b>مبيع</b>'+grxFmt(sell)+'</span>'
+           + '</div></div>';
+    }).join('');
+  }
+
+  window.grxRender = function(){
+    grxRenderCards();
+    const amt = parseFloat(document.getElementById('grxAmount').value) || 0;
+    const others = Object.keys(GRX_CUR).filter(function(k){ return k!==grxBase; });
+    document.getElementById('grxRows').innerHTML = others.map(function(k){
+      const c = GRX_CUR[k];
+      const buy = grxRate(grxBase, k, 'buy') * amt;
+      const sell = grxRate(grxBase, k, 'sell') * amt;
+      return '<div class="grx-table-row">'
+           + '<div class="grx-col-sell">'+grxFmt(sell)+'</div>'
+           + '<div class="grx-col-buy">'+grxFmt(buy)+'</div>'
+           + '<div class="grx-col-cur"><span>'+c.flag+'</span><span>'+c.name+'</span></div>'
+           + '</div>';
+    }).join('');
+  };
+
+  function grxInit(){ try{ grxRender(); }catch(e){ setTimeout(grxRender, 400); } }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', grxInit);
+  } else {
+    setTimeout(grxInit, 200);
+  }
+})();
+</script>
+
 <!-- Admin Panel (hidden, unlock via secret tap) -->
     <div class="admin-panel" id="adminPanel">
       <div class="admin-panel-inner">
@@ -4560,11 +4656,11 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
             <div style="font-size:11px;font-weight:800;color:#fbbf24;margin-bottom:8px;">⛽ أسعار المحروقات (بالدولار) — تُحدَّث يدوياً عند صدور قرار جديد</div>
             <div class="admin-rate-row">
               <label>🛢️ مازوت ($/لتر)</label>
-              <input type="number" id="rateAdmMazot" value="0.88" step="0.01">
+              <input type="number" id="rateAdmMazot" value="0.82" step="0.01">
             </div>
             <div class="admin-rate-row">
               <label>⛽ بنزين 90 ($/لتر)</label>
-              <input type="number" id="rateAdmBenzin90" value="1.10" step="0.01">
+              <input type="number" id="rateAdmBenzin90" value="0.96" step="0.01">
             </div>
             <div class="admin-rate-row">
               <label>⛽ بنزين 95 ($/لتر)</label>
@@ -4572,7 +4668,7 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
             </div>
             <div class="admin-rate-row">
               <label>🔥 غاز منزلي ($/أسطوانة)</label>
-              <input type="number" id="rateAdmGas" value="12.50" step="0.1">
+              <input type="number" id="rateAdmGas" value="11.49" step="0.1">
             </div>
           </div>
           <div style="margin-top:10px;padding:8px;background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.15);border-radius:10px;font-size:10px;color:rgba(255,255,255,0.5);">
@@ -4587,7 +4683,7 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
             <div style="font-size:10px;color:rgba(255,255,255,0.45);margin-bottom:8px;" id="tgLastFetch">آخر جلب: لم يتم بعد</div>
             <div id="tgStatus" style="font-size:10px;text-align:center;padding:5px;border-radius:8px;margin-bottom:8px;display:none;"></div>
             <div style="display:flex;gap:6px;">
-              <button onclick="fetchRatesFromTelegram()" id="tgFetchBtn"
+              <button onclick="fetchRatesFromTelegram(this)" id="tgFetchBtn"
                 style="flex:1;background:linear-gradient(135deg,#5B5FEF,#7C82FF);border:none;color:white;font-family:'Cairo',sans-serif;font-size:11px;font-weight:800;padding:8px;border-radius:10px;cursor:pointer;">
                 🔄 جلب من تلغرام
               </button>
@@ -5292,10 +5388,12 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
   <div class="page-header">
     <div style="font-size:54px;">⛽</div>
     <h2 style="background:linear-gradient(135deg,#d4af37,#f5e27a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">حاسبة المحروقات</h2>
-    <div class="sub">مازوت • بنزين 90 • بنزين 95 • غاز منزلي</div>
+    <div class="sub">مازوت • بنزين 90 • غاز منزلي</div>
   </div>
   <div style="padding:0 16px 8px;">
-    <button onclick="goPage('home')" style="width:100%;background:linear-gradient(135deg,rgba(212,175,55,0.15),rgba(212,175,55,0.05));border:1.5px solid rgba(212,175,55,0.3);border-radius:14px;color:#d4af37;font-family:'Cairo',sans-serif;font-weight:800;font-size:13px;padding:11px;cursor:pointer;">← الرئيسية</button>
+    <button onclick="goPage('home')" style="width:100%;background:linear-gradient(135deg,#d4af37,#b8912c);border:none;border-radius:14px;color:#1a1a1a;font-family:'Cairo',sans-serif;font-weight:900;font-size:15px;padding:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(212,175,55,0.45);">
+      <span style="font-size:18px;">←</span><span>الرجوع للصفحة الرئيسية</span>
+    </button>
   </div>
 
   <!-- شبكة الخيارات الثلاثة -->
@@ -5362,7 +5460,6 @@ body.light-mode .nv-syp-card { background: var(--card) !important; }
     <div class="fc-car-fueltype">
       <button class="fc-ft-btn active" id="fcFtMazot" onclick="fcSetFuelType('mazot')">🛢️ مازوت</button>
       <button class="fc-ft-btn" id="fcFtBenzin90" onclick="fcSetFuelType('benzin90')">⛽ بنزين 90</button>
-      <button class="fc-ft-btn" id="fcFtBenzin95" onclick="fcSetFuelType('benzin95')">⛽ بنزين 95</button>
     </div>
     <div class="fc-result-card" id="fcCarResult">
       <div class="fc-result-empty">أدخل البيانات أعلاه للحساب...</div>
@@ -5596,7 +5693,7 @@ function toggleMode() {
 }
 
 
-let rates={oldSyp:11700.3, newSyp:117.3, tryRate:44.2, buySyp:11500, buyNewSyp:115, fuel:{mazot:0.88, benzin90:1.10, benzin95:1.15, gas:12.50}};
+let rates={oldSyp:11700.3, newSyp:117.3, tryRate:44.2, buySyp:11500, buyNewSyp:115, fuel:{mazot:0.82, benzin90:0.96, benzin95:1.15, gas:11.49}};
 const MARGIN = 1.02; // هامش الربح 2%
 let activeField=null;
 let adminTapCount=0;
@@ -5709,7 +5806,7 @@ function loadLocalRates(){
     }
     // أسعار المحروقات — محفوظة محلياً بشكل منفصل (يدوية، تتغيّر نادراً)
     const savedFuel = JSON.parse(localStorage.getItem('halou_fuel_rates'));
-    rates.fuel = savedFuel || { mazot:0.88, benzin90:1.10, benzin95:1.15, gas:12.50 };
+    rates.fuel = savedFuel || { mazot:0.82, benzin90:0.96, benzin95:1.15, gas:11.49 };
     if(adminUnlocked){
       const fm = document.getElementById('rateAdmMazot');
       const fb90 = document.getElementById('rateAdmBenzin90');
@@ -5818,7 +5915,7 @@ async function saveAdminRates(){
   const dateStr = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
   const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
 
-  const payload = { newSyp:rates.newSyp, oldSyp:rates.oldSyp, tryRate:rates.tryRate, dateStr, timeStr };
+  const payload = { newSyp:rates.newSyp, oldSyp:rates.oldSyp, tryRate:rates.tryRate, dateStr, timeStr, tgUpdatedAt: Date.now() };
 
   // Always save locally as backup
   localStorage.setItem('halou_rates', JSON.stringify(payload));
@@ -5957,6 +6054,8 @@ function openCalc(){
   fetchLiveRates();
   // إصلاح ارتفاع المودال عند فتح لوحة المفاتيح
   adjustCalcHeight();
+  // تحديث كروت وجدول أسعار العملات الجديدة بأحدث الأسعار عند كل فتح
+  if (typeof grxRender === 'function') grxRender();
 }
 
 // ── تعديل ارتفاع الحاسبة عند تغيّر الـ viewport (فتح/إغلاق لوحة المفاتيح) ──
@@ -6948,6 +7047,14 @@ async function autoFetchForAllUsers() {
       return;
     }
 
+    // ── التاريخ والوقت (يجب حسابهما قبل استخدامهما) ──
+    const now = new Date();
+    const days=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    const months=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    const dateStr = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+    const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    const fetchedAt = Date.now(); // طابع زمني لحسم أولوية السعر عند إعادة فتح التطبيق
+
     const prevRate = rates.newSyp;
     rates.newSyp    = newNewSyp;
     rates.oldSyp    = newOldSyp;
@@ -6958,17 +7065,13 @@ async function autoFetchForAllUsers() {
     rates._dateStr  = dateStr;
     rates._timeStr  = timeStr;
 
-    const now = new Date();
-    const days=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-    const months=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-    const dateStr = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
-    const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-
-    // حفظ محلي
+    // حفظ محلي — مع طابع زمني (tgUpdatedAt) حتى يبقى هذا السعر معتمَداً
+    // ولا تستبدله دورة المزامنة السحابية القادمة بسعر أقدم
     localStorage.setItem('halou_rates', JSON.stringify({
       newSyp: newNewSyp, oldSyp: newOldSyp,
       tryRate: newTryRate, trySyp: newTrySyp,
-      dateStr, timeStr, source: 'sptoday+tcmb'
+      dateStr, timeStr, source: 'sptoday+tcmb',
+      tgUpdatedAt: fetchedAt
     }));
 
     applyRatesToUI(dateStr, timeStr, 'sptoday');
@@ -7009,7 +7112,8 @@ async function pushRateToCloud(newSyp, oldSyp, dateStr, timeStr, tryRate, trySyp
       trySyp:  trySyp  || rates.trySyp  || null,
       dateStr, timeStr,
       source: 'sptoday',
-      updatedAt: Date.now()
+      updatedAt: Date.now(),
+      tgUpdatedAt: Date.now() // نفس الطابع الزمني المعتمد محلياً — يمنع استبدال هذا السعر بسعر أقدم عند إعادة الفتح
     };
     await fetch(`${JSONBIN_BASE}/${BIN_ID}`, {
       method: 'PUT',
@@ -7063,7 +7167,15 @@ function initTimelineObserver(cid) {
       entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('show'); });
     }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
   }
-  document.querySelectorAll('#' + cid + ' .tl-item').forEach(el => _tlObserver.observe(el));
+  const items = document.querySelectorAll('#' + cid + ' .tl-item');
+  items.forEach(el => _tlObserver.observe(el));
+  // حماية إضافية: لو الصفحة الحاوية للباقات ظاهرة (active) حالياً وقت إعادة البناء
+  // (مثلاً بعد تحديث الأدمن للأسعار أثناء تواجد الزبون بنفس الصفحة) أظهرها فوراً
+  // بدل ما تعتمد فقط على المراقب اللي ممكن ما يتأكد من تقاطعها بشكل موثوق
+  const container = document.getElementById(cid)?.closest('.page');
+  if (container && container.classList.contains('active')) {
+    requestAnimationFrame(() => items.forEach(el => el.classList.add('show')));
+  }
 }
 
 function renderPkgs(pkgs, cid, cb) {
@@ -7444,6 +7556,12 @@ function goPage(id) {
     if (hintEl)   hintEl.style.display   = 'none';
     if (waBtn)    waBtn.style.display    = 'none';
   }
+  // ── إصلاح: إظهار الباقات فوراً بشكل مضمون ──
+  // (بعض المتصفحات/الأجهزة لا تُعيد فحص IntersectionObserver بشكل موثوق
+  // لما تكون الصفحة مخفية وقت بناء الباقات، فتضل الباقات غير ظاهرة رغم وجودها)
+  requestAnimationFrame(() => {
+    document.querySelectorAll('#' + id + ' .tl-item').forEach(el => el.classList.add('show'));
+  });
   // تتبع الصفحة في الإحصائيات
   if (typeof trackPageView === 'function') trackPageView(id);
 }
@@ -8560,7 +8678,7 @@ function initShamcashImages() {
 }
 
 // ===== TELEGRAM AUTO RATES =====
-const TG_CHANNEL = 'https://t.me/s/aa123456hhn';
+const TG_CHANNEL = 'https://t.me/s/syriastockss';
 let   tgAutoInterval = null;
 let   tgAutoOn = false;
 
@@ -8611,34 +8729,80 @@ async function fetchTelegramHTML() {
   throw new Error('فشل الاتصال بجميع الـ proxies: ' + lastErr);
 }
 
-// استخراج السعر من HTML
+// استخراج السعر من HTML — مصمم لتنسيق منشورات قناة "سيرياستوكس"
+// شكل المنشور المتوقع:
+//   عملة قديمة فئه 5000
+//   #الشراء:13025 الحد الأدنى
+//   #المبيع:13075 الحد الأعلى
+//   عملة جديدة
+//   #الشراء:130 الحد الأدنى
+//   #المبيع : 130.5 الحد الأعلى
 function extractRateFromHTML(html) {
-  const tail = html.slice(-8000);
-  const nums = [...tail.matchAll(/\b(1[0-9]{4})\b/g)].map(m => parseInt(m[1]));
-  if (!nums.length) throw new Error('لم يتم العثور على أرقام في القناة');
-  const highest = Math.max(...nums);
-  // newSyp = أول 3 أرقام (12850 → 128)
-  // oldSyp = newSyp × 100 دائماً (128 × 100 = 12800)
-  const newSyp = Math.floor(highest / 100);
-  const oldSyp = newSyp * 100;
-  return { newSyp, oldSyp };
+  // إزالة الرموز الخفية/رموز التنويع اللي تتكرر بكثرة بالمنشور وتكسر الأنماط النصية
+  const clean = html.replace(/[\u200B-\u200F\uFE00-\uFE0F\u2060\u200E]/g, ' ');
+
+  // نأخذ جزء كبير من نهاية الصفحة (آخر منشور عادة قرب نهاية HTML بصفحة t.me/s/)
+  const tail = clean.slice(-25000);
+
+  // نبحث عن كل ظهورات "عملة قديمة" و"عملة جديدة" ونعتمد آخر ظهور (الأحدث)
+  const oldParts = tail.split(/عملة\s*قديمة/);
+  const newParts = tail.split(/عملة\s*جديدة/);
+
+  if (oldParts.length < 2 || newParts.length < 2) {
+    throw new Error('لم يتم العثور على منشور بتنسيق الأسعار المتوقع (عملة قديمة/جديدة)');
+  }
+
+  const oldSection = oldParts[oldParts.length - 1].slice(0, 500);
+  const newSection = newParts[newParts.length - 1].slice(0, 500);
+
+  // نمط: الشراء:رقم ... (أي شي بينهم) ... المبيع:رقم
+  const numPattern = /الشراء\s*:?\s*([\d]+(?:\.[\d]+)?)[\s\S]{0,300}?المبيع\s*:?\s*([\d]+(?:\.[\d]+)?)/;
+
+  const oldM = oldSection.match(numPattern);
+  const newM = newSection.match(numPattern);
+
+  if (!oldM || !newM) {
+    throw new Error('تعذّر استخراج أرقام الشراء/المبيع من آخر منشور بالقناة');
+  }
+
+  const oldBuy  = parseFloat(oldM[1]);
+  const oldSell = parseFloat(oldM[2]);
+  const newBuy  = parseFloat(newM[1]);
+  const newSell = parseFloat(newM[2]);
+
+  // فحص منطقية الأرقام (عملة قديمة بالآلاف، عملة جديدة بالعشرات/المئات)
+  if (!oldSell || !newSell || oldSell < 1000 || oldSell > 500000 || newSell < 10 || newSell > 5000) {
+    throw new Error('الأرقام المستخرجة غير منطقية — يبدو أن تنسيق المنشور تغيّر بالقناة');
+  }
+
+  return { newSyp: newSell, oldSyp: oldSell, buyNewSyp: newBuy, buySyp: oldBuy };
 }
 
-async function fetchRatesFromTelegram() {
-  const btn    = document.getElementById('tgFetchBtn');
-  const status = document.getElementById('tgStatus');
-  const lastEl = document.getElementById('tgLastFetch');
+async function fetchRatesFromTelegram(clickedBtn) {
+  // الزر المضغوط فعلياً (سواء من بنر الحاسبة أو لوحة الأدمن) — نحدّثه هو بالتحديد
+  const btn    = clickedBtn || document.getElementById('tgFetchBtn');
+  const status = document.getElementById('tgStatus'); // موجود فقط بلوحة الأدمن
+  const lastEl = document.getElementById('tgLastFetch'); // موجود فقط بلوحة الأدمن
 
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الجلب...'; }
+  // عناصر بنر الحاسبة (اللي يشوفها الزبون العادي فعلياً)
+  const ruText     = document.getElementById('ruText');
+  const calcStatus = document.getElementById('calcStatus');
+  const originalBtnText  = btn ? btn.textContent : '';
+  const originalRuText   = ruText ? ruText.textContent : '';
+
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري التحديث...'; btn.style.opacity = '0.65'; }
+  if (ruText) ruText.textContent = '⏳ جاري جلب آخر الأسعار من تلغرام...';
   showStatus(status, 'warning', '⏳ جاري الاتصال بتلغرام...');
 
   try {
     const html = await fetchTelegramHTML();
-    const { newSyp: newSypVal, oldSyp: oldSypVal } = extractRateFromHTML(html);
+    const { newSyp: newSypVal, oldSyp: oldSypVal, buyNewSyp: buyNewSypVal, buySyp: buySypVal } = extractRateFromHTML(html);
 
-    // تحديث الحقول والأسعار
+    // تحديث الحقول والأسعار (بيع + شراء)
     rates.newSyp = newSypVal;
     rates.oldSyp = oldSypVal;
+    if (buyNewSypVal) rates.buyNewSyp = buyNewSypVal;
+    if (buySypVal)    rates.buySyp    = buySypVal;
     const rateAdmNew = document.getElementById('rateAdmNew');
     const rateAdmOld = document.getElementById('rateAdmOld');
     if (rateAdmNew) rateAdmNew.value = newSypVal;
@@ -8657,11 +8821,22 @@ async function fetchRatesFromTelegram() {
     showStatus(status, 'success', `✅ تم التحديث! $1 = ${newSypVal} ج.س (من ${oldSypVal} ق.س)`);
     setTimeout(() => { if(status) status.style.display='none'; }, 5000);
 
+    if (btn) btn.textContent = '✅ تم التحديث';
+    if (ruText) ruText.textContent = `✅ آخر تحديث من تلغرام — ${timeStr} | $1 = ${newSypVal} ج.س`;
+
   } catch(e) {
     showStatus(status, 'error', '❌ ' + (e.message || 'خطأ غير معروف'));
     setTimeout(() => { if(status) status.style.display='none'; }, 6000);
+    if (btn) btn.textContent = '❌ فشل الجلب';
+    if (ruText) ruText.textContent = '❌ تعذّر الاتصال بتلغرام، حاول مرة أخرى';
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '🔄 جلب من تلغرام'; }
+    if (btn) {
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.textContent = originalBtnText || '📡 تلغرام';
+        btn.style.opacity = '1';
+      }, 2000);
+    }
   }
 }
 
@@ -10033,11 +10208,10 @@ function fmt5(val, dec) {
 // ══════════════════════════════════════════════
 
 function _fcFuelItems() {
-  const fuel = (rates && rates.fuel) || { mazot:0.88, benzin90:1.10, benzin95:1.15, gas:12.50 };
+  const fuel = (rates && rates.fuel) || { mazot:0.82, benzin90:0.96, benzin95:1.15, gas:11.49 };
   return [
     { key:'mazot',    icon:'🛢️', name:'مازوت',     unit:'لتر',     usdPrice: fuel.mazot    },
     { key:'benzin90', icon:'⛽', name:'بنزين 90',  unit:'لتر',     usdPrice: fuel.benzin90 },
-    { key:'benzin95', icon:'⛽', name:'بنزين 95',  unit:'لتر',     usdPrice: fuel.benzin95 },
     { key:'gas',      icon:'🔥', name:'غاز منزلي', unit:'أسطوانة', usdPrice: fuel.gas      },
   ];
 }
@@ -10133,7 +10307,7 @@ function fcRenderLiters() {
 let _fcSelectedFuelType = 'mazot';
 function fcSetFuelType(type) {
   _fcSelectedFuelType = type;
-  ['Mazot','Benzin90','Benzin95'].forEach(k => {
+  ['Mazot','Benzin90'].forEach(k => {
     const btn = document.getElementById('fcFt' + k);
     if (btn) btn.classList.toggle('active', k.toLowerCase() === type.toLowerCase());
   });
