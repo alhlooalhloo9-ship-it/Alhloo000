@@ -1,5 +1,5 @@
 {
-    "last_update": "2026-07-31 23:07:27",
+    "last_update": "2026-08-01 03:29:52",
     "currency": {
         "USD_TO_SYP": {
             "buy": "14800",
@@ -10,7 +10,7 @@
             "sell": "445"
         },
         "USD_TO_TRY": {
-            "global_rate": "47.5"
+            "global_rate": "47.54"
         }
     }
 }
