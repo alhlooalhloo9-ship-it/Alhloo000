@@ -6902,100 +6902,11 @@ async function fetchTCMBRate() {
 
 // ── تحديث تلقائي من sp-today.com لجميع المستخدمين ──
 async function autoFetchForAllUsers() {
-  try {
-    showRateLoading();
+  // المصدر المعتمد الوحيد لأسعار الصرف هو ملف prices.json الذي تحدّثه GitHub Actions من ليرتنا.
+  // لا نجلب أسعار الصرف مباشرة من SP-Today حتى لا تستبدل الأسعار المعتمدة.
+  await loadRatesFromCloud();
+  return { source: 'Lirtna prices.json' };
 
-    // ① جلب صفحة الدولار السوري من sp-today
-    const usdHtml = await fetchViaProxy('https://sp-today.com/currency/us-dollar');
-    const usdData = extractBuySell(usdHtml);
-    if (!usdData || usdData.sell < 5000) throw new Error('USD parse fail');
-
-    // ② جلب سعر USD/TRY — TCMB أولاً ثم sp-today احتياطاً
-    let usdTryRate = null;
-
-    // المصدر الأول: TCMB + ER-API + Frankfurter
-    usdTryRate = await fetchTCMBRate();
-
-    // المصدر الاحتياطي: sp-today
-    if (!usdTryRate) {
-      console.log('[AutoFetch] TCMB failed, fallback to sp-today for TRY...');
-      try {
-        const tryHtml = await fetchViaProxy('https://sp-today.com/currency/turkish-lira');
-        const tryData = extractBuySell(tryHtml);
-        if (tryData && tryData.sell > 10) {
-          // sp-today يعطي SYP/TRY → نحسب USD/TRY
-          usdTryRate = Math.round((usdData.sell / tryData.sell) * 100) / 100;
-        }
-      } catch(e2) { console.warn('[AutoFetch] sp-today TRY also failed:', e2.message); }
-    }
-
-    // إذا فشل كل شيء → احتفظ بالسعر الحالي
-    if (!usdTryRate) {
-      usdTryRate = rates.tryRate || 38.5;
-      console.warn('[AutoFetch] كل مصادر TRY فشلت، نبقى على السعر الحالي:', usdTryRate);
-    }
-
-    // ③ حساب القيم
-    const newNewSyp  = Math.round((usdData.sell / 100) * 10) / 10;     // ج.س جديد
-    const newOldSyp  = usdData.sell;                                     // ق.س قديم
-    const newTryRate = Math.round(usdTryRate * 100) / 100;               // $1 = ₺
-    const newTrySyp  = Math.round((usdData.sell / usdTryRate / 100) * 100) / 100; // ₺1 = ج.س
-
-    // لم يتغير شيء؟
-    if (newNewSyp === rates.newSyp && newTryRate === rates.tryRate) {
-      hideRateNotif();
-      return;
-    }
-
-    const prevRate = rates.newSyp;
-    rates.newSyp    = newNewSyp;
-    rates.oldSyp    = newOldSyp;
-    rates.tryRate   = newTryRate;
-    rates.trySyp    = newTrySyp;
-    rates.buySyp    = usdData.buy;
-    rates.buyNewSyp = Math.round((usdData.buy / 100) * 10) / 10;
-    rates._dateStr  = dateStr;
-    rates._timeStr  = timeStr;
-
-    const now = new Date();
-    const days=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-    const months=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-    const dateStr = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
-    const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-
-    // حفظ محلي
-    localStorage.setItem('halou_rates', JSON.stringify({
-      newSyp: newNewSyp, oldSyp: newOldSyp,
-      tryRate: newTryRate, trySyp: newTrySyp,
-      dateStr, timeStr, source: 'sptoday+tcmb'
-    }));
-
-    applyRatesToUI(dateStr, timeStr, 'sptoday');
-    showRateUpdated(prevRate, newNewSyp);
-
-    // ④ جلب سعر الذهب (بالتوازي مع نشر JSONBin)
-    fetchGoldPrice().then(() => {
-      console.log('[AutoFetch] gold updated =', tickerGoldPrice);
-    });
-
-    // نشر على JSONBin لمزامنة جميع المستخدمين
-    await pushRateToCloud(newNewSyp, newOldSyp, dateStr, timeStr, newTryRate, newTrySyp);
-
-    // تحديث حقول الأدمن إذا كان مفتوحاً
-    if (typeof adminUnlocked !== 'undefined' && adminUnlocked) {
-      const fNew = document.getElementById('rateAdmNew');
-      const fOld = document.getElementById('rateAdmOld');
-      const fTry = document.getElementById('rateAdmTry');
-      if (fNew) fNew.value = newNewSyp;
-      if (fOld) fOld.value = newOldSyp;
-      if (fTry) fTry.value = newTryRate;
-      const adEl = document.getElementById('adminLastSaved');
-      if (adEl) adEl.textContent = dateStr + ' — ' + timeStr + ' 🌐';
-    }
-  } catch(e) {
-    hideRateNotif();
-    console.warn('[AutoFetch] failed:', e.message);
-  }
 }
 
 // دالة نشر السعر على JSONBin مباشرة (بدون حاجة لفتح لوحة الأدمن)
@@ -7021,9 +6932,7 @@ async function pushRateToCloud(newSyp, oldSyp, dateStr, timeStr, tryRate, trySyp
   }
 }
 
-// تشغيل بعد 5 ثواني من التحميل، ثم كل 5 دقائق
-autoFetchForAllUsers(); // جلب فوري عند فتح التطبيق
-setInterval(autoFetchForAllUsers, 5 * 60 * 1000);
+// مصدر أسعار الصرف الموحد هو prices.json من ليرتنا. تُقرأ التغييرات منه كل دقيقة.;
 
 // ===== RENDER PACKAGES =====
 // خريطة serviceId → pkgs + callback + label
