@@ -1,8 +1,8 @@
-name: تحديث أسعار الصرف من ليرتنا
+name: تحديث أسعار الصرف من قناة اتحاد الصرافين
 
 on:
   schedule:
-    - cron: '7 * * * *'
+    - cron: '15 5 * * *'
   workflow_dispatch:
 
 permissions:
@@ -15,60 +15,91 @@ jobs:
       - name: تنزيل المشروع
         uses: actions/checkout@v4
 
-      - name: إعداد Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
+      - name: تثبيت OCR العربي والإنجليزي
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-ara tesseract-ocr-eng
+          python -m pip install requests beautifulsoup4 pillow pytesseract
 
-      - name: تثبيت المكتبات
-        run: pip install requests beautifulsoup4
-
-      - name: قراءة أسعار ليرتنا وتحديث الملف
+      - name: استخراج الأسعار من أحدث صورة منشورة بالقناة
         run: |
           cat > update_rates.py <<'PY'
-          import json, re
+          import json, re, sys
           from datetime import datetime
           from zoneinfo import ZoneInfo
+          from io import BytesIO
           import requests
           from bs4 import BeautifulSoup
+          from PIL import Image
+          import pytesseract
 
-          url = "https://lirtna.com/"
+          channel_url = "https://t.me/s/ALSRAFEN"
           headers = {"User-Agent": "Mozilla/5.0 (compatible; AlhlooShippingRates/1.0)"}
-          response = requests.get(url, headers=headers, timeout=25)
-          response.raise_for_status()
-          soup = BeautifulSoup(response.text, "html.parser")
+          page = requests.get(channel_url, headers=headers, timeout=30)
+          page.raise_for_status()
+          soup = BeautifulSoup(page.text, "html.parser")
 
-          def num(text):
-              text = text.replace(",", "").replace("٬", "").replace("٫", ".")
-              match = re.search(r"\d+(?:\.\d+)?", text)
-              return float(match.group()) if match else None
-
-          found = {}
-          for row in soup.find_all("tr"):
-              cells = [cell.get_text(" ", strip=True) for cell in row.find_all(["td", "th"])]
-              if len(cells) < 3:
+          # Only inspect images attached to channel posts; do not use avatars/icons.
+          candidates = []
+          for post in soup.select(".tgme_widget_message"):
+              text = post.get_text(" ", strip=True)
+              if "اخر_تحديث_للشاشة_الرسمية" not in text and "آخر_تحديث_للشاشة_الرسمية" not in text:
                   continue
-              label = cells[0].lower()
-              sell, buy = num(cells[1]), num(cells[2])
-              if not sell or not buy:
-                  continue
-              if "دولار" in label or "dollar" in label:
-                  found["usd"] = {"buy": buy, "sell": sell}
-              elif "ليرة تركية" in label or "turkish lira" in label:
-                  found["try"] = {"buy": buy, "sell": sell}
+              photo = post.select_one(".tgme_widget_message_photo_wrap")
+              if photo:
+                  style = photo.get("style", "")
+                  match = re.search(r"background-image\s*:\s*url\(['\"]?(.*?)['\"]?\)", style)
+                  if match:
+                      candidates.append(match.group(1))
+          if not candidates:
+              raise RuntimeError("لم نعثر على صورة منشور أسعار واضحة في قناة تلغرام؛ لم يتم تغيير الأسعار.")
 
-          if "usd" not in found or "try" not in found:
-              raise RuntimeError("لم نستطع قراءة سعري الدولار والليرة التركية من ليرتنا؛ لن نكتب أسعاراً تقديرية.")
+          image_response = requests.get(candidates[0], headers=headers, timeout=30)
+          image_response.raise_for_status()
+          image = Image.open(BytesIO(image_response.content)).convert("RGB")
+          ocr = pytesseract.image_to_string(image, lang="ara+eng", config="--psm 6")
+          print("OCR text from latest official-screen post:")
+          print(ocr)
+
+          # Conservative parsing: require currency row and explicit buy/sell labels.
+          lines = [re.sub(r"\s+", " ", line).strip() for line in ocr.splitlines() if line.strip()]
+          def digits(s):
+              s = s.translate(str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹", "01234567890123456789"))
+              return [float(x.replace(",", "").replace("٬", "").replace("٫", ".")) for x in re.findall(r"\d+(?:[.,٬٫]\d+)?", s)]
+          def find_row(currency_terms):
+              matches = []
+              for line in lines:
+                  if any(term in line.lower() for term in currency_terms):
+                      nums = digits(line)
+                      if len(nums) >= 2:
+                          matches.append((line, nums))
+              if len(matches) != 1:
+                  return None
+              line, nums = matches[0]
+              # Require explicit direction labels on the same row to avoid guessing column order.
+              lower = line.lower()
+              if not (("شراء" in line or "شراء" in lower) and ("بيع" in line or "بيع" in lower)):
+                  return None
+              # Conventional display order on this channel's official screen: buy then sell.
+              return {"buy": nums[-2], "sell": nums[-1]}
+
+          usd = find_row(["دولار", "usd"])
+          tr = find_row(["تركية", "تركي", "try"])
+          if not usd or not tr:
+              raise RuntimeError("تعذر تمييز صفّي الدولار والليرة التركية مع حقلي شراء/بيع بشكل مؤكد؛ لم يتم تعديل prices.json. يلزم ضبط OCR على شكل الصورة الفعلي.")
+
+          # Reject implausible OCR results rather than publishing a misread price.
+          if not (100 <= usd["buy"] <= 100000 and 100 <= usd["sell"] <= 100000 and 0.1 <= tr["buy"] <= 1000 and 0.1 <= tr["sell"] <= 1000):
+              raise RuntimeError("نتيجة OCR خارج النطاق المتوقع؛ لن يتم نشرها.")
 
           now = datetime.now(ZoneInfo("Asia/Damascus"))
-          usd, tr = found["usd"], found["try"]
           output = {
               "last_update": now.strftime("%Y-%m-%d %H:%M:%S"),
               "dateStr": now.strftime("%Y-%m-%d"),
               "timeStr": now.strftime("%H:%M"),
               "tgUpdatedAt": int(now.timestamp() * 1000),
-              "source": "Lirtna",
-              "sourceUrl": url,
+              "source": "اتحاد الصرافين في إدلب - Telegram OCR",
+              "sourceUrl": channel_url,
               "newSyp": usd["sell"],
               "oldSyp": round(usd["sell"] * 100, 2),
               "buyNewSyp": usd["buy"],
@@ -77,8 +108,9 @@ jobs:
               "tryBuySyp": tr["buy"],
               "tryRate": round(usd["sell"] / tr["sell"], 4)
           }
-          with open("prices.json", "w", encoding="utf-8") as file:
-              json.dump(output, file, ensure_ascii=False, indent=2)
+          with open("prices.json", "w", encoding="utf-8") as f:
+              json.dump(output, f, ensure_ascii=False, indent=2)
+          print("Validated rates:")
           print(json.dumps(output, ensure_ascii=False, indent=2))
           PY
           python update_rates.py
@@ -88,5 +120,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add prices.json
-          git commit -m "تحديث أسعار الصرف من ليرتنا" || exit 0
+          git commit -m "تحديث أسعار الصرف من قناة اتحاد الصرافين" || exit 0
           git push
