@@ -1,58 +1,100 @@
-name: Auto Update Prices
+name: تحديث أسعار الصرف من ليرتنا
 
 on:
   schedule:
-    - cron: '0 * * * *'
+    - cron: '7 * * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  build:
+  update-rates:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Check
-      uses: actions/checkout@v3
+      - name: تنزيل المشروع
+        uses: actions/checkout@v4
 
-    - name: Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
+      - name: إعداد Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
 
-    - name: Tools
-      run: |
-        pip install requests beautifulsoup4
+      - name: تثبيت المكتبات
+        run: pip install requests beautifulsoup4
 
-    - name: Script
-      run: |
-        echo 'import json, requests' > get.py
-        echo 'from bs4 import BeautifulSoup' >> get.py
-        echo 'from datetime import datetime' >> get.py
-        echo 'url = "https://sarf-today.com/"' >> get.py
-        echo 'head = {"User-Agent": "Mozilla/5.0"}' >> get.py
-        echo 'b_usd, s_usd, b_try, s_try = "14800", "15000", "430", "445"' >> get.py
-        echo 'try:' >> get.py
-        echo '    res = requests.get(url, headers=head, timeout=15)' >> get.py
-        echo '    if res.status_code == 200:' >> get.py
-        echo '        soup = BeautifulSoup(res.text, "html.parser")' >> get.py
-        echo '        b_usd = soup.find("span", {"id": "usd_buy"}).text.strip()' >> get.py
-        echo '        s_usd = soup.find("span", {"id": "usd_sell"}).text.strip()' >> get.py
-        echo '        b_try = soup.find("span", {"id": "try_buy"}).text.strip()' >> get.py
-        echo '        s_try = soup.find("span", {"id": "try_sell"}).text.strip()' >> get.py
-        echo 'except: pass' >> get.py
-        echo 'g_try = "33.50"' >> get.py
-        echo 'try:' >> get.py
-        echo '    api = requests.get("https://open.er-api.com/v6/latest/USD", timeout=10).json()' >> get.py
-        echo '    g_try = str(round(api["rates"]["TRY"], 2))' >> get.py
-        echo 'except: pass' >> get.py
-        echo 'out = {"last_update": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "currency": {"USD_TO_SYP": {"buy": b_usd, "sell": s_usd}, "TRY_TO_SYP": {"buy": b_try, "sell": s_try}, "USD_TO_TRY": {"global_rate": g_try}}}' >> get.py
-        echo 'with open("prices.json", "w", encoding="utf-8") as f: json.dump(out, f, ensure_ascii=False, indent=4)' >> get.py
+      - name: جلب الأسعار من ليرتنا وتحديث prices.json
+        run: |
+          cat > update_rates.py <<'PY'
+          import json
+          import re
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+          import requests
+          from bs4 import BeautifulSoup
 
-    - name: Run
-      run: python get.py
+          HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; AlhlooShippingRates/1.0)"}
+          TIMEOUT = 20
 
-    - name: Push
-      run: |
-        git config --global user.name "GitHub Action"
-        git config --global user.email "action@github.com"
-        git add prices.json
-        git commit -m "🔄 Update Prices" && git push || echo "No changes"
+          def number(value):
+              value = value.replace(",", "").replace("٬", "").replace("٫", ".").strip()
+              match = re.search(r"\d+(?:\.\d+)?", value)
+              return float(match.group(0)) if match else None
+
+          def read_rate(url, keywords):
+              response = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
+              response.raise_for_status()
+              soup = BeautifulSoup(response.text, "html.parser")
+              for row in soup.find_all("tr"):
+                  cells = [cell.get_text(" ", strip=True) for cell in row.find_all(["td", "th"])]
+                  if len(cells) < 3:
+                      continue
+                  label = " ".join(cells[0].lower().split())
+                  if all(word.lower() in label for word in keywords):
+                      sell = number(cells[1])
+                      buy = number(cells[2])
+                      if sell and buy:
+                          return {"buy": buy, "sell": sell}
+              raise RuntimeError("لم يتم العثور على السعر المطلوب في " + url)
+
+          # أسعار السوق في دمشق من موقع ليرتنا
+          usd = read_rate("https://lirtna.com/currency/us-dollar", ["دولار", "دمشق"])
+          try_rate_syp = read_rate("https://lirtna.com/currency/turkish-lira", ["ليرة تركية", "دمشق"])
+
+          # سعر الدولار مقابل الليرة التركية عالميًا، مع بديل احتياطي إذا تعذر المصدر
+          usd_try = None
+          try:
+              api = requests.get("https://open.er-api.com/v6/latest/USD", timeout=TIMEOUT).json()
+              usd_try = float(api["rates"]["TRY"])
+          except Exception:
+              pass
+
+          now = datetime.now(ZoneInfo("Asia/Damascus"))
+          output = {
+              "last_update": now.strftime("%Y-%m-%d %H:%M:%S"),
+              "dateStr": now.strftime("%Y-%m-%d"),
+              "timeStr": now.strftime("%H:%M"),
+              "tgUpdatedAt": int(now.timestamp() * 1000),
+              "source": "Lirtna",
+              "sourceUrl": "https://lirtna.com/",
+              "newSyp": usd["sell"],
+              "oldSyp": round(usd["sell"] * 100, 2),
+              "buyNewSyp": usd["buy"],
+              "buySyp": round(usd["buy"] * 100, 2),
+              "trySyp": try_rate_syp["sell"],
+              "tryBuySyp": try_rate_syp["buy"],
+              "tryRate": round(usd_try, 4) if usd_try else 49.65
+          }
+          with open("prices.json", "w", encoding="utf-8") as file:
+              json.dump(output, file, ensure_ascii=False, indent=2)
+          print(json.dumps(output, ensure_ascii=False, indent=2))
+          PY
+          python update_rates.py
+
+      - name: حفظ الأسعار في GitHub
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add prices.json
+          git commit -m "تحديث أسعار الصرف من ليرتنا" || exit 0
+          git push
