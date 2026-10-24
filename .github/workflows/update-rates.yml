@@ -2,7 +2,7 @@ name: تحديث أسعار الصرف من ليرتنا
 
 on:
   schedule:
-    - cron: '15 5 * * *'
+    - cron: '0 * * * *'
   workflow_dispatch:
 
 permissions:
