@@ -23,67 +23,59 @@ jobs:
       - name: تثبيت المكتبات
         run: pip install requests beautifulsoup4
 
-      - name: جلب الأسعار من ليرتنا وتحديث prices.json
+      - name: قراءة أسعار ليرتنا وتحديث الملف
         run: |
           cat > update_rates.py <<'PY'
-          import json
-          import re
+          import json, re
           from datetime import datetime
           from zoneinfo import ZoneInfo
           import requests
           from bs4 import BeautifulSoup
 
-          HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; AlhlooShippingRates/1.0)"}
-          TIMEOUT = 20
+          url = "https://lirtna.com/"
+          headers = {"User-Agent": "Mozilla/5.0 (compatible; AlhlooShippingRates/1.0)"}
+          response = requests.get(url, headers=headers, timeout=25)
+          response.raise_for_status()
+          soup = BeautifulSoup(response.text, "html.parser")
 
-          def number(value):
-              value = value.replace(",", "").replace("٬", "").replace("٫", ".").strip()
-              match = re.search(r"\d+(?:\.\d+)?", value)
-              return float(match.group(0)) if match else None
+          def num(text):
+              text = text.replace(",", "").replace("٬", "").replace("٫", ".")
+              match = re.search(r"\d+(?:\.\d+)?", text)
+              return float(match.group()) if match else None
 
-          def read_rate(url, keywords):
-              response = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
-              response.raise_for_status()
-              soup = BeautifulSoup(response.text, "html.parser")
-              for row in soup.find_all("tr"):
-                  cells = [cell.get_text(" ", strip=True) for cell in row.find_all(["td", "th"])]
-                  if len(cells) < 3:
-                      continue
-                  label = " ".join(cells[0].lower().split())
-                  if all(word.lower() in label for word in keywords):
-                      sell = number(cells[1])
-                      buy = number(cells[2])
-                      if sell and buy:
-                          return {"buy": buy, "sell": sell}
-              raise RuntimeError("لم يتم العثور على السعر المطلوب في " + url)
+          found = {}
+          for row in soup.find_all("tr"):
+              cells = [cell.get_text(" ", strip=True) for cell in row.find_all(["td", "th"])]
+              if len(cells) < 3:
+                  continue
+              label = cells[0].lower()
+              sell, buy = num(cells[1]), num(cells[2])
+              if not sell or not buy:
+                  continue
+              if "دولار" in label or "dollar" in label:
+                  found["usd"] = {"buy": buy, "sell": sell}
+              elif "ليرة تركية" in label or "turkish lira" in label:
+                  found["try"] = {"buy": buy, "sell": sell}
 
-          # أسعار السوق في دمشق من موقع ليرتنا
-          usd = read_rate("https://lirtna.com/currency/us-dollar", ["دولار", "دمشق"])
-          try_rate_syp = read_rate("https://lirtna.com/currency/turkish-lira", ["ليرة تركية", "دمشق"])
-
-          # سعر الدولار مقابل الليرة التركية عالميًا، مع بديل احتياطي إذا تعذر المصدر
-          usd_try = None
-          try:
-              api = requests.get("https://open.er-api.com/v6/latest/USD", timeout=TIMEOUT).json()
-              usd_try = float(api["rates"]["TRY"])
-          except Exception:
-              pass
+          if "usd" not in found or "try" not in found:
+              raise RuntimeError("لم نستطع قراءة سعري الدولار والليرة التركية من ليرتنا؛ لن نكتب أسعاراً تقديرية.")
 
           now = datetime.now(ZoneInfo("Asia/Damascus"))
+          usd, tr = found["usd"], found["try"]
           output = {
               "last_update": now.strftime("%Y-%m-%d %H:%M:%S"),
               "dateStr": now.strftime("%Y-%m-%d"),
               "timeStr": now.strftime("%H:%M"),
               "tgUpdatedAt": int(now.timestamp() * 1000),
               "source": "Lirtna",
-              "sourceUrl": "https://lirtna.com/",
+              "sourceUrl": url,
               "newSyp": usd["sell"],
               "oldSyp": round(usd["sell"] * 100, 2),
               "buyNewSyp": usd["buy"],
               "buySyp": round(usd["buy"] * 100, 2),
-              "trySyp": try_rate_syp["sell"],
-              "tryBuySyp": try_rate_syp["buy"],
-              "tryRate": round(usd_try, 4) if usd_try else 49.65
+              "trySyp": tr["sell"],
+              "tryBuySyp": tr["buy"],
+              "tryRate": round(usd["sell"] / tr["sell"], 4)
           }
           with open("prices.json", "w", encoding="utf-8") as file:
               json.dump(output, file, ensure_ascii=False, indent=2)
