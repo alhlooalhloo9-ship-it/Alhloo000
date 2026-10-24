@@ -6959,9 +6959,9 @@ function initTimelineObserver(cid) {
 
 function renderPkgs(pkgs, cid, cb) {
   const serviceId = Object.keys(PKG_MAP).find(k => PKG_MAP[k].cid === cid) || '';
-  // هامش مخفّض 1% لباقات سيرياتيل وMTN فقط (بدل الهامش العام 2%)
+  // هامش الربح يُطبّق على باقات سيرياتيل وMTN فقط، ولا يؤثر على الحاسبة العامة.
   const isTelecom = (cid === 'syriatel-pkgs' || cid === 'mtn-pkgs');
-  const pkgMargin = isTelecom ? (MARGIN - 0.01) : MARGIN;
+  const pkgMargin = isTelecom ? MARGIN : 1;
   const useRate = (rates.newSyp || 117.3) * pkgMargin;
   const logo = PKG_LOGO[cid] || { icon:'📦', name:'الباقات', color:'#9ca3af' };
 
