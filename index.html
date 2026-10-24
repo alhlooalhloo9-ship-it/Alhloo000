@@ -5677,7 +5677,8 @@ async function loadRatesFromCloud(){
   } catch(e) {
     console.error('[Lirtna] تعذر تحميل prices.json:',e);
     if(statusEl){ statusEl.textContent='🔴 تعذر جلب الأسعار'; statusEl.className='calc-status manual'; }
-    loadLocalRates();
+    // Do not silently load old saved rates into the calculator.
+    FIELDS_5.forEach(f => { const el=document.getElementById('inp-'+f); if(el) el.value=''; });
     throw e;
   }
 }
@@ -9825,7 +9826,7 @@ function convertFrom5(source) {
   if (!inpEl) return;
   const cleaned = inpEl.value.replace(/,/g, '').replace(/[^0-9.]/g, '');
   const raw = parseFloat(cleaned);
-  if (isNaN(raw) || cleaned === '') {
+  if (!Number.isFinite(raw) || cleaned === '') {
     FIELDS_5.filter(f => f !== source).forEach(f => {
       const el = document.getElementById('inp-' + f);
       if (el) el.value = '';
@@ -9833,51 +9834,39 @@ function convertFrom5(source) {
     return;
   }
 
-  // Use current Lirtna rates only. Never use stale 113/117.3 hard-coded exchange values.
-  const sellNew = Number(rates.newSyp);
-  const buyNew = Number(rates.buyNewSyp);
-  const sellOld = Number(rates.oldSyp);
-  const buyOld = Number(rates.buySyp);
-  const trySell = Number(rates.trySyp);
-  const tryBuy = Number(rates.tryBuySyp);
-  if (![sellNew,buyNew,sellOld,buyOld].every(v => Number.isFinite(v) && v > 0)) {
+  // CALCULATOR ONLY: show the Lirtna market equivalence, with no profit margin.
+  // Lirtna: 1 USD = 141.5 new SYP sell / 141 buy; old SYP is x100.
+  // Lirtna: 1 USD = rates.tryRate TRY (approximately 49.6491), so USD->TRY multiplies.
+  const usdSellNew = Number(rates.newSyp);
+  const usdBuyNew = Number(rates.buyNewSyp);
+  const usdSellOld = Number(rates.oldSyp) || usdSellNew * 100;
+  const usdBuyOld = Number(rates.buySyp) || (usdBuyNew > 0 ? usdBuyNew * 100 : 0);
+  const tryPerUsd = Number(rates.tryRate);
+  if (!(usdSellNew > 0) || !(tryPerUsd > 0)) {
     const status = document.getElementById('calcStatus');
-    if (status) { status.textContent = '🔴 الأسعار غير محمّلة — لا تعتمد على الحاسبة'; status.className = 'calc-status manual'; }
+    if (status) { status.textContent = '🔴 تعذر تحميل أسعار ليرتنا — أعد فتح الحاسبة'; status.className = 'calc-status manual'; }
     return;
   }
   const gp = Number(tickerGoldPrice) > 0 ? Number(tickerGoldPrice) : 0;
-  // The customer gives USD: we BUY USD at Lirtna's buy rate, less our 2% safety margin.
-  // The customer receives USD: they BUY USD from us at Lirtna's sell rate, plus our 2% margin.
-  const usdBuyNew = buyNew * USD_BUY_FACTOR;
-  const usdSellNew = sellNew * USD_SELL_FACTOR;
-  const usdBuyOld = buyOld * USD_BUY_FACTOR;
-  const usdSellOld = sellOld * USD_SELL_FACTOR;
 
   let usd;
   if (source === 'usd') usd = raw;
-  else if (source === 'try') {
-    const baseTry = trySell > 0 ? trySell : (sellNew / Number(rates.tryRate));
-    usd = raw * baseTry / sellNew;
-  }
+  else if (source === 'try') usd = raw / tryPerUsd;
   else if (source === 'new') usd = raw / usdSellNew;
   else if (source === 'old') usd = raw / usdSellOld;
   else if (source === 'gold') {
     if (!gp) return;
     usd = raw * gp;
-  }
-  else return;
+  } else return;
 
   const set5 = (f, val) => {
     const el = document.getElementById('inp-' + f);
     if (el && f !== source) el.value = val;
   };
   set5('usd', fmt5(usd, 2));
-  set5('try', fmt5(usd * Number(rates.tryRate || (sellNew / (trySell || 2.85))), 2));
-  // Explicit directional payout: entering USD shows the amount we pay to buy it from the customer.
-  const payoutNew = source === 'usd' ? usd * usdBuyNew : usd * usdSellNew;
-  const payoutOld = source === 'usd' ? usd * usdBuyOld : usd * usdSellOld;
-  set5('new', fmt5(payoutNew, 2));
-  set5('old', fmt5(payoutOld, 0));
+  set5('try', fmt5(usd * tryPerUsd, 2));
+  set5('new', fmt5(usd * usdSellNew, 2));
+  set5('old', fmt5(usd * usdSellOld, 0));
   if (gp) set5('gold', fmt5(usd / gp, 3));
 }
 function fmt5(val, dec) {
