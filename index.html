@@ -5833,9 +5833,8 @@ async function saveAdminRates(){
 
 // ===== AUTO-REFRESH every 60s for all users =====
 async function fetchLiveRates(){
+  // المصدر الموحد للأسعار هو prices.json الذي يتم تحديثه من ليرتنا كل ساعة.
   await loadRatesFromCloud();
-  // جلب أسعار محدّثة من sp-today عند فتح الحاسبة
-  autoFetchForAllUsers().catch(()=>{});
 }
 setInterval(loadRatesFromCloud, 60000);
 
@@ -6801,7 +6800,7 @@ async function startupLoadPrices() {
   } catch(e) {}
 
   // ── تحديث من المصادر الخارجية في الخلفية ──
-  setTimeout(() => autoFetchForAllUsers().catch(() => {}), 500);
+  // تم توحيد مصدر الصرف في prices.json من ليرتنا؛ لا نستبدله بمصدر آخر.
   setTimeout(() => fetchGoldPrice().catch(() => {}), 1500);
 }
 
@@ -6822,7 +6821,7 @@ setTimeout(() => { if (!_tickerTimer) initTicker(); }, 5000);
     initTicker();
     // ثم: تحقق بصمت من وجود سعر أحدث، حدّث فقط إذا تغيّر فعلاً
     loadRatesFromCloud().finally(() => {
-      setTimeout(() => autoFetchForAllUsers().catch(() => {}), 1500);
+      // تم توحيد مصدر الصرف في prices.json من ليرتنا؛ لا نستبدله بمصدر آخر.
     });
   } else {
     // أول فتح حقيقي للتطبيق
