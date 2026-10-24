@@ -1,16 +1,15 @@
 {
-    "last_update": "2026-10-24 01:26:15",
-    "currency": {
-        "USD_TO_SYP": {
-            "buy": "14800",
-            "sell": "15000"
-        },
-        "TRY_TO_SYP": {
-            "buy": "430",
-            "sell": "445"
-        },
-        "USD_TO_TRY": {
-            "global_rate": "49.73"
-        }
-    }
+  "last_update": "2026-10-24",
+  "dateStr": "2026-10-23",
+  "timeStr": "",
+  "tgUpdatedAt": 1792800000000,
+  "source": "Lirtna",
+  "sourceUrl": "https://lirtna.com/",
+  "newSyp": 141.5,
+  "oldSyp": 14150,
+  "buyNewSyp": 141,
+  "buySyp": 14100,
+  "trySyp": 2.85,
+  "tryBuySyp": 2.82,
+  "tryRate": 49.6491
 }
