@@ -4,12 +4,16 @@
   "timeStr": "08:00",
   "tgUpdatedAt": 1792828800000,
   "source": "Lirtna",
-  "sourceUrl": "https://lirtna.com/currencies",
+  "sourceUrl": "https://lirtna.com/",
   "newSyp": 141.5,
   "oldSyp": 14150,
   "buyNewSyp": 141,
   "buySyp": 14100,
   "trySyp": 2.85,
   "tryBuySyp": 2.82,
-  "tryRate": 49.6491
+  "tryRate": 49.6491,
+  "gold18Syp": 13585,
+  "gold21Syp": 15849,
+  "gold24Syp": 18113,
+  "goldOzUsd": 3996
 }
