@@ -5642,7 +5642,7 @@ function showSyncStatus(msg, color='rgba(255,255,255,0.5)'){
 async function loadRatesFromCloud(){
   const statusEl = document.getElementById('calcStatus');
   try {
-    const res = await fetch('./prices.json?t=' + Date.now(), {cache:'no-store'});
+    const res = await fetch('./prices.json?v=fx20261024b&t=' + Date.now(), {cache:'no-store'});
     if(!res.ok) throw new Error('HTTP ' + res.status);
     const r = await res.json();
     if(!r || !Number.isFinite(Number(r.newSyp)) || !Number.isFinite(Number(r.tryRate)) || !r.tgUpdatedAt) throw new Error('ملف الأسعار غير مكتمل');
@@ -9830,9 +9830,13 @@ function convertFrom5(source) {
   // Directional exchange rates protect the business:
   // customer pays the higher SELL rate when buying USD; receives the lower BUY rate when selling USD.
   const usdSellSyp = Number(rates.newSyp || 141.5) * MARGIN;
-  const usdBuySyp = Number(rates.buyNewSyp || (Number(rates.newSyp || 141.5) / MARGIN)) * (2 - MARGIN);
-  const usdSellOld = Number(rates.oldSyp || usdSellSyp * 100) * MARGIN;
-  const usdBuyOld = Number(rates.buySyp || (Number(rates.oldSyp || 14150) / MARGIN)) * (2 - MARGIN);
+  // Prefer the explicit Lirtna BUY rate. If missing, derive from the current SELL rate, never from stale defaults.
+  const baseBuyNew = Number(rates.buyNewSyp) > 0 ? Number(rates.buyNewSyp) : Number(rates.newSyp || 141.5) / MARGIN;
+  const usdBuySyp = baseBuyNew * (2 - MARGIN);
+  const baseSellOld = Number(rates.oldSyp) > 0 ? Number(rates.oldSyp) : Number(rates.newSyp || 141.5) * 100;
+  const baseBuyOld = Number(rates.buySyp) > 0 ? Number(rates.buySyp) : baseSellOld / MARGIN;
+  const usdSellOld = baseSellOld * MARGIN;
+  const usdBuyOld = baseBuyOld * (2 - MARGIN);
   const trySellSyp = Number(rates.trySyp || (rates.newSyp / rates.tryRate)) * MARGIN;
   const tryBuySyp = Number(rates.tryBuySyp || (rates.trySyp || (rates.newSyp / rates.tryRate)) / MARGIN) * (2 - MARGIN);
 
