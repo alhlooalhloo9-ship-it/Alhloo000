@@ -5642,53 +5642,36 @@ function showSyncStatus(msg, color='rgba(255,255,255,0.5)'){
 async function loadRatesFromCloud(){
   const statusEl = document.getElementById('calcStatus');
   try {
-    // ── قراءة الأسعار من prices.json المحلي (يُحدَّث كل ساعة بواسطة GitHub Actions) ──
-    const res = await fetch(`./prices.json?t=${Date.now()}`);
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const res = await fetch('./prices.json?t=' + Date.now(), {cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP ' + res.status);
     const r = await res.json();
-    if(!r || (!r.newSyp && !r.tryRate)) throw new Error('empty');
-
-    const cloudNew  = parseFloat(r.newSyp)  || 117.3;
-    const cloudOld  = parseFloat(r.oldSyp)  || 11700.3;
-    const cloudTry  = parseFloat(r.tryRate) || 44.2;
-    const cloudTime = r.tgUpdatedAt || 0;
-
-    // تحقق: إذا كان السعر المحلي أحدث من السحابة → لا تكتب فوقه
-    const localRaw  = localStorage.getItem('halou_rates');
-    const localData = localRaw ? JSON.parse(localRaw) : null;
-    const localTime = localData ? (localData.tgUpdatedAt || 0) : 0;
-
-    if (localTime > cloudTime && localData && localData.newSyp) {
-      // السعر المحلي (من تلغرام) أحدث — استخدمه
-      rates.newSyp  = parseFloat(localData.newSyp);
-      rates.oldSyp  = parseFloat(localData.oldSyp);
-      rates.tryRate = parseFloat(localData.tryRate) || cloudTry;
-      applyRatesToUI(localData.dateStr, localData.timeStr, 'telegram');
-    } else {
-      // prices.json أحدث — استخدمه
-      rates.newSyp  = cloudNew;
-      rates.oldSyp  = cloudOld;
-      rates.tryRate = cloudTry;
-      applyRatesToUI(r.dateStr||'', r.timeStr||'');
-      localStorage.setItem('halou_rates', JSON.stringify({
-        newSyp: cloudNew, oldSyp: cloudOld, tryRate: cloudTry,
-        dateStr: r.dateStr||'', timeStr: r.timeStr||'',
-        tgUpdatedAt: cloudTime
-      }));
+    if(!r || !Number.isFinite(Number(r.newSyp)) || !Number.isFinite(Number(r.tryRate)) || !r.tgUpdatedAt) throw new Error('ملف الأسعار غير مكتمل');
+    // prices.json from Lirtna is the sole source of truth; stale localStorage must never override it.
+    rates.newSyp = Number(r.newSyp);
+    rates.oldSyp = Number(r.oldSyp);
+    rates.tryRate = Number(r.tryRate);
+    if (Number.isFinite(Number(r.trySyp))) rates.trySyp = Number(r.trySyp);
+    applyRatesToUI(r.dateStr || '', r.timeStr || '', 'lirtna');
+    localStorage.setItem('halou_rates', JSON.stringify({
+      newSyp: rates.newSyp, oldSyp: rates.oldSyp, tryRate: rates.tryRate,
+      trySyp: r.trySyp, dateStr: r.dateStr || '', timeStr: r.timeStr || '',
+      tgUpdatedAt: Number(r.tgUpdatedAt), source:'Lirtna'
+    }));
+    if (statusEl) { statusEl.textContent='🟢 أسعار ليرتنا'; statusEl.className='calc-status live'; }
+    if (adminUnlocked) {
+      const elTry=document.getElementById('rateAdmTry'), elOld=document.getElementById('rateAdmOld'), elNew=document.getElementById('rateAdmNew');
+      if(elTry) elTry.value=rates.tryRate;
+      if(elOld) elOld.value=rates.oldSyp;
+      if(elNew) elNew.value=rates.newSyp;
+      const saved=document.getElementById('adminLastSaved');
+      if(saved && r.dateStr) saved.textContent=(r.dateStr+' — '+(r.timeStr||''));
     }
-
-    if(statusEl){ statusEl.textContent='🟢 أسعار محدّثة'; statusEl.className='calc-status live'; }
-
-    if(adminUnlocked){
-      document.getElementById('rateAdmTry').value = rates.tryRate;
-      document.getElementById('rateAdmOld').value = rates.oldSyp;
-      document.getElementById('rateAdmNew').value = rates.newSyp;
-      if(r.dateStr) document.getElementById('adminLastSaved').textContent = `${r.dateStr} — ${r.timeStr||''}`;
-    }
-
-  } catch(e){
-    if(statusEl){ statusEl.textContent='🟡 أسعار الصرف جاهزة'; statusEl.className='calc-status manual'; }
+    return r;
+  } catch(e) {
+    console.error('[Lirtna] تعذر تحميل prices.json:',e);
+    if(statusEl){ statusEl.textContent='🔴 تعذر جلب الأسعار'; statusEl.className='calc-status manual'; }
     loadLocalRates();
+    throw e;
   }
 }
 
@@ -9185,81 +9168,24 @@ let tickerGoldPrice = null;      // سعر غرام الذهب 24K بالدول�
 let tickerLastFetch  = 0;
 
 async function fetchGoldPrice() {
-  const sig = (ms) => { const c = new AbortController(); setTimeout(()=>c.abort(), ms); return c.signal; };
-
-  // ── Source 1: open.er-api.com/XAU (نفس الـ API الذي يجلب سعر التركي) ──
   try {
-    const res = await fetch('https://open.er-api.com/v6/latest/XAU', {
-      cache: 'no-store', signal: sig(5000)
-    });
-    if (res.ok) {
-      const data = await res.json();
-      // XAU = 1 أوقية → نريد USD لكل أوقية ثم نقسم على 31.1035 للغرام
-      const usdPerOz = data?.rates?.USD;
-      if (usdPerOz && usdPerOz > 500) {
-        const grUSD = Math.round((usdPerOz / 31.1035) * 100) / 100;
-        if (grUSD > 20 && grUSD < 1000) {
-          tickerGoldPrice = grUSD;
-          localStorage.setItem('halou_gold_price', grUSD);
-          console.log('[Gold] er-api XAU =', usdPerOz, '$/oz →', grUSD, '$/g');
-          return grUSD;
-        }
-      }
-    }
-  } catch(e) { console.warn('[Gold] er-api XAU:', e.message); }
-
-  // ── Source 2: frankfurter.app (مجاني بدون key، يدعم XAU) ──
-  try {
-    const res = await fetch('https://api.frankfurter.app/latest?from=XAU&to=USD', {
-      cache: 'no-store', signal: sig(5000)
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const usdPerOz = data?.rates?.USD;
-      if (usdPerOz && usdPerOz > 500) {
-        const grUSD = Math.round((usdPerOz / 31.1035) * 100) / 100;
-        if (grUSD > 20 && grUSD < 1000) {
-          tickerGoldPrice = grUSD;
-          localStorage.setItem('halou_gold_price', grUSD);
-          console.log('[Gold] frankfurter XAU =', usdPerOz, '$/oz →', grUSD, '$/g');
-          return grUSD;
-        }
-      }
-    }
-  } catch(e) { console.warn('[Gold] frankfurter XAU:', e.message); }
-
-  // ── Source 3: metals.live ──
-  try {
-    const res = await fetch('https://api.metals.live/v1/spot/gold', {
-      cache: 'no-store', signal: sig(4000)
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const ozUSD = Array.isArray(data) ? data[0]?.gold : data?.gold;
-      if (ozUSD && ozUSD > 500) {
-        const grUSD = Math.round((ozUSD / 31.1035) * 100) / 100;
-        if (grUSD > 20 && grUSD < 1000) {
-          tickerGoldPrice = grUSD;
-          localStorage.setItem('halou_gold_price', grUSD);
-          console.log('[Gold] metals.live =', grUSD, '$/g');
-          return grUSD;
-        }
-      }
-    }
-  } catch(e) { console.warn('[Gold] metals.live:', e.message); }
-
-  // ── Source 4: حساب تقريبي من أسعار الصرف المتاحة ──
-  // إذا كان عندنا سعر الدولار بالليرة يمكن استخدام سعر الذهب المحفوظ
-  const savedGold = parseFloat(localStorage.getItem('halou_gold_price'));
-  if (savedGold && savedGold > 20) {
-    tickerGoldPrice = savedGold;
-    console.log('[Gold] من الذاكرة المحلية:', savedGold);
-    return savedGold;
+    const res = await fetch('./prices.json?t=' + Date.now(), {cache:'no-store'});
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const ounce = Number(data.goldOzUsd);
+    if (!Number.isFinite(ounce) || ounce <= 500) throw new Error('لا يوجد سعر أونصة صالح في ملف ليرتنا');
+    tickerGoldPrice = Math.round((ounce / 31.1035) * 100) / 100;
+    localStorage.setItem('halou_gold_price', String(tickerGoldPrice));
+    const goldInp = document.getElementById('inp-gold');
+    if (goldInp) goldInp.placeholder = '1 غ = $' + tickerGoldPrice.toFixed(2);
+    console.log('[Gold] السعر من ليرتنا =', tickerGoldPrice, '$/g');
+    return tickerGoldPrice;
+  } catch (e) {
+    console.warn('[Gold] تعذر تحميل الذهب من ليرتنا:', e.message);
+    return null;
   }
-
-  console.warn('[Gold] كل المصادر فشلت');
-  return null;
 }
+
 function buildTickerHTML() {
   // غير مستخدمة في النظام الجديد — محتفظ بها للتوافق
   return '';
