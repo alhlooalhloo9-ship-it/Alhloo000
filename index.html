@@ -5737,11 +5737,11 @@ function updateNewCalcUI() {
     const months=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
     const dateStr = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
     const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-    ruText.textContent = `تم تحديث سعر الصرف بتاريخ ${dateStr} — ${timeStr} | $1 = ${Math.round(rates.newSyp * MARGIN * 10)/10} ج.س | ${Math.round(rates.oldSyp * MARGIN)} ق.س | ${rates.tryRate} ₺`;
+    ruText.textContent = `تم تحديث سعر الصرف بتاريخ ${dateStr} — ${timeStr} | $1 = ${Math.round(rates.newSyp * 10)/10} ج.س | ${Math.round(rates.oldSyp)} ق.س | ${rates.tryRate} ₺`;
   }
   // update home calc card
   const calcCard = document.querySelector('.calc-sq-rate');
-  if (calcCard) calcCard.innerHTML = `$1 = ${Math.round(rates.newSyp * MARGIN * 10)/10} ج.س<br>$1 = ${rates.tryRate} ₺`;
+  if (calcCard) calcCard.innerHTML = `$1 = ${Math.round(rates.newSyp * 10)/10} ج.س<br>$1 = ${rates.tryRate} ₺`;
 }
 
 // ── دالة مركزية لإعادة رسم الباقات بالسعر الجديد ──
