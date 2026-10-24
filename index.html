@@ -5649,8 +5649,11 @@ async function loadRatesFromCloud(){
     // prices.json from Lirtna is the sole source of truth; stale localStorage must never override it.
     rates.newSyp = Number(r.newSyp);
     rates.oldSyp = Number(r.oldSyp);
+    rates.buyNewSyp = Number(r.buyNewSyp || (Number(r.newSyp) / MARGIN));
+    rates.buySyp = Number(r.buySyp || (Number(r.oldSyp) / MARGIN));
     rates.tryRate = Number(r.tryRate);
     if (Number.isFinite(Number(r.trySyp))) rates.trySyp = Number(r.trySyp);
+    if (Number.isFinite(Number(r.tryBuySyp))) rates.tryBuySyp = Number(r.tryBuySyp);
     applyRatesToUI(r.dateStr || '', r.timeStr || '', 'lirtna');
     localStorage.setItem('halou_rates', JSON.stringify({
       newSyp: rates.newSyp, oldSyp: rates.oldSyp, tryRate: rates.tryRate,
@@ -9812,7 +9815,6 @@ function convertFrom5(source) {
   setActive5(source);
   const inpEl = document.getElementById('inp-' + source);
   if (!inpEl) return;
-  // تنظيف النص: إزالة الفواصل، قبول النقطة كفاصل عشري
   const cleaned = inpEl.value.replace(/,/g, '').replace(/[^0-9.]/g, '');
   const raw = parseFloat(cleaned);
 
@@ -9824,32 +9826,36 @@ function convertFrom5(source) {
     return;
   }
 
-  const gp = tickerGoldPrice || 154; // سعر غرام الذهب 24K بالدولار
+  const gp = tickerGoldPrice || 154;
+  // Directional exchange rates protect the business:
+  // customer pays the higher SELL rate when buying USD; receives the lower BUY rate when selling USD.
+  const usdSellSyp = Number(rates.newSyp || 141.5) * MARGIN;
+  const usdBuySyp = Number(rates.buyNewSyp || (Number(rates.newSyp || 141.5) / MARGIN)) * (2 - MARGIN);
+  const usdSellOld = Number(rates.oldSyp || usdSellSyp * 100) * MARGIN;
+  const usdBuyOld = Number(rates.buySyp || (Number(rates.oldSyp || 14150) / MARGIN)) * (2 - MARGIN);
+  const trySellSyp = Number(rates.trySyp || (rates.newSyp / rates.tryRate)) * MARGIN;
+  const tryBuySyp = Number(rates.tryBuySyp || (rates.trySyp || (rates.newSyp / rates.tryRate)) / MARGIN) * (2 - MARGIN);
 
-  // ── تطبيق هامش الربح 2% على أسعار الليرة السورية ──
-  const mNewSyp = rates.newSyp * MARGIN;
-  const mOldSyp = rates.oldSyp * MARGIN;
-
-  // ── تحويل إلى دولار ──
   let usd;
-  if      (source === 'usd')  usd = raw;
-  else if (source === 'try')  usd = raw / rates.tryRate;
-  else if (source === 'new')  usd = raw / mNewSyp;
-  else if (source === 'old')  usd = raw / mOldSyp;
+  if (source === 'usd') usd = raw;
+  else if (source === 'try') usd = raw / rates.tryRate;
+  else if (source === 'new') usd = raw / usdSellSyp;
+  else if (source === 'old') usd = raw / usdSellOld;
   else if (source === 'gold') usd = raw * gp;
 
-  // ── دولار → باقي الحقول ──
   const set5 = (f, val) => {
     const el = document.getElementById('inp-' + f);
     if (el && f !== source) el.value = val;
   };
 
-  set5('usd',  fmt5(usd,              2));
-  set5('try',  fmt5(usd * rates.tryRate, 1));
-  set5('new',  fmt5(usd * mNewSyp,  0));
-  set5('old',  fmt5(usd * mOldSyp,  0));
-  set5('gold', fmt5(usd / gp,            3));
-
+  set5('usd', fmt5(usd, 2));
+  set5('try', fmt5(usd * rates.tryRate, 1));
+  // If customer gives USD, use our lower BUY rate for SYP payouts; otherwise use SELL rate.
+  const payoutNew = source === 'usd' ? usd * usdBuySyp : usd * usdSellSyp;
+  const payoutOld = source === 'usd' ? usd * usdBuyOld : usd * usdSellOld;
+  set5('new', fmt5(payoutNew, 0));
+  set5('old', fmt5(payoutOld, 0));
+  set5('gold', fmt5(usd / gp, 3));
 }
 
 function fmt5(val, dec) {
