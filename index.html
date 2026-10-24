@@ -5597,7 +5597,11 @@ function toggleMode() {
 
 
 let rates={oldSyp:11700.3, newSyp:117.3, tryRate:44.2, buySyp:11500, buyNewSyp:115, fuel:{mazot:0.88, benzin90:1.10, benzin95:1.15, gas:12.50}};
-const MARGIN = 1.02; // هامش الربح 2%
+const FX_APP_VERSION = 'lirtna-fx-v3-20261024';
+const PROFIT_MARGIN = 0.02; // هامش ربح 2% للحاسبة فقط
+const USD_SELL_FACTOR = 1 + PROFIT_MARGIN;
+const USD_BUY_FACTOR = 1 - PROFIT_MARGIN;
+const MARGIN = USD_SELL_FACTOR; // توافق مؤقت مع أقسام الباقات القديمة فقط
 let activeField=null;
 let adminTapCount=0;
 let adminTapTimer=null;
@@ -5642,7 +5646,7 @@ function showSyncStatus(msg, color='rgba(255,255,255,0.5)'){
 async function loadRatesFromCloud(){
   const statusEl = document.getElementById('calcStatus');
   try {
-    const res = await fetch('./prices.json?v=fx20261024b&t=' + Date.now(), {cache:'no-store'});
+    const res = await fetch('./prices.json?v=' + encodeURIComponent(FX_APP_VERSION) + '&t=' + Date.now(), {cache:'no-store'});
     if(!res.ok) throw new Error('HTTP ' + res.status);
     const r = await res.json();
     if(!r || !Number.isFinite(Number(r.newSyp)) || !Number.isFinite(Number(r.tryRate)) || !r.tgUpdatedAt) throw new Error('ملف الأسعار غير مكتمل');
@@ -5683,9 +5687,13 @@ function loadLocalRates(){
   try {
     const saved = JSON.parse(localStorage.getItem('halou_rates'));
     if(saved){
-      rates.tryRate = saved.tryRate || 44.2;
-      rates.oldSyp  = saved.oldSyp  || 11700.3;
-      rates.newSyp  = saved.newSyp  || 117.3;
+      rates.tryRate = Number(saved.tryRate) || 0;
+      rates.oldSyp  = Number(saved.oldSyp) || 0;
+      rates.newSyp  = Number(saved.newSyp) || 0;
+      rates.buyNewSyp = Number(saved.buyNewSyp) || 0;
+      rates.buySyp = Number(saved.buySyp) || 0;
+      rates.trySyp = Number(saved.trySyp) || 0;
+      rates.tryBuySyp = Number(saved.tryBuySyp) || 0;
       applyRatesToUI(saved.dateStr, saved.timeStr);
       if(adminUnlocked){
         document.getElementById('rateAdmTry').value = rates.tryRate;
@@ -9817,7 +9825,6 @@ function convertFrom5(source) {
   if (!inpEl) return;
   const cleaned = inpEl.value.replace(/,/g, '').replace(/[^0-9.]/g, '');
   const raw = parseFloat(cleaned);
-
   if (isNaN(raw) || cleaned === '') {
     FIELDS_5.filter(f => f !== source).forEach(f => {
       const el = document.getElementById('inp-' + f);
@@ -9826,42 +9833,53 @@ function convertFrom5(source) {
     return;
   }
 
-  const gp = tickerGoldPrice || 154;
-  // Directional exchange rates protect the business:
-  // customer pays the higher SELL rate when buying USD; receives the lower BUY rate when selling USD.
-  const usdSellSyp = Number(rates.newSyp || 141.5) * MARGIN;
-  // Prefer the explicit Lirtna BUY rate. If missing, derive from the current SELL rate, never from stale defaults.
-  const baseBuyNew = Number(rates.buyNewSyp) > 0 ? Number(rates.buyNewSyp) : Number(rates.newSyp || 141.5) / MARGIN;
-  const usdBuySyp = baseBuyNew * (2 - MARGIN);
-  const baseSellOld = Number(rates.oldSyp) > 0 ? Number(rates.oldSyp) : Number(rates.newSyp || 141.5) * 100;
-  const baseBuyOld = Number(rates.buySyp) > 0 ? Number(rates.buySyp) : baseSellOld / MARGIN;
-  const usdSellOld = baseSellOld * MARGIN;
-  const usdBuyOld = baseBuyOld * (2 - MARGIN);
-  const trySellSyp = Number(rates.trySyp || (rates.newSyp / rates.tryRate)) * MARGIN;
-  const tryBuySyp = Number(rates.tryBuySyp || (rates.trySyp || (rates.newSyp / rates.tryRate)) / MARGIN) * (2 - MARGIN);
+  // Use current Lirtna rates only. Never use stale 113/117.3 hard-coded exchange values.
+  const sellNew = Number(rates.newSyp);
+  const buyNew = Number(rates.buyNewSyp);
+  const sellOld = Number(rates.oldSyp);
+  const buyOld = Number(rates.buySyp);
+  const trySell = Number(rates.trySyp);
+  const tryBuy = Number(rates.tryBuySyp);
+  if (![sellNew,buyNew,sellOld,buyOld].every(v => Number.isFinite(v) && v > 0)) {
+    const status = document.getElementById('calcStatus');
+    if (status) { status.textContent = '🔴 الأسعار غير محمّلة — لا تعتمد على الحاسبة'; status.className = 'calc-status manual'; }
+    return;
+  }
+  const gp = Number(tickerGoldPrice) > 0 ? Number(tickerGoldPrice) : 0;
+  // The customer gives USD: we BUY USD at Lirtna's buy rate, less our 2% safety margin.
+  // The customer receives USD: they BUY USD from us at Lirtna's sell rate, plus our 2% margin.
+  const usdBuyNew = buyNew * USD_BUY_FACTOR;
+  const usdSellNew = sellNew * USD_SELL_FACTOR;
+  const usdBuyOld = buyOld * USD_BUY_FACTOR;
+  const usdSellOld = sellOld * USD_SELL_FACTOR;
 
   let usd;
   if (source === 'usd') usd = raw;
-  else if (source === 'try') usd = raw / rates.tryRate;
-  else if (source === 'new') usd = raw / usdSellSyp;
+  else if (source === 'try') {
+    const baseTry = trySell > 0 ? trySell : (sellNew / Number(rates.tryRate));
+    usd = raw * baseTry / sellNew;
+  }
+  else if (source === 'new') usd = raw / usdSellNew;
   else if (source === 'old') usd = raw / usdSellOld;
-  else if (source === 'gold') usd = raw * gp;
+  else if (source === 'gold') {
+    if (!gp) return;
+    usd = raw * gp;
+  }
+  else return;
 
   const set5 = (f, val) => {
     const el = document.getElementById('inp-' + f);
     if (el && f !== source) el.value = val;
   };
-
   set5('usd', fmt5(usd, 2));
-  set5('try', fmt5(usd * rates.tryRate, 1));
-  // If customer gives USD, use our lower BUY rate for SYP payouts; otherwise use SELL rate.
-  const payoutNew = source === 'usd' ? usd * usdBuySyp : usd * usdSellSyp;
+  set5('try', fmt5(usd * Number(rates.tryRate || (sellNew / (trySell || 2.85))), 2));
+  // Explicit directional payout: entering USD shows the amount we pay to buy it from the customer.
+  const payoutNew = source === 'usd' ? usd * usdBuyNew : usd * usdSellNew;
   const payoutOld = source === 'usd' ? usd * usdBuyOld : usd * usdSellOld;
-  set5('new', fmt5(payoutNew, 0));
+  set5('new', fmt5(payoutNew, 2));
   set5('old', fmt5(payoutOld, 0));
-  set5('gold', fmt5(usd / gp, 3));
+  if (gp) set5('gold', fmt5(usd / gp, 3));
 }
-
 function fmt5(val, dec) {
   if (isNaN(val) || !isFinite(val) || val === 0) return '';
   if (dec === 0) return Math.round(val).toLocaleString('en-US');
