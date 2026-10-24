@@ -1,4 +1,4 @@
-name: تحديث أسعار الصرف من ليرتنا
+name: تحديث أسعار الصرف والذهب من ليرتنا
 
 on:
   schedule:
@@ -14,16 +14,13 @@ jobs:
     steps:
       - name: تنزيل المشروع
         uses: actions/checkout@v4
-
       - name: إعداد Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
-
       - name: تثبيت المكتبات
         run: pip install requests beautifulsoup4
-
-      - name: جلب أسعار الدولار والليرة التركية من ليرتنا
+      - name: استخراج أسعار ليرتنا والتحقق منها
         run: |
           cat > update_rates.py <<'PY'
           import json, re
@@ -32,80 +29,84 @@ jobs:
           import requests
           from bs4 import BeautifulSoup
 
-          url = "https://lirtna.com/"
-          headers = {"User-Agent": "Mozilla/5.0 (compatible; AlhlooShippingRates/1.0)"}
-          response = requests.get(url, headers=headers, timeout=30)
+          URL = "https://lirtna.com/"
+          HEADERS = {"User-Agent": "Mozilla/5.0 AlhlooShippingRates/1.0"}
+          response = requests.get(URL, headers=HEADERS, timeout=30)
           response.raise_for_status()
           soup = BeautifulSoup(response.text, "html.parser")
 
-          def clean(text):
-              return re.sub(r"\s+", " ", text).strip().lower()
-
-          def numbers(text):
-              text = text.translate(str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹", "01234567890123456789"))
-              # On Lirtna, each cell may contain the new and old SYP values.
-              text = text.replace(",", "").replace("٬", "").replace("٫", ".")
-              return [float(x) for x in re.findall(r"\d+(?:\.\d+)?", text)]
-
-          usd = None
-          try_rate = None
+          def norm(s):
+              return re.sub(r"\\s+", " ", s).strip().lower()
+          def nums(s):
+              s = s.translate(str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹", "01234567890123456789"))
+              s = s.replace(",", "").replace("٬", "").replace("٫", ".")
+              return [float(x) for x in re.findall(r"\\d+(?:\\.\\d+)?", s)]
+          rows=[]
           for table in soup.find_all("table"):
-              rows = table.find_all("tr")
-              if not rows:
-                  continue
-              for row in rows[1:]:
-                  cells = row.find_all(["td", "th"])
-                  if len(cells) < 3:
-                      continue
-                  label = clean(cells[0].get_text(" ", strip=True))
-                  sell_nums = numbers(cells[1].get_text(" ", strip=True))
-                  buy_nums = numbers(cells[2].get_text(" ", strip=True))
-                  if not sell_nums or not buy_nums:
-                      continue
-                  # The first number in each cell is the new Syrian pound value;
-                  # later numbers, when present, are the old-pound equivalent.
-                  sell = sell_nums[0]
-                  buy = buy_nums[0]
-                  if "دولار" in label or "usd" in label or "dollar" in label:
-                      usd = {"sell": sell, "buy": buy}
-                  elif "ليرة تركية" in label or "تركية" in label or "try" in label:
-                      try_rate = {"sell": sell, "buy": buy}
+              for tr in table.find_all("tr"):
+                  cells=[c.get_text(" ",strip=True) for c in tr.find_all(["th","td"])]
+                  if cells: rows.append(cells)
+
+          usd=try_rate=None
+          gold={}
+          for cells in rows:
+              label=norm(cells[0])
+              if len(cells)>=3:
+                  sell_nums=nums(cells[1]); buy_nums=nums(cells[2])
+                  if sell_nums and buy_nums:
+                      sell,buy=sell_nums[0],buy_nums[0]
+                      if ("دولار" in label or "usd" in label or "dollar" in label) and ("سعر" not in label):
+                          usd={"sell":sell,"buy":buy}
+                      elif ("ليرة تركية" in label or "try" in label or "تركية" in label) and ("سعر" not in label):
+                          try_rate={"sell":sell,"buy":buy}
+              if "غرام عيار 24" in label or "عيار 24" in label:
+                  values=nums(" ".join(cells[1:]))
+                  if values: gold["gold24Syp"]=values[0]
+              elif "غرام عيار 21" in label or "عيار 21" in label:
+                  values=nums(" ".join(cells[1:]))
+                  if values: gold["gold21Syp"]=values[0]
+              elif "غرام عيار 18" in label or "عيار 18" in label:
+                  values=nums(" ".join(cells[1:]))
+                  if values: gold["gold18Syp"]=values[0]
+              elif "أونصة الذهب" in label or "اونصة الذهب" in label:
+                  values=nums(" ".join(cells[1:]))
+                  if values: gold["goldOzUsd"]=values[0]
 
           if not usd or not try_rate:
-              raise RuntimeError("تعذر استخراج الدولار والليرة التركية من جدول ليرتنا؛ لم يتم تغيير prices.json.")
+              raise RuntimeError("لم يتم التعرف بثقة على صفّي الدولار والليرة التركية في جداول ليرتنا؛ لن نغيّر الملف.")
+          if not (50 <= usd["buy"] <= 1000 and 50 <= usd["sell"] <= 1000 and usd["sell"] >= usd["buy"]):
+              raise RuntimeError(f"سعر الدولار غير منطقي/ربما تمت قراءة الليرة القديمة: {usd}")
+          if not (0.1 <= try_rate["buy"] <= 20 and 0.1 <= try_rate["sell"] <= 20 and try_rate["sell"] >= try_rate["buy"]):
+              raise RuntimeError(f"سعر الليرة التركية غير منطقي: {try_rate}")
+          if not gold.get("gold24Syp") or not gold.get("goldOzUsd"):
+              raise RuntimeError(f"تعذر قراءة أسعار الذهب 24 عيار/الأونصة من ليرتنا: {gold}; لم يتم نشر تحديث جزئي.")
 
-          if not (1 <= usd["buy"] <= 100000 and 1 <= usd["sell"] <= 100000 and 0.01 <= try_rate["buy"] <= 1000 and 0.01 <= try_rate["sell"] <= 1000):
-              raise RuntimeError("الأسعار المستخرجة خارج النطاق المتوقع؛ لن يتم نشرها.")
-          if usd["sell"] < usd["buy"] or try_rate["sell"] < try_rate["buy"]:
-              raise RuntimeError("ترتيب الشراء والمبيع غير منطقي؛ لن يتم نشر الأسعار.")
-
-          now = datetime.now(ZoneInfo("Asia/Damascus"))
-          output = {
-              "last_update": now.strftime("%Y-%m-%d %H:%M:%S"),
-              "dateStr": now.strftime("%Y-%m-%d"),
-              "timeStr": now.strftime("%H:%M"),
-              "tgUpdatedAt": int(now.timestamp() * 1000),
-              "source": "Lirtna",
-              "sourceUrl": url,
-              "newSyp": usd["sell"],
-              "oldSyp": round(usd["sell"] * 100, 2),
-              "buyNewSyp": usd["buy"],
-              "buySyp": round(usd["buy"] * 100, 2),
-              "trySyp": try_rate["sell"],
-              "tryBuySyp": try_rate["buy"],
-              "tryRate": round(usd["sell"] / try_rate["sell"], 4)
+          now=datetime.now(ZoneInfo("Asia/Damascus"))
+          data={
+            "last_update":now.strftime("%Y-%m-%d %H:%M:%S"),
+            "dateStr":now.strftime("%Y-%m-%d"),
+            "timeStr":now.strftime("%H:%M"),
+            "tgUpdatedAt":int(now.timestamp()*1000),
+            "source":"Lirtna",
+            "sourceUrl":URL,
+            "newSyp":usd["sell"],
+            "oldSyp":round(usd["sell"]*100,2),
+            "buyNewSyp":usd["buy"],
+            "buySyp":round(usd["buy"]*100,2),
+            "trySyp":try_rate["sell"],
+            "tryBuySyp":try_rate["buy"],
+            "tryRate":round(usd["sell"]/try_rate["sell"],4),
+            **gold
           }
-          with open("prices.json", "w", encoding="utf-8") as f:
-              json.dump(output, f, ensure_ascii=False, indent=2)
-          print("Validated prices from Lirtna:")
-          print(json.dumps(output, ensure_ascii=False, indent=2))
+          with open("prices.json","w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False,indent=2)
+          print(json.dumps(data,ensure_ascii=False,indent=2))
           PY
           python update_rates.py
-
-      - name: حفظ الأسعار في GitHub
+      - name: حفظ الأسعار الجديدة
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add prices.json
-          git commit -m "تحديث أسعار الصرف من ليرتنا" || exit 0
+          git diff --cached --quiet && exit 0
+          git commit -m "تحديث أسعار الصرف والذهب من ليرتنا"
           git push
