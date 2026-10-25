@@ -5597,7 +5597,7 @@ function toggleMode() {
 
 
 let rates={oldSyp:11700.3, newSyp:117.3, tryRate:44.2, buySyp:11500, buyNewSyp:115, fuel:{mazot:0.88, benzin90:1.10, benzin95:1.15, gas:12.50}};
-const FX_APP_VERSION = 'lirtna-fx-v3-20261024';
+const FX_APP_VERSION = 'lirtna-fx-v4-20261025';
 const PROFIT_MARGIN = 0.02; // هامش ربح 2% للحاسبة فقط
 const USD_SELL_FACTOR = 1 + PROFIT_MARGIN;
 const USD_BUY_FACTOR = 1 - PROFIT_MARGIN;
@@ -5831,7 +5831,7 @@ async function fetchLiveRates(){
   // المصدر الموحد للأسعار هو prices.json الذي يتم تحديثه من ليرتنا كل ساعة.
   await loadRatesFromCloud();
 }
-setInterval(loadRatesFromCloud, 60000);
+setInterval(() => { loadRatesFromCloud().catch(()=>{}); }, 60000);
 
 function restoreBinCredsToUI(){ /* credentials hardcoded */ }
 
