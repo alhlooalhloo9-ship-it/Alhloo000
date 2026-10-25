@@ -55,9 +55,9 @@ jobs:
                   sell_nums=nums(cells[1]); buy_nums=nums(cells[2])
                   if sell_nums and buy_nums:
                       sell,buy=sell_nums[0],buy_nums[0]
-                      if ("دولار" in label or "usd" in label or "dollar" in label) and ("سعر" not in label):
+                      if label in ("دولار ($)", "دولار", "usd", "us dollar", "الدولار الأمريكي", "الدولار الامريكي", "الدولار الأميركي", "الدولار الاميركي"):
                           usd={"sell":sell,"buy":buy}
-                      elif ("ليرة تركية" in label or "try" in label or "تركية" in label) and ("سعر" not in label):
+                      elif label in ("ليرة تركية (try)", "ليرة تركية", "try", "تركية"):
                           try_rate={"sell":sell,"buy":buy}
               if "غرام عيار 24" in label or "عيار 24" in label:
                   values=nums(" ".join(cells[1:]))
