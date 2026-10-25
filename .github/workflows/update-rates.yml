@@ -36,11 +36,11 @@ jobs:
           soup = BeautifulSoup(response.text, "html.parser")
 
           def norm(s):
-              return re.sub(r"\\s+", " ", s).strip().lower()
+              return re.sub(r"\s+", " ", s).strip().lower()
           def nums(s):
               s = s.translate(str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹", "01234567890123456789"))
               s = s.replace(",", "").replace("٬", "").replace("٫", ".")
-              return [float(x) for x in re.findall(r"\\d+(?:\\.\\d+)?", s)]
+              return [float(x) for x in re.findall(r"\d+(?:\.\d+)?", s)]
           rows=[]
           for table in soup.find_all("table"):
               for tr in table.find_all("tr"):
