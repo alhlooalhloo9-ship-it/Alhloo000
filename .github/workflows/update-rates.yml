@@ -1,112 +1,187 @@
-name: تحديث أسعار الصرف والذهب من ليرتنا
+name: تحديث أسعار ليرتنا تلقائياً
 
 on:
   schedule:
-    - cron: '0 3 * * *'
+    - cron: '17 * * * *'
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/update-rates.yml'
 
 permissions:
   contents: write
 
+concurrency:
+  group: lirtna-rates-update
+  cancel-in-progress: false
+
 jobs:
   update-rates:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: تنزيل المشروع
         uses: actions/checkout@v4
+
       - name: إعداد Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
+
       - name: تثبيت المكتبات
         run: pip install requests beautifulsoup4
-      - name: استخراج أسعار ليرتنا والتحقق منها
+
+      - name: جلب الأسعار والتحقق منها من ليرتنا
+        env:
+          PYTHONUNBUFFERED: '1'
         run: |
           cat > update_rates.py <<'PY'
-          import json, re
+          import json, re, time
           from datetime import datetime
           from zoneinfo import ZoneInfo
+          from pathlib import Path
           import requests
           from bs4 import BeautifulSoup
 
           URL = "https://lirtna.com/"
-          HEADERS = {"User-Agent": "Mozilla/5.0 AlhlooShippingRates/1.0"}
-          response = requests.get(URL, headers=HEADERS, timeout=30)
-          response.raise_for_status()
-          soup = BeautifulSoup(response.text, "html.parser")
+          HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; AlhlooShippingRates/2.0)"}
+          session = requests.Session()
+          html = None
+          last_error = None
+          for attempt in range(4):
+              try:
+                  response = session.get(URL, headers=HEADERS, timeout=25)
+                  response.raise_for_status()
+                  if len(response.text) < 3000:
+                      raise RuntimeError("صفحة ليرتنا المستلمة أقصر من المتوقع")
+                  html = response.text
+                  break
+              except Exception as exc:
+                  last_error = exc
+                  print(f"محاولة {attempt + 1}/4 فشلت: {exc}")
+                  time.sleep(2 + attempt * 2)
+          if html is None:
+              raise RuntimeError(f"تعذر الوصول إلى ليرتنا بعد 4 محاولات: {last_error}")
 
-          def norm(s):
-              return re.sub(r"\s+", " ", s).strip().lower()
-          def nums(s):
-              s = s.translate(str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹", "01234567890123456789"))
-              s = s.replace(",", "").replace("٬", "").replace("٫", ".")
-              return [float(x) for x in re.findall(r"\d+(?:\.\d+)?", s)]
-          rows=[]
-          for table in soup.find_all("table"):
-              for tr in table.find_all("tr"):
-                  cells=[c.get_text(" ",strip=True) for c in tr.find_all(["th","td"])]
-                  if cells: rows.append(cells)
+          soup = BeautifulSoup(html, "html.parser")
+          def norm(value):
+              value = value.lower().replace("\u200f", "").replace("\u200e", "")
+              return re.sub(r"\\s+", " ", value).strip()
+          def nums(value):
+              value = value.translate(str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹", "01234567890123456789"))
+              value = value.replace(",", "").replace("٬", "").replace("٫", ".")
+              return [float(x) for x in re.findall(r"\\d+(?:\\.\\d+)?", value)]
+          def currency_kind(label):
+              label = norm(label)
+              if "دولار كندي" in label or "الدولار الكندي" in label or "cad" in label:
+                  return None
+              if "دولار" in label or re.search(r"(^|[^a-z])usd([^a-z]|$)", label):
+                  return "usd"
+              if "ليرة تركية" in label or "تركية" in label or re.search(r"(^|[^a-z])try([^a-z]|$)", label):
+                  return "try"
+              return None
 
-          usd=try_rate=None
-          gold={}
-          for cells in rows:
-              label=norm(cells[0])
-              if len(cells)>=3:
-                  sell_nums=nums(cells[1]); buy_nums=nums(cells[2])
-                  if sell_nums and buy_nums:
-                      sell,buy=sell_nums[0],buy_nums[0]
-                      if label in ("دولار ($)", "دولار", "usd", "us dollar", "الدولار الأمريكي", "الدولار الامريكي", "الدولار الأميركي", "الدولار الاميركي"):
-                          usd={"sell":sell,"buy":buy}
-                      elif label in ("ليرة تركية (try)", "ليرة تركية", "try", "تركية"):
-                          try_rate={"sell":sell,"buy":buy}
-              if "غرام عيار 24" in label or "عيار 24" in label:
-                  values=nums(" ".join(cells[1:]))
-                  if values: gold["gold24Syp"]=values[0]
-              elif "غرام عيار 21" in label or "عيار 21" in label:
-                  values=nums(" ".join(cells[1:]))
-                  if values: gold["gold21Syp"]=values[0]
-              elif "غرام عيار 18" in label or "عيار 18" in label:
-                  values=nums(" ".join(cells[1:]))
-                  if values: gold["gold18Syp"]=values[0]
-              elif "أونصة الذهب" in label or "اونصة الذهب" in label:
-                  values=nums(" ".join(cells[1:]))
-                  if values: gold["goldOzUsd"]=values[0]
+          found = {}
+          gold = {}
+          for row in soup.find_all("tr"):
+              cells = [cell.get_text(" ", strip=True) for cell in row.find_all(["th", "td"])]
+              if not cells:
+                  continue
+              label = cells[0]
+              kind = currency_kind(label)
+              if kind and len(cells) >= 3:
+                  sell_values, buy_values = nums(cells[1]), nums(cells[2])
+                  if sell_values and buy_values:
+                      found[kind] = {"sell": sell_values[0], "buy": buy_values[0], "label": label}
+              combined = norm(" ".join(cells))
+              values = nums(" ".join(cells[1:]))
+              if values and ("عيار 18" in combined or "18 karat" in combined):
+                  gold["gold18Syp"] = values[0]
+              elif values and ("عيار 21" in combined or "21 karat" in combined):
+                  gold["gold21Syp"] = values[0]
+              elif values and ("عيار 24" in combined or "24 karat" in combined):
+                  gold["gold24Syp"] = values[0]
+              elif values and ("أونصة الذهب" in combined or "اونصة الذهب" in combined or "gold ounce" in combined):
+                  gold["goldOzUsd"] = values[0]
 
-          if not usd or not try_rate:
-              raise RuntimeError("لم يتم التعرف بثقة على صفّي الدولار والليرة التركية في جداول ليرتنا؛ لن نغيّر الملف.")
-          if not (50 <= usd["buy"] <= 1000 and 50 <= usd["sell"] <= 1000 and usd["sell"] >= usd["buy"]):
-              raise RuntimeError(f"سعر الدولار غير منطقي/ربما تمت قراءة الليرة القديمة: {usd}")
-          if not (0.1 <= try_rate["buy"] <= 20 and 0.1 <= try_rate["sell"] <= 20 and try_rate["sell"] >= try_rate["buy"]):
-              raise RuntimeError(f"سعر الليرة التركية غير منطقي: {try_rate}")
-          if not gold.get("gold24Syp") or not gold.get("goldOzUsd"):
-              raise RuntimeError(f"تعذر قراءة أسعار الذهب 24 عيار/الأونصة من ليرتنا: {gold}; لم يتم نشر تحديث جزئي.")
+          if "usd" not in found or "try" not in found:
+              # Fallback: parse the visible text rows when Lirtna changes its table markup.
+              lines = [re.sub(r"\\s+", " ", line).strip() for line in soup.get_text("\\n").splitlines()]
+              lines = [line for line in lines if line]
+              for idx, line in enumerate(lines):
+                  kind = currency_kind(line)
+                  if kind and idx + 2 < len(lines):
+                      joined = " ".join(lines[idx:idx+4])
+                      values = nums(joined)
+                      # Do not use this fallback if it can't confidently find sell/buy values.
+                      if len(values) >= 2 and kind not in found:
+                          found[kind] = {"sell": values[0], "buy": values[1], "label": line}
 
-          now=datetime.now(ZoneInfo("Asia/Damascus"))
-          data={
-            "last_update":now.strftime("%Y-%m-%d %H:%M:%S"),
-            "dateStr":now.strftime("%Y-%m-%d"),
-            "timeStr":now.strftime("%H:%M"),
-            "tgUpdatedAt":int(now.timestamp()*1000),
-            "source":"Lirtna",
-            "sourceUrl":URL,
-            "newSyp":usd["sell"],
-            "oldSyp":round(usd["sell"]*100,2),
-            "buyNewSyp":usd["buy"],
-            "buySyp":round(usd["buy"]*100,2),
-            "trySyp":try_rate["sell"],
-            "tryBuySyp":try_rate["buy"],
-            "tryRate":round(usd["sell"]/try_rate["sell"],4),
-            **gold
+          usd, tr = found.get("usd"), found.get("try")
+          if not usd or not tr:
+              raise RuntimeError("لم يُعثر بثقة على سعرَي الدولار والليرة التركية في صفحة ليرتنا؛ لن يتم نشر بيانات خاطئة.")
+          if not (50 <= usd["sell"] <= 1000 and 50 <= usd["buy"] <= usd["sell"]):
+              raise RuntimeError(f"سعر الدولار خارج النطاق المتوقع: {usd}")
+          if not (0.1 <= tr["sell"] <= 20 and 0.1 <= tr["buy"] <= tr["sell"]):
+              raise RuntimeError(f"سعر الليرة التركية خارج النطاق المتوقع: {tr}")
+
+          path = Path("prices.json")
+          previous = {}
+          if path.exists():
+              try:
+                  previous = json.loads(path.read_text(encoding="utf-8"))
+              except Exception:
+                  previous = {}
+          now = datetime.now(ZoneInfo("Asia/Damascus"))
+          data = {
+              "last_update": now.strftime("%Y-%m-%d %H:%M:%S"),
+              "dateStr": now.strftime("%Y-%m-%d"),
+              "timeStr": now.strftime("%H:%M"),
+              "tgUpdatedAt": int(now.timestamp() * 1000),
+              "source": "Lirtna",
+              "sourceUrl": URL,
+              "newSyp": usd["sell"],
+              "oldSyp": round(usd["sell"] * 100, 2),
+              "buyNewSyp": usd["buy"],
+              "buySyp": round(usd["buy"] * 100, 2),
+              "trySyp": tr["sell"],
+              "tryBuySyp": tr["buy"],
+              "tryRate": round(usd["sell"] / tr["sell"], 4),
           }
-          with open("prices.json","w",encoding="utf-8") as f: json.dump(data,f,ensure_ascii=False,indent=2)
-          print(json.dumps(data,ensure_ascii=False,indent=2))
+          for key in ("gold18Syp", "gold21Syp", "gold24Syp", "goldOzUsd"):
+              if key in gold and gold[key] > 0:
+                  data[key] = gold[key]
+              elif previous.get(key):
+                  data[key] = previous[key]
+          if "gold24Syp" not in data or "goldOzUsd" not in data:
+              raise RuntimeError("أسعار الصرف قُرئت لكن بيانات الذهب غير متاحة ولا توجد قيمة سابقة صالحة؛ أوقف النشر الآمن.")
+          path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+          print("نجاح: تم استخراج الأسعار والتحقق منها من ليرتنا.")
+          print(json.dumps(data, ensure_ascii=False, indent=2))
           PY
           python update_rates.py
+
+      - name: التحقق من ملف الأسعار
+        run: |
+          python - <<'PY'
+          import json
+          d=json.load(open("prices.json", encoding="utf-8"))
+          assert d.get("source") == "Lirtna"
+          assert d.get("newSyp", 0) >= 50
+          assert d.get("oldSyp", 0) == d.get("newSyp", 0) * 100
+          assert d.get("tryRate", 0) > 0
+          assert d.get("tgUpdatedAt", 0) > 0
+          print("نجاح التحقق النهائي من prices.json")
+          PY
+
       - name: حفظ الأسعار الجديدة
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add prices.json
-          git diff --cached --quiet && exit 0
-          git commit -m "تحديث أسعار الصرف والذهب من ليرتنا"
+          if git diff --cached --quiet; then
+            echo "الأسعار لم تتغير، لكن تم جلبها والتحقق منها بنجاح."
+            exit 0
+          fi
+          git commit -m "تحديث تلقائي لأسعار ليرتنا"
           git push
