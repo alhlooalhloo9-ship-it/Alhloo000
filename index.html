@@ -5646,7 +5646,8 @@ function showSyncStatus(msg, color='rgba(255,255,255,0.5)'){
 async function loadRatesFromCloud(){
   const statusEl = document.getElementById('calcStatus');
   try {
-    const res = await fetch('./prices.json?v=' + encodeURIComponent(FX_APP_VERSION) + '&t=' + Date.now(), {cache:'no-store'});
+    const RATE_JSON_URL = 'https://raw.githubusercontent.com/alhlooalhloo9-ship-it/Alhloo000/main/prices.json';
+    const res = await fetch(RATE_JSON_URL + '?v=' + encodeURIComponent(FX_APP_VERSION) + '&t=' + Date.now(), {cache:'no-store', mode:'cors'});
     if(!res.ok) throw new Error('HTTP ' + res.status);
     const r = await res.json();
     if(!r || !Number.isFinite(Number(r.newSyp)) || !Number.isFinite(Number(r.tryRate)) || !r.tgUpdatedAt) throw new Error('ملف الأسعار غير مكتمل');
