@@ -5597,7 +5597,7 @@ function toggleMode() {
 
 
 let rates={oldSyp:11700.3, newSyp:117.3, tryRate:44.2, buySyp:11500, buyNewSyp:115, fuel:{mazot:0.88, benzin90:1.10, benzin95:1.15, gas:12.50}};
-const FX_APP_VERSION = 'lirtna-fx-v4-20261025';
+const FX_APP_VERSION = 'lirtna-live-v5-20261026';
 const PROFIT_MARGIN = 0.02; // هامش ربح 2% للحاسبة فقط
 const USD_SELL_FACTOR = 1 + PROFIT_MARGIN;
 const USD_BUY_FACTOR = 1 - PROFIT_MARGIN;
@@ -5686,24 +5686,10 @@ async function loadRatesFromCloud(){
 
 // Fallback: load from localStorage
 function loadLocalRates(){
+  // لا نحمّل أسعار الصرف القديمة من ذاكرة الجهاز أبداً.
+  // أسعار الصرف يجب أن تأتي حصراً من prices.json المنشور من ليرتنا.
   try {
-    const saved = JSON.parse(localStorage.getItem('halou_rates'));
-    if(saved){
-      rates.tryRate = Number(saved.tryRate) || 0;
-      rates.oldSyp  = Number(saved.oldSyp) || 0;
-      rates.newSyp  = Number(saved.newSyp) || 0;
-      rates.buyNewSyp = Number(saved.buyNewSyp) || 0;
-      rates.buySyp = Number(saved.buySyp) || 0;
-      rates.trySyp = Number(saved.trySyp) || 0;
-      rates.tryBuySyp = Number(saved.tryBuySyp) || 0;
-      applyRatesToUI(saved.dateStr, saved.timeStr);
-      if(adminUnlocked){
-        document.getElementById('rateAdmTry').value = rates.tryRate;
-        document.getElementById('rateAdmOld').value = rates.oldSyp;
-        document.getElementById('rateAdmNew').value = rates.newSyp;
-      }
-    }
-    // أسعار المحروقات — محفوظة محلياً بشكل منفصل (يدوية، تتغيّر نادراً)
+    localStorage.removeItem('halou_rates');
     const savedFuel = JSON.parse(localStorage.getItem('halou_fuel_rates'));
     rates.fuel = savedFuel || { mazot:0.88, benzin90:1.10, benzin95:1.15, gas:12.50 };
     if(adminUnlocked){
