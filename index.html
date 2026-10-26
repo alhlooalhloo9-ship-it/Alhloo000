@@ -5596,8 +5596,8 @@ function toggleMode() {
 }
 
 
-let rates={oldSyp:11700.3, newSyp:117.3, tryRate:44.2, buySyp:11500, buyNewSyp:115, fuel:{mazot:0.88, benzin90:1.10, benzin95:1.15, gas:12.50}};
-const FX_APP_VERSION = 'lirtna-live-v5-20261026';
+let rates={oldSyp:0, newSyp:0, tryRate:0, buySyp:0, buyNewSyp:0, fuel:{mazot:0.88, benzin90:1.10, benzin95:1.15, gas:12.50}};
+const FX_APP_VERSION = 'lirtna-live-v6-20261026';
 const PROFIT_MARGIN = 0.02; // هامش ربح 2% للحاسبة فقط
 const USD_SELL_FACTOR = 1 + PROFIT_MARGIN;
 const USD_BUY_FACTOR = 1 - PROFIT_MARGIN;
@@ -6766,51 +6766,42 @@ function dismissSplash(skipped) {
 }
 
 async function startupLoadPrices() {
-  // ── ① أولاً: تحميل آخر سعر محفوظ محلياً فوراً (بدون انتظار، حتى بدون إنترنت) ──
-  loadLocalRates();
-
-  // ── ② فتح التطبيق فوراً بالسعر المحفوظ — لا فلاش ولا أرقام افتراضية ──
+  // لا تعرض أي سعر افتراضي أو محفوظ قبل نجاح جلب ملف الأسعار الحالي.
+  const statusEl = document.getElementById('calcStatus');
+  if (statusEl) {
+    statusEl.textContent = '⏳ جارٍ جلب أسعار ليرتنا...';
+    statusEl.className = 'calc-status';
+  }
   dismissSplash(true);
-  if (!_tickerTimer) setTimeout(initTicker, 100);
-
-  // ── ③ بصمت: تحقق إذا يوجد سعر أحدث على السيرفر، حدّث فقط إذا كان جديداً فعلاً ──
   try {
-    await Promise.race([
-      loadRatesFromCloud(),
-      new Promise(r => setTimeout(r, 4000)) // حد أقصى 4 ثواني، ثم يبقى على آخر سعر محفوظ
-    ]);
-  } catch(e) {}
-
-  // ── تحديث من المصادر الخارجية في الخلفية ──
-  // تم توحيد مصدر الصرف في prices.json من ليرتنا؛ لا نستبدله بمصدر آخر.
+    await loadRatesFromCloud();
+  } catch (e) {
+    console.error('[Lirtna] تعذّر تحميل الأسعار الحالية:', e);
+    const bar = document.querySelector('.rate-update-bar .ru-text') ||
+                document.getElementById('ruText') ||
+                document.querySelector('.ru-text');
+    if (bar) bar.textContent = 'تعذّر الاتصال بليرتنا — لن نعرض أسعاراً قديمة';
+    if (statusEl) {
+      statusEl.textContent = '🔴 تعذّر تحميل الأسعار الحالية';
+      statusEl.className = 'calc-status manual';
+    }
+    FIELDS_5.forEach(f => {
+      const el = document.getElementById('inp-' + f);
+      if (el) el.value = '';
+    });
+  }
+  if (!_tickerTimer) initTicker();
   setTimeout(() => fetchGoldPrice().catch(() => {}), 1500);
 }
 
 // ===== STARTUP =====
-// ضمان مطلق: الشريط يبدأ بعد 5 ثواني مهما حدث
-setTimeout(() => { if (!_tickerTimer) initTicker(); }, 5000);
-
-// الـ splash يظهر فقط أول مرة — عند الرجوع من واتساب يتخطاه صامتاً
+// جلب مباشر للأسعار الحالية عند كل فتح، دون تحميل ذاكرة أسعار الصرف القديمة.
 (function() {
-  const alreadyLoaded = sessionStorage.getItem('halou_prices_loaded');
-  if (alreadyLoaded) {
-    // رجع المستخدم — أخفِ الـ splash فوراً وحدّث بصمت
-    const splash = document.getElementById('priceSplash');
-    if (splash) splash.remove();
-    _splashDone = true;
-    // أولاً: عرض آخر سعر محفوظ فوراً (بدون فلاش، يعمل حتى بدون إنترنت)
-    loadLocalRates();
-    initTicker();
-    // ثم: تحقق بصمت من وجود سعر أحدث، حدّث فقط إذا تغيّر فعلاً
-    loadRatesFromCloud().finally(() => {
-      // تم توحيد مصدر الصرف في prices.json من ليرتنا؛ لا نستبدله بمصدر آخر.
-    });
-  } else {
-    // أول فتح حقيقي للتطبيق
-    sessionStorage.setItem('halou_prices_loaded', '1');
-    startupLoadPrices();
-  }
+  try { localStorage.removeItem('halou_rates'); } catch(e) {}
+  startupLoadPrices();
+  setInterval(() => { loadRatesFromCloud().catch(() => {}); }, 60000);
 })();
+
 loadOffersFromCloud();
 setInterval(loadOffersFromCloud, 60000);
 // تحميل عدد الرسائل غير المقروءة للـ badge
