@@ -66,11 +66,11 @@ jobs:
           soup = BeautifulSoup(html, "html.parser")
           def norm(value):
               value = value.lower().replace("\u200f", "").replace("\u200e", "")
-              return re.sub(r"\\s+", " ", value).strip()
+              return re.sub(r"\s+", " ", value).strip()
           def nums(value):
               value = value.translate(str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹", "01234567890123456789"))
               value = value.replace(",", "").replace("٬", "").replace("٫", ".")
-              return [float(x) for x in re.findall(r"\\d+(?:\\.\\d+)?", value)]
+              return [float(x) for x in re.findall(r"\d+(?:\.\d+)?", value)]
           def currency_kind(label):
               label = norm(label)
               if "دولار كندي" in label or "الدولار الكندي" in label or "cad" in label:
@@ -106,10 +106,10 @@ jobs:
 
           if "usd" not in found or "try" not in found:
               # Robust fallback: Lirtna may render rate rows as divs/anchors instead of table rows.
-              flat = re.sub(r"\\s+", " ", soup.get_text(" ", strip=True))
+              flat = re.sub(r"\s+", " ", soup.get_text(" ", strip=True))
               patterns_by_kind = {
-                  "usd": [r"دولار\\s*\\(\\$\\)", r"الدولار الأمريكي", r"الدولار الامريكي", r"US Dollar"],
-                  "try": [r"ليرة تركية\\s*\\(TRY\\)", r"ليرة تركية", r"Turkish Lira"]
+                  "usd": [r"دولار\s*\(\$\)", r"الدولار الأمريكي", r"الدولار الامريكي", r"US Dollar"],
+                  "try": [r"ليرة تركية\s*\(TRY\)", r"ليرة تركية", r"Turkish Lira"]
               }
               for kind, patterns in patterns_by_kind.items():
                   if kind in found:
@@ -132,9 +132,6 @@ jobs:
                           break
           usd, tr = found.get("usd"), found.get("try")
           if not usd or not tr:
-              print("DEBUG title:", soup.title.get_text(" ", strip=True) if soup.title else "(no title)")
-              print("DEBUG page text:", soup.get_text(" ", strip=True)[:2500])
-              print("DEBUG found:", json.dumps(found, ensure_ascii=False))
               raise RuntimeError("لم يُعثر بثقة على سعرَي الدولار والليرة التركية في صفحة ليرتنا؛ لن يتم نشر بيانات خاطئة.")
           if not (50 <= usd["sell"] <= 1000 and 50 <= usd["buy"] <= usd["sell"]):
               raise RuntimeError(f"سعر الدولار خارج النطاق المتوقع: {usd}")
@@ -171,7 +168,7 @@ jobs:
                   data[key] = previous[key]
           if "gold24Syp" not in data or "goldOzUsd" not in data:
               raise RuntimeError("أسعار الصرف قُرئت لكن بيانات الذهب غير متاحة ولا توجد قيمة سابقة صالحة؛ أوقف النشر الآمن.")
-          path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+          path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
           print("نجاح: تم استخراج الأسعار والتحقق منها من ليرتنا.")
           print(json.dumps(data, ensure_ascii=False, indent=2))
           PY
