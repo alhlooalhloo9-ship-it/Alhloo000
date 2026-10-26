@@ -132,6 +132,9 @@ jobs:
                           break
           usd, tr = found.get("usd"), found.get("try")
           if not usd or not tr:
+              print("DEBUG title:", soup.title.get_text(" ", strip=True) if soup.title else "(no title)")
+              print("DEBUG page text:", soup.get_text(" ", strip=True)[:2500])
+              print("DEBUG found:", json.dumps(found, ensure_ascii=False))
               raise RuntimeError("لم يُعثر بثقة على سعرَي الدولار والليرة التركية في صفحة ليرتنا؛ لن يتم نشر بيانات خاطئة.")
           if not (50 <= usd["sell"] <= 1000 and 50 <= usd["buy"] <= usd["sell"]):
               raise RuntimeError(f"سعر الدولار خارج النطاق المتوقع: {usd}")
