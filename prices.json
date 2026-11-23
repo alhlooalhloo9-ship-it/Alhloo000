@@ -1,8 +1,8 @@
 {
-  "last_update": "2026-11-23 00:47:25",
+  "last_update": "2026-11-23 05:46:57",
   "dateStr": "2026-11-23",
-  "timeStr": "00:47",
-  "tgUpdatedAt": 1795384045926,
+  "timeStr": "05:46",
+  "tgUpdatedAt": 1795402017318,
   "source": "Lirtna",
   "sourceUrl": "https://lirtna.com/",
   "newSyp": 151.25,
@@ -12,8 +12,8 @@
   "trySyp": 2.99,
   "tryBuySyp": 2.96,
   "tryRate": 50.5853,
-  "gold18Syp": 12862.0,
-  "gold21Syp": 15006.0,
-  "gold24Syp": 17149.0,
-  "goldOzUsd": 3538.0
+  "gold18Syp": 13086.0,
+  "gold21Syp": 15267.0,
+  "gold24Syp": 17448.0,
+  "goldOzUsd": 3600.0
 }
