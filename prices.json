@@ -1,8 +1,8 @@
 {
-  "last_update": "2026-11-27 13:53:34",
+  "last_update": "2026-11-27 22:58:06",
   "dateStr": "2026-11-27",
-  "timeStr": "13:53",
-  "tgUpdatedAt": 1795776814899,
+  "timeStr": "22:58",
+  "tgUpdatedAt": 1795809486811,
   "source": "Lirtna",
   "sourceUrl": "https://lirtna.com/",
   "newSyp": 153.5,
@@ -15,5 +15,5 @@
   "gold18Syp": 13000.0,
   "gold21Syp": 15200.0,
   "gold24Syp": 17500.0,
-  "goldOzUsd": 3679.5
+  "goldOzUsd": 3640.8
 }
